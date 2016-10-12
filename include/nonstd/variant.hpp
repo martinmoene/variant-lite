@@ -632,7 +632,7 @@ using variant_alternative_t = typename variant_alternative<I, T>::type;
 // index of the variant in the invalid state (constant)
 
 #if variant_CPP11_OR_GREATER
-variant_constexpr std::size_t variant_npos = -1;
+variant_constexpr std::size_t variant_npos = static_cast<std::size_t>( -1 );
 #else
 enum { variant_npos = -1 };
 #endif
@@ -879,7 +879,7 @@ private:
 
     type_index_t variant_npos_internal() const variant_noexcept
     {
-        return std::numeric_limits<type_index_t>::min();
+        return static_cast<type_index_t>( -1 );
     }
 
     void copy_assign( variant const & rhs )
