@@ -17,5 +17,5 @@ variant-lite is inspired on
 
 References
 ----------
-Ben Deane. [Using Types Effectively](https://youtu.be/ojZbFIQSdl8?list=PLHTh1InhhwT7J5jl4vAhO1WvGHUUFgUQH). CppCon 2016. 
-CppReference. [variant](http://en.cppreference.com/w/cpp/utility/variant).
+Ben Deane. [Using Types Effectively](https://youtu.be/ojZbFIQSdl8?list=PLHTh1InhhwT7J5jl4vAhO1WvGHUUFgUQH). CppCon 2016.  
+CppReference. [variant](http://en.cppreference.com/w/cpp/utility/variant).  
