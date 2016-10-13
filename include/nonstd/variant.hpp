@@ -1,7 +1,6 @@
 // ToDo
 // visit
 // compare
-// get<N> at same time as get<type>
 // some emplace
 // some forwarding ctors (std::initializer_list<U>)
 
@@ -148,19 +147,20 @@
 # define variant_noexcept /*noexcept*/
 #endif
 
-namespace nonstd {
+namespace nonstd { namespace variants {
 
-namespace variant_detail {
+namespace detail
+{
 
 // typelist:
 
-#define variant_TL1( T1                         ) variant_detail::typelist< T1, variant_detail::nulltype >
-#define variant_TL2( T1, T2                     ) variant_detail::typelist< T1, variant_TL1( T2) >
-#define variant_TL3( T1, T2, T3                 ) variant_detail::typelist< T1, variant_TL2( T2, T3 ) >
-#define variant_TL4( T1, T2, T3, T4             ) variant_detail::typelist< T1, variant_TL3( T2, T3, T4 ) >
-#define variant_TL5( T1, T2, T3, T4, T5         ) variant_detail::typelist< T1, variant_TL4( T2, T3, T4, T5 ) >
-#define variant_TL6( T1, T2, T3, T4, T5, T6     ) variant_detail::typelist< T1, variant_TL5( T2, T3, T4, T5, T6 ) >
-#define variant_TL7( T1, T2, T3, T4, T5, T6, T7 ) variant_detail::typelist< T1, variant_TL6( T2, T3, T4, T5, T6, T7 ) >
+#define variant_TL1( T1                         ) detail::typelist< T1, detail::nulltype >
+#define variant_TL2( T1, T2                     ) detail::typelist< T1, variant_TL1( T2) >
+#define variant_TL3( T1, T2, T3                 ) detail::typelist< T1, variant_TL2( T2, T3 ) >
+#define variant_TL4( T1, T2, T3, T4             ) detail::typelist< T1, variant_TL3( T2, T3, T4 ) >
+#define variant_TL5( T1, T2, T3, T4, T5         ) detail::typelist< T1, variant_TL4( T2, T3, T4, T5 ) >
+#define variant_TL6( T1, T2, T3, T4, T5, T6     ) detail::typelist< T1, variant_TL5( T2, T3, T4, T5, T6 ) >
+#define variant_TL7( T1, T2, T3, T4, T5, T6, T7 ) detail::typelist< T1, variant_TL6( T2, T3, T4, T5, T6, T7 ) >
 
 template< bool condition, class Then, class Else >
 struct select;
@@ -373,7 +373,7 @@ union max_align_t
 // Determine POD type to use for alignment:
 
 #define variant_ALIGN_AS( to_align ) \
-    typename variant_detail::type_of_size< variant_detail::alignment_types, variant_detail::alignment_of< to_align >::value >::type
+    typename detail::type_of_size< detail::alignment_types, detail::alignment_of< to_align >::value >::type
 
 template <typename T>
 struct alignment_of;
@@ -454,7 +454,7 @@ typedef
 #endif // variant_FEATURE_MAX_ALIGN_HACK
 
 template< typename T>
-inline std::size_t hash_code( T const & v )
+inline std::size_t hash( T const & v )
 {
     // primes:
     unsigned const int a  = 54059;
@@ -474,6 +474,7 @@ inline std::size_t hash_code( T const & v )
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 struct helper
 {
+    typedef signed char type_index_t;
     typedef variant_TL7( T0, T1, T2, T3, T4, T5, T6 ) variant_types;
 
     template< class U >
@@ -486,6 +487,11 @@ struct helper
     static U const * as( void const * data )
     {
         return reinterpret_cast<const U*>( data );
+    }
+
+    static type_index_t to_index_t( std::size_t index )
+    {
+        return static_cast<type_index_t>( index );
     }
 
     static void destroy( std::size_t index, void * data )
@@ -504,24 +510,24 @@ struct helper
 
 #if variant_CPP11_OR_GREATER
     template< class T, class... Args >
-    static int construct_t( void * data, Args&&... args )
+    static type_index_t construct_t( void * data, Args&&... args )
     {
         new( data ) T( std::forward<Args...>( args... ) );
 
-        return variant_detail::typelist_index_of< variant_types, T>::value;
+        return to_index_t( detail::typelist_index_of< variant_types, T>::value );
     }
 
     template< std::size_t I, class... Args >
-    static int construct_i( void * data, Args&&... args )
+    static type_index_t construct_i( void * data, Args&&... args )
     {
-        using type = typename variant_detail::typelist_type_at< variant_types, I >::type;
+        using type = typename detail::typelist_type_at< variant_types, I >::type;
 
         construct_t< type >( data, std::forward<Args...>( args... ) );
 
-        return I;
+        return to_index_t( I );
     }
 
-    static int move( std::size_t const from_index, const void * from_value, void * to_value )
+    static type_index_t move( std::size_t const from_index, const void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -533,11 +539,11 @@ struct helper
             case 5: new( to_value ) T5( std::move( *as<T5>( from_value ) ) ); break;
             case 6: new( to_value ) T6( std::move( *as<T6>( from_value ) ) ); break;
         }
-        return from_index;
+        return to_index_t( from_index );
     }
 #endif
 
-    static int copy( std::size_t const from_index, const void * from_value, void * to_value )
+    static type_index_t copy( std::size_t const from_index, const void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -549,7 +555,7 @@ struct helper
             case 5: new( to_value ) T5( *as<T5>( from_value ) ); break;
             case 6: new( to_value ) T6( *as<T6>( from_value ) ); break;
         }
-        return from_index;
+        return to_index_t( from_index );
     }
 };
 
@@ -571,27 +577,33 @@ inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
 
-#if variant_CPP11_OR_GREATER
+namespace detail
+{
+    template< class T >
+    struct in_place_type_tag {};
 
-struct in_place_tag { in_place_tag() = delete; };
+    template< std::size_t I >
+    struct in_place_index_tag {};
+}
 
-in_place_tag in_place( /* unspecified */ );
+struct in_place_tag {};
 
-template < class T >
-in_place_tag in_place( /* unspecified */ /*<T>*/ );
+template< class T >
+inline in_place_tag in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+{
+    return in_place_tag();
+}
 
-template < std::size_t I >
-in_place_tag in_place( /* unspecified */ /*<I>*/ );
+template< std::size_t I >
+inline in_place_tag in_place( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
+{
+    return in_place_tag();
+}
 
-using in_place_t = in_place_tag (&)( /* unspecified */ );
+// mimic templated typedef:
 
-template < class T >
-using in_place_type_t = in_place_tag (&)( /* unspecified */ /*<T>*/ );
-
-template < std::size_t I >
-using in_place_index_t = in_place_tag (&)( /* unspecified */ /*<I>*/ );
-
-#endif
+#define in_place_type_t( T)  in_place_tag(&)( detail::in_place_type_tag<T>  )
+#define in_place_index_t(T)  in_place_tag(&)( detail::in_place_index_tag<I> )
 
 // obtain the size of the variant's list of alternatives at compile time
 
@@ -601,7 +613,7 @@ struct variant_size; /* undefined */
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 struct variant_size< variant<T0, T1, T2, T3, T4, T5, T6> >
 {
-    enum { value = variant_detail::typelist_size< variant_TL7(T0, T1, T2, T3, T4, T5, T6) >::value };
+    enum { value = detail::typelist_size< variant_TL7(T0, T1, T2, T3, T4, T5, T6) >::value };
 };
 
 #if variant_CPP14_OR_GREATER
@@ -617,7 +629,7 @@ struct variant_alternative; /* undefined */
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 struct variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >
 {
-    typedef typename variant_detail::typelist_type_at<variant_TL7(T0, T1, T2, T3, T4, T5, T6), I>::type type;
+    typedef typename detail::typelist_type_at<variant_TL7(T0, T1, T2, T3, T4, T5, T6), I>::type type;
 };
 
 #if variant_CPP11_OR_GREATER
@@ -650,16 +662,16 @@ class bad_variant_access : public std::exception
 
 template<
     class T0,
-    class T1 = variant_detail::T1,
-    class T2 = variant_detail::T2,
-    class T3 = variant_detail::T3,
-    class T4 = variant_detail::T4,
-    class T5 = variant_detail::T5,
-    class T6 = variant_detail::T6
+    class T1 = detail::T1,
+    class T2 = detail::T2,
+    class T3 = detail::T3,
+    class T4 = detail::T4,
+    class T5 = detail::T5,
+    class T6 = detail::T6
 >
 class variant
 {
-    typedef variant_detail::helper<T0, T1, T2, T3, T4, T5, T6> helper_type;
+    typedef detail::helper<T0, T1, T2, T3, T4, T5, T6> helper_type;
 
 public:
     variant() { new( ptr() ) T0(); type_index = 0; }
@@ -697,7 +709,7 @@ public:
     }
 
     template< class T, class... Args >
-    variant_constexpr14 explicit variant( in_place_type_t<T>, Args&&... args)
+    variant_constexpr14 explicit variant( in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args...>( args... ) );
@@ -705,10 +717,10 @@ public:
 
     // NTS:implement
     template< class T, class U, class... Args >
-    variant_constexpr explicit variant( in_place_type_t<T>, std::initializer_list<U> il, Args&&... args );
+    variant_constexpr explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args );
 
     template< std::size_t I, class... Args >
-    variant_constexpr14 explicit variant( in_place_index_t<I>, Args&&... args )
+    variant_constexpr14 explicit variant( in_place_index_t(I), Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args...>( args... ) );
@@ -716,7 +728,7 @@ public:
 
     // NTS:implement
     template <size_t I, class U, class... Args>
-    variant_constexpr explicit variant( in_place_index_t<I>, std::initializer_list<U> il, Args&&... args );
+    variant_constexpr explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args );
 
 #endif // variant_CPP11_OR_GREATER
 
@@ -730,6 +742,14 @@ public:
         copy_assign( other );
         return *this;
     }
+
+#if variant_CPP11_OR_GREATER
+    variant & operator=( variant && other )
+    {
+        move_assign( std::move( other ) );
+        return *this;
+    }
+#endif
 
     variant_constexpr std::size_t index() const
     {
@@ -750,7 +770,7 @@ public:
         {
             return false;
         }
-//        variant_detail::comparer<variant, variant_detail::equal_comp> visitor( *this );
+//        detail::comparer<variant, detail::equal_comp> visitor( *this );
 //
 //        return visit( rhs, visitor );
         return false; // NTS:implement
@@ -770,7 +790,7 @@ public:
         {
             return this->index() < rhs.index();
         }
-//        variant_detail::comparer<variant, variant_detail::less_comp> visitor( *this );
+//        detail::comparer<variant, detail::less_comp> visitor( *this );
 //
 //        return visit( rhs, visitor );
         return false; // NTS:implement
@@ -838,27 +858,18 @@ public:
         other = temp;
     }
 
+    //
     // non-standard:
-
-    std::size_t hash() const
-    {
-        return hash_code( *this );
-    }
+    //
 
     template< class T >
     variant_constexpr std::size_t index_of() const variant_noexcept
     {
-        return variant_detail::typelist_index_of<variant_types, T>::value;
-    }
-
-    // NTS:remove
-    variant_constexpr int variant_types_max_f() const variant_noexcept
-    {
-        return data_size;
+        return detail::typelist_index_of<variant_types, T>::value;
     }
 
 private:
-    typedef signed char type_index_t;
+    typedef typename helper_type::type_index_t type_index_t;
 
     void * ptr() variant_noexcept
     {
@@ -910,11 +921,11 @@ private:
 private:
     typedef variant_TL7( T0, T1, T2, T3, T4, T5, T6 ) variant_types;
 
-    enum { data_size  = variant_detail::typelist_max< variant_types >::value };
+    enum { data_size  = detail::typelist_max< variant_types >::value };
 
 #if variant_CPP11_OR_GREATER
 
-    enum { data_align = variant_detail::typelist_max_alignof< variant_types >::value };
+    enum { data_align = detail::typelist_max_alignof< variant_types >::value };
 
     using aligned_storage_t = typename std::aligned_storage< data_size, data_align >::type;
     aligned_storage_t data;
@@ -923,11 +934,11 @@ private:
 
     typedef struct { unsigned char data[ data_size ]; } aligned_storage_t;
 
-    variant_detail::max_align_t hack;
+    detail::max_align_t hack;
     aligned_storage_t data;
 
 #else
-    typedef typename variant_detail::typelist_max< variant_types >::type max_type;
+    typedef typename detail::typelist_max< variant_types >::type max_type;
 
     typedef variant_ALIGN_AS( max_type ) align_as_type;
 
@@ -952,27 +963,21 @@ inline variant_constexpr bool holds_alternative( variant<T0, T1, T2, T3, T4, T5,
     return v.index() == v.template index_of<T>();
 }
 
-namespace variant_detail {
-
-template<       class T > struct traits_type    { typedef char type; };
-template< std::size_t I > struct traits_nontype { typedef int  type; };
-}
-
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline R & get( variant<T0, T1, T2, T3, T4, T5, T6> & v, typename variant_detail::traits_type<R>::type = 0 )
+inline R & get( variant<T0, T1, T2, T3, T4, T5, T6> & v, in_place_type_t(R) = in_place<R> )
 {
     return v.template get<R>();
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6  >
-inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, typename variant_detail::traits_type<R>::type = 0 )
+inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_type_t(R) = in_place<R> )
 {
     return v.template get<R>();
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >::type &
-get( variant<T0, T1, T2, T3, T4, T5, T6> & v, typename variant_detail::traits_nontype<I>::type = 0 )
+get( variant<T0, T1, T2, T3, T4, T5, T6> & v, in_place_index_t(I) = in_place<I> )
 {
     if ( I != v.index() )
     {
@@ -981,12 +986,12 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> & v, typename variant_detail::traits_no
 
     typedef variant_TL7(T0, T1, T2, T3, T4, T5, T6) variant_types;
 
-    return v.template get< typename variant_detail::typelist_type_at< variant_types, I >::type >();
+    return v.template get< typename detail::typelist_type_at< variant_types, I >::type >();
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >::type const &
-get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, typename variant_detail::traits_nontype<I>::type = 0 )
+get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_place<I> )
 {
     if ( I != v.index() )
     {
@@ -995,34 +1000,34 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, typename variant_detail::tra
 
     typedef variant_TL7(T0, T1, T2, T3, T4, T5, T6) variant_types;
 
-    return v.template get< typename variant_detail::typelist_type_at< variant_types, I >::type >();
+    return v.template get< typename detail::typelist_type_at< variant_types, I >::type >();
 }
 
 // NTS:implement
 
 #if variant_CPP11_OR_GREATER
 
+template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr typename std::add_pointer<T>::type
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> );
+
+template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr typename std::add_pointer< const T >::type
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>);
+
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline variant_constexpr typename std::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv )
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &pv-get<I>() : NULL;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline variant_constexpr typename std::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv )
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &pv-get<I>() : NULL;
 }
-
-template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr typename std::add_pointer<T>::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv );
-
-template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr typename std::add_pointer< const T >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv );
 
 #endif // variant_CPP11_OR_GREATER
 
@@ -1033,6 +1038,10 @@ inline void swap(
 {
     a.swap( b );
 }
+
+} // namespace variants
+
+using namespace variants;
 
 } // namespace nonstd
 
@@ -1045,12 +1054,15 @@ namespace std {
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 class hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6> >
 {
+public:
     std::size_t operator()( nonstd::variant<T0, T1, T2, T3, T4, T5, T6> const & v ) const
     {
-        return v.hash();
+        return detail::hash( v );
     }
 };
-}
+
+} //namespace std
+
 #endif // variant_CPP11_OR_GREATER
 
 #endif // NONSTD_VARIANT_LITE_HPP
