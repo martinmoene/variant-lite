@@ -34,4 +34,4 @@ public:
 
 }
 
-#endif NONSTD_OPTIONAL_LITE_HPP
+#endif // NONSTD_OPTIONAL_LITE_HPP
