@@ -211,7 +211,7 @@ private:
     typedef typename typelist_max<Tail>::type tail_type;
 
 public:
-    enum { value = sizeof( Head ) > tail_value ? sizeof( Head ) : tail_value } ;
+    enum { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
 
     typedef typename select< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
 };
@@ -236,7 +236,7 @@ private:
     enum { tail_value = size_t( typelist_max_alignof<Tail>::value ) };
 
 public:
-    enum { value = alignof( Head ) > tail_value ? alignof( Head ) : tail_value };
+    enum { value = (alignof( Head ) > tail_value) ? alignof( Head ) : std::size_t( tail_value ) };
 };
 
 #endif
