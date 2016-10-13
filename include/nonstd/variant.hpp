@@ -672,6 +672,16 @@ public:
     variant( T5 const & t5 ) { new( ptr() ) T5( t5 ); type_index = 5; }
     variant( T6 const & t6 ) { new( ptr() ) T6( t6 ); type_index = 6; }
 
+#if variant_CPP11_OR_GREATER
+    variant( T0 && t0 ) { new( ptr() ) T0( std::move( t0 ) ); type_index = 0; }
+    variant( T1 && t1 ) { new( ptr() ) T1( std::move( t1 ) ); type_index = 1; }
+    variant( T2 && t2 ) { new( ptr() ) T2( std::move( t2 ) ); type_index = 2; }
+    variant( T3 && t3 ) { new( ptr() ) T3( std::move( t3 ) ); type_index = 3; }
+    variant( T4 && t4 ) { new( ptr() ) T4( std::move( t4 ) ); type_index = 4; }
+    variant( T5 && t5 ) { new( ptr() ) T5( std::move( t5 ) ); type_index = 5; }
+    variant( T6 && t6 ) { new( ptr() ) T6( std::move( t6 ) ); type_index = 6; }
+#endif
+
     variant(variant const & other)
     : type_index( other.type_index )
     {
