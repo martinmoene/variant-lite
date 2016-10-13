@@ -4,7 +4,6 @@
 // get<N> at same time as get<type>
 // some emplace
 // some forwarding ctors (std::initializer_list<U>)
-// get<N> at same time as get<type> (temporarily gett<type>)
 
 //
 // Copyright (c) 2016 Martin Moene
@@ -943,23 +942,27 @@ inline variant_constexpr bool holds_alternative( variant<T0, T1, T2, T3, T4, T5,
     return v.index() == v.template index_of<T>();
 }
 
-// NTS:select R/I <=================================
+namespace variant_detail {
+
+template<       class T > struct traits_type    { typedef char type; };
+template< std::size_t I > struct traits_nontype { typedef int  type; };
+}
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline R & gett( variant<T0, T1, T2, T3, T4, T5, T6> & v )
+inline R & get( variant<T0, T1, T2, T3, T4, T5, T6> & v, typename variant_detail::traits_type<R>::type = 0 )
 {
     return v.template get<R>();
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6  >
-inline R const & gett( variant<T0, T1, T2, T3, T4, T5, T6> const & v )
+inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, typename variant_detail::traits_type<R>::type = 0 )
 {
     return v.template get<R>();
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >::type &
-get( variant<T0, T1, T2, T3, T4, T5, T6> & v )
+get( variant<T0, T1, T2, T3, T4, T5, T6> & v, typename variant_detail::traits_nontype<I>::type = 0 )
 {
     if ( I != v.index() )
     {
@@ -973,7 +976,7 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> & v )
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >::type const &
-get( variant<T0, T1, T2, T3, T4, T5, T6> const & v )
+get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, typename variant_detail::traits_nontype<I>::type = 0 )
 {
     if ( I != v.index() )
     {
