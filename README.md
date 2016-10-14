@@ -25,27 +25,29 @@ CppReference. [variant](http://en.cppreference.com/w/cpp/utility/variant).
 ```
 variant: Disallows non-default constructible as first type (non-standard)
 variant: Allows non-default constructible as second and later type
-variant: Allows variant default construction
-variant: Allows variant copy-construction
-variant: Allows variant move-construction (C++11)
-variant: Allows variant copy-assignment
-variant: Allows variant move-assignment (C++11)
-variant: Allows element value-construction
-variant: Allows element copy-construction
-variant: Allows element move-construction (C++11)
-variant: Allows element type-based in-place construction (C++11)
-variant: Allows element type-based in-place intializer-list construction (C++11)
-variant: Allows element index-based in-place construction (C++11)
-variant: Allows element index-based in-place intializer-list construction (C++11)
-variant: Allows element type-based emplacement (C++11)
-variant: Allows element type-based intializer-list emplacement (C++11)
-variant: Allows element index-based emplacement (C++11)
-variant: Allows element index-based intializer-list emplacement (C++11)
+variant: Allows to default-construct variant
+variant: Allows to copy-construct from variant
+variant: Allows to move-construct from variant (C++11)
+variant: Allows to copy-assign from variant
+variant: Allows to move-assign from variant (C++11)
+variant: Allows to construct from element value
+variant: Allows to copy-construct from element
+variant: Allows to move-construct from element (C++11)
+variant: Allows to copy-assign from element
+variant: Allows to move-assign from element (C++11)
+variant: Allows to in-place construct element based on type (C++11)
+variant: Allows to in-place construct element based on index (C++11)
+variant: Allows to in-place construct element via intializer-list based on type (C++11)
+variant: Allows to in-place construct element via intializer-list based on index (C++11)
+variant: Allows to emplace element based on type (C++11)
+variant: Allows to emplace element based on index (C++11)
+variant: Allows to emplace element via intializer-list based on type (C++11)
+variant: Allows to emplace element via intializer-list based on index (C++11)
 variant: Allows to obtain the index of the current type
 variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to compare variants
 variant: Allows to swap variants (member)
-variant: Allows to obtain number of types (non-standard: max 7)
+variant: Allows to obtain number of element types (non-standard: max 7)
 variant: Allows to get element by type
 variant: Allows to get element by index
 variant: Allows to get pointer to element or NULL by type

@@ -17,38 +17,67 @@
 
 namespace {
 
-struct S
+// The following tracer code originates as Oracle from Optional by
+// Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
+
+enum State
 {
-    enum State
-    {
-        default_constructed,
-        copy_constructed,
-        move_constructed,
-        value_constructed,
-    };
-
-    State state;
-    int   value;
-
-    static int deflt() { return 3; }
-
-    S(             ) : state( default_constructed ), value( deflt() ){}
-    S( S const & s ) : state( copy_constructed    ), value( s.value ){}
-#if variant_CPP11_OR_GREATER
-    S( S &&      s ) : state( move_constructed    ), value( std::move(s.value) ){ s.value = -1; }
-#endif
-    S( int       v ) : state( value_constructed   ), value( v ){}
+    /* 0 */ default_constructed,
+    /* 1 */ value_copy_constructed,
+    /* 2 */ value_move_constructed,
+    /* 3 */ copy_constructed,
+    /* 4 */ move_constructed,
+    /* 5 */ move_assigned,
+    /* 6 */ copy_assigned,
+    /* 7 */ value_copy_assigned,
+    /* 8 */ value_move_assigned,
+    /* 9 */ moved_from,
+    /*10 */ value_constructed,
 };
 
-//inline bool operator==( S const & a, S const & b )
-//{
-//    return a.value == b.value;
-//}
-//
-//inline std::ostream & operator<<( std::ostream & os, S const & s )
-//{
-//    return os << "S{" << s.value << "}";
-//}
+struct V
+{
+    State state;
+    int   value;
+    
+    V(             ) : state( default_constructed ), value( deflt() ) {}
+    V( int       v ) : state( value_constructed   ), value( v       ) {}
+    V( V const & v ) : state( copy_constructed    ), value( v.value ) {}
+    V( V &&      v ) : state( move_constructed    ), value( std::move( v.value ) ) {}
+    
+    V & operator=( int       v ) { state = value_copy_assigned; value = v; return *this; }
+    V & operator=( V const & v ) { state = copy_assigned      ; value = v.value; return *this; }
+    V & operator=( V &&      v ) { state = move_assigned      ; value = std::move( v.value ); return *this; }
+
+    static int deflt() { return 42; }
+
+    bool operator==( V const & other ) const { return state == other.state && value == other.value; }
+};
+
+struct S
+{
+    State state;
+    V     value;
+
+    S(             ) : state( default_constructed    ) {}
+    S( V const & v ) : state( value_copy_constructed ), value( v ) {}
+    S( V &&      v ) : state( value_move_constructed ), value( std::move( v ) ) { v.state = moved_from; }
+    S( S const & s ) : state( copy_constructed       ), value( s.value        ) {}
+    S( S &&      s ) : state( move_constructed       ), value( std::move( s.value ) ) { s.state = moved_from; }
+
+    S & operator=( V const & v ) { state = value_copy_assigned; value = v; return *this; }
+    S & operator=( V &&      v ) { state = value_move_assigned; value = std::move( v ); v.state = moved_from; return *this; }
+    S & operator=( const S & s ) { state = copy_assigned      ; value = s.value; return *this; }
+    S & operator=( S &&      s ) { state = move_assigned      ; value = std::move( s.value ); s.state = moved_from; return *this; }
+
+    bool operator==( S const & other ) const { return state == other.state && value == other.value; }
+};
+
+inline std::ostream & operator<<( std::ostream & os, V const & v )
+{
+    using lest::to_string;
+    return os << "[V:" << to_string( v.value ) << "]";
+}
 
 }
 
@@ -72,88 +101,142 @@ CASE( "variant: Allows non-default constructible as second and later type" )
     EXPECT( true );
 }
 
-CASE( "variant: Allows variant default construction" )
+CASE( "variant: Allows to default-construct variant" )
 {
     variant<S> var;
 
-    EXPECT( get<S>(var).state == S::default_constructed );
-    EXPECT( get<0>(var).state == S::default_constructed );
+    EXPECT( get<S>(var).value.value == V::deflt() );
+    EXPECT( get<S>(var).value.state == default_constructed );
+    EXPECT( get<S>(var).state       == default_constructed );
 }
 
-CASE( "variant: Allows variant copy-construction" )
+CASE( "variant: Allows to copy-construct from variant" )
 {
     S s( 7 );
     variant<S> var1( s );
 
     variant<S> var2( var1 );
 
-    EXPECT( get<S>(var2).value == 7 );
+    EXPECT( get<S>(var2).value.value == 7 );
+    EXPECT( get<S>(var2).state       == copy_constructed );
 }
 
-CASE( "variant: Allows variant move-construction (C++11)" )
+CASE( "variant: Allows to move-construct from variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<S> var(( variant<S>() ));
+    variant<S> var{ variant<S>{} };
 
-    EXPECT( get<S>(var).value == S::deflt() );
+    EXPECT( get<S>(var).value.value == V::deflt() );
+    EXPECT( get<S>(var).value.state == default_constructed );
+    EXPECT( get<S>(var).state       == move_constructed );
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows variant copy-assignment" )
+CASE( "variant: Allows to copy-assign from variant" )
 {
     variant<S> var1;
     variant<S> var2;
 
     var2 = var1;
 
-    EXPECT( get<S>(var2).value == S::deflt() );
+    EXPECT( get<S>(var2).value.value == V::deflt() );
+    EXPECT( get<S>(var2).value.state == copy_constructed );
+    EXPECT( get<S>(var2).state       == copy_constructed );
 }
 
-CASE( "variant: Allows variant move-assignment (C++11)" )
+CASE( "variant: Allows to move-assign from variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<S> var;
 
-    var = variant<S>();
+    var = variant<S>{};
 
-    EXPECT( get<S>(var).value == S::deflt() );
+    EXPECT( get<S>(var).value.value == V::deflt() );
+    EXPECT( get<S>(var).value.state == move_constructed );
+    EXPECT( get<S>(var).state       == move_constructed );
 #else
     EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
 }
 
 // NTS:fix
-CASE( "variant: Allows element value-construction" )
+CASE( "variant: Allows to construct from element value" )
+{
+    V v(7);
+    
+    variant<S> var( v );
+
+    EXPECT( get<S>(var).value.value == 7 );
+#if variant_CPP11_OR_GREATER
+    EXPECT( get<S>(var).value.state == move_constructed );
+    EXPECT( get<S>(var).state       == move_constructed );
+#else
+    EXPECT( get<S>(var).value.state == copy_constructed );
+    EXPECT( get<S>(var).state       == copy_constructed );
+#endif
+}
+
+CASE( "variant: Allows to copy-construct from element" )
 {
     S s(7);
 
     variant<S> var( s );
 
-    EXPECT( get<S>(var).state == S::copy_constructed );
-    EXPECT( get<S>(var).value == 7 );
+    EXPECT( get<S>(var).value.value == 7 );
+    EXPECT( get<S>(var).state       == copy_constructed );
 }
 
-CASE( "variant: Allows element copy-construction" )
-{
-    S s(7);
-
-    variant<S> var( s );
-
-    EXPECT( get<S>(var).state == S::copy_constructed );
-    EXPECT( get<S>(var).value == 7 );
-}
-
-CASE( "variant: Allows element move-construction (C++11)" )
+CASE( "variant: Allows to move-construct from element (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<S> var( S(7) );
+    variant<S> var{ S{7} };
 
-    EXPECT( get<S>(var).state == S::move_constructed );
-    EXPECT( get<S>(var).value == 7 );
+    EXPECT( get<S>(var).value.value == 7 );
+    EXPECT( get<S>(var).state       == move_constructed );
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
+#endif
+}
+
+//CASE( "variant: Allows to copy-assign from element value" )
+//{
+//    V v( 7 );
+//    variant<int, S> var;
+//
+//    var = v;
+//
+//    EXPECT( get<S>(var).value.value == 7 );
+//    EXPECT( get<S>(var).state       == copy_assigned );
+//}
+
+CASE( "variant: Allows to copy-assign from element" )
+{
+    S s( 7 );
+    variant<int, S> var;
+
+    var = s;
+
+    EXPECT( get<S>(var).value.value == 7 );
+#if variant_CPP11_OR_GREATER
+    EXPECT( get<S>(var).state       == move_constructed );
+#else
+    EXPECT( get<S>(var).state       == copy_constructed );
+#endif
+}
+
+CASE( "variant: Allows to move-assign from element (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    variant<int, S> var;
+
+    var = S{ 7 };
+
+    EXPECT( get<S>(var).value.value == 7 );
+    EXPECT( get<S>(var).state       == move_constructed );
+#else
+    EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
 }
 
@@ -173,7 +256,7 @@ struct NoCopyMove
 }
 #endif
 
-CASE( "variant: Allows element type-based in-place construction (C++11)" )
+CASE( "variant: Allows to in-place construct element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var( in_place<NoCopyMove>, 7 );
@@ -184,11 +267,7 @@ CASE( "variant: Allows element type-based in-place construction (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows element type-based in-place intializer-list construction (C++11)" )
-{
-}
-
-CASE( "variant: Allows element index-based in-place construction (C++11)" )
+CASE( "variant: Allows to in-place construct element based on index (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var( in_place<1>, 7 );
@@ -199,11 +278,15 @@ CASE( "variant: Allows element index-based in-place construction (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows element index-based in-place intializer-list construction (C++11)" )
+CASE( "variant: Allows to in-place construct element via intializer-list based on type (C++11)" )
 {
 }
 
-CASE( "variant: Allows element type-based emplacement (C++11)" )
+CASE( "variant: Allows to in-place construct element via intializer-list based on index (C++11)" )
+{
+}
+
+CASE( "variant: Allows to emplace element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var;
@@ -216,11 +299,7 @@ CASE( "variant: Allows element type-based emplacement (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows element type-based intializer-list emplacement (C++11)" )
-{
-}
-
-CASE( "variant: Allows element index-based emplacement (C++11)" )
+CASE( "variant: Allows to emplace element based on index (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var;
@@ -233,7 +312,11 @@ CASE( "variant: Allows element index-based emplacement (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows element index-based intializer-list emplacement (C++11)" )
+CASE( "variant: Allows to emplace element via intializer-list based on type (C++11)" )
+{
+}
+
+CASE( "variant: Allows to emplace element via intializer-list based on index (C++11)" )
 {
 }
 
@@ -268,15 +351,15 @@ CASE( "variant: Allows to swap variants (member)" )
 
     vari.swap( vars );
 
-    EXPECT( s.value == get< S >( vari ).value );
-    EXPECT(       3 == get<int>( vars )       );
+    EXPECT( s.value.value == get< S >( vari ).value.value );
+    EXPECT(             3 == get<int>( vars )             );
 }
 
 //
 // variant non-member operations:
 //
 
-CASE( "variant: Allows to obtain number of types (non-standard: max 7)" )
+CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" )
 {
     struct t1{};
     struct t2{};
@@ -310,14 +393,14 @@ CASE( "variant: Allows to get element by type" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( get<S>(var).value == 7 );
+    EXPECT( get<S>(var).value.value == 7 );
 }
 
 CASE( "variant: Allows to get element by index" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( get<1>(var).value == 7 );
+    EXPECT( get<1>(var).value.value == 7 );
 }
 
 CASE( "variant: Allows to get pointer to element or NULL by type" )
@@ -327,7 +410,7 @@ CASE( "variant: Allows to get pointer to element or NULL by type" )
     EXPECT( nullptr == get_if<int>( &var ) );
 
     EXPECT( nullptr != get_if< S >( &var ) );
-    EXPECT(            get_if< S >( &var )->value == 7 );
+    EXPECT(            get_if< S >( &var )->value.value == 7 );
 }
 
 CASE( "variant: Allows to get pointer to element or NULL by index" )
@@ -337,7 +420,7 @@ CASE( "variant: Allows to get pointer to element or NULL by index" )
     EXPECT( nullptr == get_if<0>( &var ) );
 
     EXPECT( nullptr != get_if<1>( &var ) );
-    EXPECT(            get_if<1>( &var )->value == 7 );
+    EXPECT(            get_if<1>( &var )->value.value == 7 );
 }
 
 CASE( "variant: Allows to swap variants (non-member)" )
@@ -348,8 +431,8 @@ CASE( "variant: Allows to swap variants (non-member)" )
 
     swap( vari, vars );
 
-    EXPECT( s.value == get< S >( vari ).value );
-    EXPECT(       3 == get<int>( vars )       );
+    EXPECT( s.value.value == get< S >( vari ).value.value );
+    EXPECT(             3 == get<int>( vars )             );
 }
 
 CASE( "variant: Allows to obtain hash (C++11)" )
