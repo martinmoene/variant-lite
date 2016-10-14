@@ -44,12 +44,12 @@ variant: Allows element index-based intializer-list emplacement (C++11)
 variant: Allows to obtain the index of the current type
 variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to compare variants
-variant: Allows to swap (member) variants (non-standard)
+variant: Allows to swap variants (member)
 variant: Allows to obtain number of types (non-standard: max 7)
 variant: Allows to get element by type
 variant: Allows to get element by index
 variant: Allows to get pointer to element or NULL by type (C++11)
 variant: Allows to get pointer to element or NULL by index (C++11)
-variant: Allows to swap (non-member) variants
+variant: Allows to swap variants (non-member)
 variant: Allows to obtain hash (C++11)
 ```

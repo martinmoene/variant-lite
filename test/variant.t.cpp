@@ -260,7 +260,7 @@ CASE( "variant: Allows to compare variants" )
 {
 }
 
-CASE( "variant: Allows to swap (member) variants (non-standard)" )
+CASE( "variant: Allows to swap variants (member)" )
 {
     S s( 7 );
     variant<int, S> vari( 3 );
@@ -317,7 +317,7 @@ CASE( "variant: Allows to get element by index" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( 7 == get<1>(var).value );
+    EXPECT( get<1>(var).value == 7 );
 }
 
 CASE( "variant: Allows to get pointer to element or NULL by type (C++11)" )
@@ -348,7 +348,7 @@ CASE( "variant: Allows to get pointer to element or NULL by index (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows to swap (non-member) variants" )
+CASE( "variant: Allows to swap variants (non-member)" )
 {
     S s( 7 );
     variant<int, S> vari( 3 );
