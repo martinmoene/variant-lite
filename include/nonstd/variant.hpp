@@ -527,17 +527,17 @@ struct helper
         return to_index_t( I );
     }
 
-    static type_index_t move( std::size_t const from_index, const void * from_value, void * to_value )
+    static type_index_t move( std::size_t const from_index, void * from_value, void * to_value )
     {
         switch ( from_index )
         {
-            case 0: new( to_value ) T0( std::move( *as<T0>( from_value ) ) ); break;
-            case 1: new( to_value ) T1( std::move( *as<T1>( from_value ) ) ); break;
-            case 2: new( to_value ) T2( std::move( *as<T2>( from_value ) ) ); break;
-            case 3: new( to_value ) T3( std::move( *as<T3>( from_value ) ) ); break;
-            case 4: new( to_value ) T4( std::move( *as<T4>( from_value ) ) ); break;
-            case 5: new( to_value ) T5( std::move( *as<T5>( from_value ) ) ); break;
-            case 6: new( to_value ) T6( std::move( *as<T6>( from_value ) ) ); break;
+            case 0: new( to_value ) T0( std::forward<T0>( *as<T0>( from_value ) ) ); break;
+            case 1: new( to_value ) T1( std::forward<T1>( *as<T1>( from_value ) ) ); break;
+            case 2: new( to_value ) T2( std::forward<T2>( *as<T2>( from_value ) ) ); break;
+            case 3: new( to_value ) T3( std::forward<T3>( *as<T3>( from_value ) ) ); break;
+            case 4: new( to_value ) T4( std::forward<T4>( *as<T4>( from_value ) ) ); break;
+            case 5: new( to_value ) T5( std::forward<T5>( *as<T5>( from_value ) ) ); break;
+            case 6: new( to_value ) T6( std::forward<T6>( *as<T6>( from_value ) ) ); break;
         }
         return to_index_t( from_index );
     }
@@ -674,24 +674,24 @@ class variant
     typedef detail::helper<T0, T1, T2, T3, T4, T5, T6> helper_type;
 
 public:
-    variant() { new( ptr() ) T0(); type_index = 0; }
+    variant() : type_index( 0 ) { new( ptr() ) T0(); }
 
-    variant( T0 const & t0 ) { new( ptr() ) T0( t0 ); type_index = 0; }
-    variant( T1 const & t1 ) { new( ptr() ) T1( t1 ); type_index = 1; }
-    variant( T2 const & t2 ) { new( ptr() ) T2( t2 ); type_index = 2; }
-    variant( T3 const & t3 ) { new( ptr() ) T3( t3 ); type_index = 3; }
-    variant( T4 const & t4 ) { new( ptr() ) T4( t4 ); type_index = 4; }
-    variant( T5 const & t5 ) { new( ptr() ) T5( t5 ); type_index = 5; }
-    variant( T6 const & t6 ) { new( ptr() ) T6( t6 ); type_index = 6; }
-
+    variant( T0 const & t0 ) : type_index( 0 ) { new( ptr() ) T0( t0 ); }
+    variant( T1 const & t1 ) : type_index( 1 ) { new( ptr() ) T1( t1 ); }
+    variant( T2 const & t2 ) : type_index( 2 ) { new( ptr() ) T2( t2 ); }
+    variant( T3 const & t3 ) : type_index( 3 ) { new( ptr() ) T3( t3 ); }
+    variant( T4 const & t4 ) : type_index( 4 ) { new( ptr() ) T4( t4 ); }
+    variant( T5 const & t5 ) : type_index( 5 ) { new( ptr() ) T5( t5 ); }
+    variant( T6 const & t6 ) : type_index( 6 ) { new( ptr() ) T6( t6 ); }
+ 
 #if variant_CPP11_OR_GREATER
-    variant( T0 && t0 ) { new( ptr() ) T0( std::move( t0 ) ); type_index = 0; }
-    variant( T1 && t1 ) { new( ptr() ) T1( std::move( t1 ) ); type_index = 1; }
-    variant( T2 && t2 ) { new( ptr() ) T2( std::move( t2 ) ); type_index = 2; }
-    variant( T3 && t3 ) { new( ptr() ) T3( std::move( t3 ) ); type_index = 3; }
-    variant( T4 && t4 ) { new( ptr() ) T4( std::move( t4 ) ); type_index = 4; }
-    variant( T5 && t5 ) { new( ptr() ) T5( std::move( t5 ) ); type_index = 5; }
-    variant( T6 && t6 ) { new( ptr() ) T6( std::move( t6 ) ); type_index = 6; }
+    variant( T0 &&      t0 ) : type_index( 0 ) { new( ptr() ) T0( std::move( t0 ) ); }
+    variant( T1 &&      t1 ) : type_index( 1 ) { new( ptr() ) T1( std::move( t1 ) ); }
+    variant( T2 &&      t2 ) : type_index( 2 ) { new( ptr() ) T2( std::move( t2 ) ); }
+    variant( T3 &&      t3 ) : type_index( 3 ) { new( ptr() ) T3( std::move( t3 ) ); }
+    variant( T4 &&      t4 ) : type_index( 4 ) { new( ptr() ) T4( std::move( t4 ) ); }
+    variant( T5 &&      t5 ) : type_index( 5 ) { new( ptr() ) T5( std::move( t5 ) ); }
+    variant( T6 &&      t6 ) : type_index( 6 ) { new( ptr() ) T6( std::move( t6 ) ); }
 #endif
 
     variant(variant const & other)
@@ -746,7 +746,7 @@ public:
 #if variant_CPP11_OR_GREATER
     variant & operator=( variant && other )
     {
-        move_assign( std::move( other ) );
+        move_assign( std::forward<variant>( other ) );
         return *this;
     }
 #endif
