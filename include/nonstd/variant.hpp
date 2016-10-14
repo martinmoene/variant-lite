@@ -26,7 +26,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <initializer_list>
 #include <limits>
 #include <new>
 #include <stdexcept>
@@ -66,6 +65,7 @@
 #endif
 
 #if variant_CPP11_OR_GREATER
+# include <initializer_list>
 # include <type_traits>
 #endif
 
@@ -1003,8 +1003,6 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
 
     return v.template get< typename detail::typelist_type_at< variant_types, I >::type >();
 }
-
-// NTS:implement
 
 #if variant_CPP11_OR_GREATER
 
