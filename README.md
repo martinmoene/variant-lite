@@ -48,8 +48,8 @@ variant: Allows to swap variants (member)
 variant: Allows to obtain number of types (non-standard: max 7)
 variant: Allows to get element by type
 variant: Allows to get element by index
-variant: Allows to get pointer to element or NULL by type (C++11)
-variant: Allows to get pointer to element or NULL by index (C++11)
+variant: Allows to get pointer to element or NULL by type
+variant: Allows to get pointer to element or NULL by index
 variant: Allows to swap variants (non-member)
 variant: Allows to obtain hash (C++11)
 ```

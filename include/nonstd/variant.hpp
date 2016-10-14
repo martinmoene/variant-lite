@@ -1003,37 +1003,49 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
     return v.template get< typename detail::typelist_type_at< variant_types, I >::type >();
 }
 
-#if variant_CPP11_OR_GREATER
-
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+#if variant_CPP11_OR_GREATER
 inline variant_constexpr typename std::add_pointer<T>::type
+#else
+inline variant_constexpr T *
+#endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+#if variant_CPP11_OR_GREATER
 inline variant_constexpr typename std::add_pointer< const T >::type
+#else
+inline variant_constexpr const T *
+#endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+#if variant_CPP11_OR_GREATER
 inline variant_constexpr typename std::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
+#else
+inline variant_constexpr typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
+#endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &get<I>( *pv ) : NULL;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+#if variant_CPP11_OR_GREATER
 inline variant_constexpr typename std::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
+#else
+inline variant_constexpr const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
+#endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &get<I>( *pv )  : NULL;
 }
-
-#endif // variant_CPP11_OR_GREATER
 
 template< class T0, class T1, class T2, class T3, class T4, class T5 >
 inline void swap(
