@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <initializer_list>
 #include <limits>
 #include <new>
 #include <stdexcept>
@@ -1009,24 +1010,30 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline variant_constexpr typename std::add_pointer<T>::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> );
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
+{
+    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : nullptr;
+}
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline variant_constexpr typename std::add_pointer< const T >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>);
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
+{
+    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : nullptr;
+}
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline variant_constexpr typename std::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
 {
-    return ( pv->index() == I ) ? &pv-get<I>() : NULL;
+    return ( pv->index() == I ) ? &get<I>( *pv ) : NULL;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline variant_constexpr typename std::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
 {
-    return ( pv->index() == I ) ? &pv-get<I>() : NULL;
+    return ( pv->index() == I ) ? &get<I>( *pv )  : NULL;
 }
 
 #endif // variant_CPP11_OR_GREATER
@@ -1057,7 +1064,7 @@ class hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6> >
 public:
     std::size_t operator()( nonstd::variant<T0, T1, T2, T3, T4, T5, T6> const & v ) const
     {
-        return detail::hash( v );
+        return nonstd::variants::detail::hash( v );
     }
 };
 
