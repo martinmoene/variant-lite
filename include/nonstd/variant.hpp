@@ -29,7 +29,6 @@
 #include <limits>
 #include <new>
 #include <stdexcept>
-#include <typeinfo>
 #include <utility>
 
 #define  variant_lite_VERSION "0.0.0"
