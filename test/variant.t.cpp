@@ -308,22 +308,44 @@ CASE( "variant: Allows to obtain number of types (non-standard: max 7)" )
 
 CASE( "variant: Allows to get element by type" )
 {
-// get<type>
+    variant<int, S> var( S( 7 ) );
+
+    EXPECT( get<S>(var).value == 7 );
 }
 
 CASE( "variant: Allows to get element by index" )
 {
-// get<N>
+    variant<int, S> var( S( 7 ) );
+
+    EXPECT( 7 == get<1>(var).value );
 }
 
-CASE( "variant: Allows to get pointer to element or NULL by type" )
+CASE( "variant: Allows to get pointer to element or NULL by type (C++11)" )
 {
-// get_if<type>
+#if variant_CPP11_OR_GREATER
+    variant<int, S> var( S( 7 ) );
+
+    EXPECT( nullptr == get_if<int>( &var ) );
+
+    EXPECT( nullptr != get_if< S >( &var ) );
+    EXPECT(            get_if< S >( &var )->value == 7 );
+#else
+    EXPECT( !!"variant: get_if() is not available (no C++11)" );
+#endif
 }
 
-CASE( "variant: Allows to get pointer to element or NULL by index" )
+CASE( "variant: Allows to get pointer to element or NULL by index (C++11)" )
 {
-// get_if<N>
+#if variant_CPP11_OR_GREATER
+    variant<int, S> var( S( 7 ) );
+
+    EXPECT( nullptr == get_if<0>( &var ) );
+
+    EXPECT( nullptr != get_if<1>( &var ) );
+    EXPECT(            get_if<1>( &var )->value == 7 );
+#else
+    EXPECT( !!"variant: get_if() is not available (no C++11)" );
+#endif
 }
 
 CASE( "variant: Allows to swap (non-member) variants" )
