@@ -19,3 +19,37 @@ References
 ----------
 Ben Deane. [Using Types Effectively](https://youtu.be/ojZbFIQSdl8?list=PLHTh1InhhwT7J5jl4vAhO1WvGHUUFgUQH). CppCon 2016.  
 CppReference. [variant](http://en.cppreference.com/w/cpp/utility/variant).  
+
+### A.1 Variant Lite test specification
+
+```
+variant: Disallows non-default constructible as first type (non-standard)
+variant: Allows non-default constructible as second and later type
+variant: Allows variant default construction
+variant: Allows variant copy-construction
+variant: Allows variant move-construction (C++11)
+variant: Allows variant copy-assignment
+variant: Allows variant move-assignment (C++11)
+variant: Allows element value-construction
+variant: Allows element copy-construction
+variant: Allows element move-construction (C++11)
+variant: Allows element type-based in-place construction (C++11)
+variant: Allows element type-based in-place intializer-list construction (C++11)
+variant: Allows element index-based in-place construction (C++11)
+variant: Allows element index-based in-place intializer-list construction (C++11)
+variant: Allows element type-based emplacement (C++11)
+variant: Allows element type-based intializer-list emplacement (C++11)
+variant: Allows element index-based emplacement (C++11)
+variant: Allows element index-based intializer-list emplacement (C++11)
+variant: Allows to obtain the index of the current type
+variant: Allows to inspect if variant is "valueless by exception"
+variant: Allows to compare variants
+variant: Allows to swap (member) variants (non-standard)
+variant: Allows to obtain number of types (non-standard: max 7)
+variant: Allows to get element by type
+variant: Allows to get element by index
+variant: Allows to get pointer to element or NULL by type (C++11)
+variant: Allows to get pointer to element or NULL by index (C++11)
+variant: Allows to swap (non-member) variants
+variant: Allows to obtain hash (C++11)
+```
