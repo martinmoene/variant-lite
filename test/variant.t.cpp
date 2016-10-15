@@ -124,12 +124,12 @@ CASE( "variant: Allows to copy-construct from variant" )
 CASE( "variant: Allows to move-construct from variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<S> var{ variant<S>{} };
+    variant<S> var{ variant<S>{ S{} } };
 
-    EXPECT( get<S>(var).value.value == V::deflt() );
-    EXPECT( get<S>(var).value.state == default_constructed );
+    EXPECT( get<S>(var).value.value == V::deflt()  );
+    EXPECT( get<S>(var).value.state == move_constructed );
     EXPECT( get<S>(var).state       == move_constructed );
-#else
+ #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
 }
