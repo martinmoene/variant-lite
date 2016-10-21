@@ -781,32 +781,6 @@ public:
         return type_index == variant_npos_internal();
     }
 
-    template< class T >
-    T & get()
-    {
-        const std::size_t i = index_of<T>();
-
-        if ( i != index() || i == max_index() )
-        {
-            throw bad_variant_access();
-        }
-
-        return *as<T>();
-    }
-
-    template< class T >
-    T const & get() const
-    {
-        const std::size_t i = index_of<T>();
-
-        if ( i != index() || i == max_index() )
-        {
-            throw bad_variant_access();
-        }
-
-        return *as<const T>();
-    }
-
 #if variant_CPP11_OR_GREATER
     template< class T, class... Args >
     void emplace( Args&&... args )
@@ -854,6 +828,32 @@ public:
     variant_constexpr std::size_t index_of() const variant_noexcept
     {
         return detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value;
+    }
+
+    template< class T >
+    T & get()
+    {
+        const std::size_t i = index_of<T>();
+
+        if ( i != index() || i == max_index() )
+        {
+            throw bad_variant_access();
+        }
+
+        return *as<T>();
+    }
+
+    template< class T >
+    T const & get() const
+    {
+        const std::size_t i = index_of<T>();
+
+        if ( i != index() || i == max_index() )
+        {
+            throw bad_variant_access();
+        }
+
+        return *as<const T>();
     }
 
 private:
