@@ -17,6 +17,12 @@
 
 namespace {
 
+#if variant_CPP11_OR_GREATER
+std::nullptr_t nullptr98 = nullptr;
+#else
+void * nullptr98 = 0;
+#endif
+
 // The following tracer code originates as Oracle from Optional by
 // Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
 
@@ -43,11 +49,14 @@ struct V
     V(             ) : state( default_constructed ), value( deflt() ) {}
     V( int       v ) : state( value_constructed   ), value( v       ) {}
     V( V const & v ) : state( copy_constructed    ), value( v.value ) {}
-    V( V &&      v ) : state( move_constructed    ), value( std::move( v.value ) ) {}
     
     V & operator=( int       v ) { state = value_copy_assigned; value = v; return *this; }
     V & operator=( V const & v ) { state = copy_assigned      ; value = v.value; return *this; }
-    V & operator=( V &&      v ) { state = move_assigned      ; value = std::move( v.value ); return *this; }
+
+#if variant_CPP11_OR_GREATER
+    V(             V && v ) : state( move_constructed   ), value(  std::move( v.value ) ) {}
+    V & operator=( V && v ) { state = move_assigned      ; value = std::move( v.value ); return *this; }
+#endif
 
     static int deflt() { return 42; }
 
@@ -61,14 +70,18 @@ struct S
 
     S(             ) : state( default_constructed    ) {}
     S( V const & v ) : state( value_copy_constructed ), value( v ) {}
-    S( V &&      v ) : state( value_move_constructed ), value( std::move( v ) ) { v.state = moved_from; }
     S( S const & s ) : state( copy_constructed       ), value( s.value        ) {}
-    S( S &&      s ) : state( move_constructed       ), value( std::move( s.value ) ) { s.state = moved_from; }
 
     S & operator=( V const & v ) { state = value_copy_assigned; value = v; return *this; }
-    S & operator=( V &&      v ) { state = value_move_assigned; value = std::move( v ); v.state = moved_from; return *this; }
     S & operator=( const S & s ) { state = copy_assigned      ; value = s.value; return *this; }
-    S & operator=( S &&      s ) { state = move_assigned      ; value = std::move( s.value ); s.state = moved_from; return *this; }
+
+#if variant_CPP11_OR_GREATER
+    S(             V && v ) : state(  value_move_constructed ), value(  std::move( v ) ) { v.state = moved_from; }
+    S(             S && s ) : state(  move_constructed       ), value(  std::move( s.value ) ) { s.state = moved_from; }
+
+    S & operator=( V && v ) { state = value_move_assigned     ; value = std::move( v ); v.state = moved_from; return *this; }
+    S & operator=( S && s ) { state = move_assigned           ; value = std::move( s.value ); s.state = moved_from; return *this; }
+#endif
 
     bool operator==( S const & other ) const { return state == other.state && value == other.value; }
 };
@@ -85,18 +98,21 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 // variant member operations:
 //
 
+namespace
+{
+    class NC { NC(){} };
+}
+
 CASE( "variant: Disallows non-default constructible as first type (non-standard)" )
 {
-    class S { S(){} };
-//  variant<S> var;
+//  variant<NC> var;
 
     EXPECT( true );
 }
 
 CASE( "variant: Allows non-default constructible as second and later type" )
 {
-    class S { S(){} };
-    variant<int, S> var;
+    variant<int, NC> var;
 
     EXPECT( true );
 }
@@ -377,7 +393,7 @@ CASE( "variant: Allows to swap variants (member)" )
 // variant non-member operations:
 //
 
-CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" )
+namespace 
 {
     struct t1{};
     struct t2{};
@@ -387,7 +403,10 @@ CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" 
     struct t6{};
     struct t7{};
     struct t8{};
+}
 
+CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" )
+{
     typedef variant<t1> var1;
     typedef variant<t1, t2> var2;
     typedef variant<t1, t2, t3> var3;
@@ -425,20 +444,20 @@ CASE( "variant: Allows to get pointer to element or NULL by type" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( nullptr == get_if<int>( &var ) );
+    EXPECT( nullptr98 == get_if<int>( &var ) );
 
-    EXPECT( nullptr != get_if< S >( &var ) );
-    EXPECT(            get_if< S >( &var )->value.value == 7 );
+    EXPECT( nullptr98 != get_if< S >( &var ) );
+    EXPECT(              get_if< S >( &var )->value.value == 7 );
 }
 
 CASE( "variant: Allows to get pointer to element or NULL by index" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( nullptr == get_if<0>( &var ) );
+    EXPECT( nullptr98 == get_if<0>( &var ) );
 
-    EXPECT( nullptr != get_if<1>( &var ) );
-    EXPECT(            get_if<1>( &var )->value.value == 7 );
+    EXPECT( nullptr98 != get_if<1>( &var ) );
+    EXPECT(              get_if<1>( &var )->value.value == 7 );
 }
 
 CASE( "variant: Allows to swap variants (non-member)" )

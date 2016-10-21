@@ -154,18 +154,18 @@ namespace detail
 
 // C++11 emulation:
 
-template< class T >
-struct remove_cv 
-{
-    typedef typename std::remove_volatile<typename std::remove_const<T>::type>::type type;
-};
- 
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
  
 template< class T > struct remove_volatile             { typedef T type; };
 template< class T > struct remove_volatile<volatile T> { typedef T type; };
 
+template< class T >
+struct remove_cv 
+{
+    typedef typename remove_volatile<typename remove_const<T>::type>::type type;
+};
+ 
 // typelist:
 
 #define variant_TL1( T1                         ) detail::typelist< T1, detail::nulltype >
@@ -665,7 +665,7 @@ using variant_alternative_t = typename variant_alternative<I, T>::type;
 #if variant_CPP11_OR_GREATER
 variant_constexpr std::size_t variant_npos = static_cast<std::size_t>( -1 );
 #else
-enum { variant_npos = -1 };
+static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
 #endif
 
 class bad_variant_access : public std::exception
@@ -999,7 +999,7 @@ inline variant_constexpr T *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : nullptr;
+    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : NULL;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
@@ -1010,7 +1010,7 @@ inline variant_constexpr const T *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : nullptr;
+    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : NULL;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
