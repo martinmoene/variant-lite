@@ -152,6 +152,20 @@ namespace nonstd { namespace variants {
 namespace detail
 {
 
+// C++11 emulation:
+
+template< class T >
+struct remove_cv 
+{
+    typedef typename std::remove_volatile<typename std::remove_const<T>::type>::type type;
+};
+ 
+template< class T > struct remove_const          { typedef T type; };
+template< class T > struct remove_const<const T> { typedef T type; };
+ 
+template< class T > struct remove_volatile             { typedef T type; };
+template< class T > struct remove_volatile<volatile T> { typedef T type; };
+
 // typelist:
 
 #define variant_TL1( T1                         ) detail::typelist< T1, detail::nulltype >
@@ -173,13 +187,19 @@ struct select< false, Then, Else > { typedef Else type; };
 
 // variant parameter unused type tags:
 
-struct T0{};
-struct T1{};
-struct T2{};
-struct T3{};
-struct T4{};
-struct T5{};
-struct T6{};
+struct TX
+{
+    inline bool operator==( TX const & ) const { return true; } 
+    inline bool operator< ( TX const & ) const { return true; } 
+};
+
+struct T0 : TX {};
+struct T1 : TX {};
+struct T2 : TX {};
+struct T3 : TX {};
+struct T4 : TX {};
+struct T5 : TX {};
+struct T6 : TX {};
 
 struct nulltype{};
 
@@ -761,56 +781,6 @@ public:
         return type_index == variant_npos_internal();
     }
 
-    // NTS:implement
-    bool operator==( variant const & rhs ) const
-    {
-        assert( valid() && rhs.valid() );
-
-        if ( this->index() != rhs.index() )
-        {
-            return false;
-        }
-//        detail::comparer<variant, detail::equal_comp> visitor( *this );
-//
-//        return visit( rhs, visitor );
-        return false; // NTS:implement
-    }
-
-    bool operator!=( variant const & rhs ) const
-    {
-        return ! ( *this == rhs );
-    }
-
-    // NTS:implement
-    bool operator<(variant const& rhs) const
-    {
-        assert( valid() && rhs.valid() );
-
-        if ( this->index() != rhs.index() )
-        {
-            return this->index() < rhs.index();
-        }
-//        detail::comparer<variant, detail::less_comp> visitor( *this );
-//
-//        return visit( rhs, visitor );
-        return false; // NTS:implement
-    }
-
-    bool operator>( variant const & rhs ) const
-    {
-        return rhs < *this;
-    }
-
-    bool operator<=( variant const & rhs ) const
-    {
-        return ! ( *this > rhs );
-    }
-
-    bool operator>=( variant const & rhs ) const
-    {
-        return ! ( *this < rhs );
-    }
-
     template< class T >
     T & get()
     {
@@ -822,6 +792,19 @@ public:
         }
 
         return *as<T>();
+    }
+
+    template< class T >
+    T const & get() const
+    {
+        const std::size_t i = index_of<T>();
+
+        if ( i != index() || i == max_index() )
+        {
+            throw bad_variant_access();
+        }
+
+        return *as<const T>();
     }
 
 #if variant_CPP11_OR_GREATER
@@ -862,10 +845,15 @@ public:
     // non-standard:
     //
 
+    variant_constexpr bool valid() const variant_noexcept
+    {
+        return type_index != variant_npos_internal();
+    }
+
     template< class T >
     variant_constexpr std::size_t index_of() const variant_noexcept
     {
-        return detail::typelist_index_of<variant_types, T>::value;
+        return detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value;
     }
 
 private:
@@ -881,15 +869,16 @@ private:
         return &data;
     }
 
-    bool valid() const variant_noexcept
-    {
-        return type_index != variant_npos_internal();
-    }
-
     template< class U >
     U * as()
     {
         return reinterpret_cast<U*>( ptr() );
+    }
+
+    template< class U >
+    U const * as() const
+    {
+        return reinterpret_cast<U const *>( ptr() );
     }
 
     variant_constexpr std::size_t max_index() const variant_noexcept
@@ -897,7 +886,7 @@ private:
         return data_size;
     }
 
-    type_index_t variant_npos_internal() const variant_noexcept
+    variant_constexpr type_index_t variant_npos_internal() const variant_noexcept
     {
         return static_cast<type_index_t>( -1 );
     }
@@ -951,7 +940,6 @@ private:
 
     type_index_t type_index;
 };
-
 
 // NTS:implement
 //template <class Visitor, class... Variants>
@@ -1053,6 +1041,103 @@ inline void swap(
     variant<T0, T1, T2, T3, T4, T5> & b ) variant_noexcept
 {
     a.swap( b );
+}
+
+namespace detail
+{
+    
+template< class Variant >
+struct Comparator
+{
+    static inline bool equal( Variant const & v, Variant const & w )
+    {
+        switch( v.index() )
+        {
+            case 0: return get<0>( v ) == get<0>( w );
+            case 1: return get<1>( v ) == get<1>( w );
+            case 2: return get<2>( v ) == get<2>( w );
+            case 3: return get<3>( v ) == get<3>( w );
+            case 4: return get<4>( v ) == get<4>( w );
+            case 5: return get<5>( v ) == get<5>( w );
+            case 6: return get<6>( v ) == get<6>( w );
+            default: return false;
+        }
+    }
+
+    static inline bool less_than( Variant const & v, Variant const & w )
+    {
+        switch( v.index() )
+        {
+            case 0: return get<0>( v ) < get<0>( w );
+            case 1: return get<1>( v ) < get<1>( w );
+            case 2: return get<2>( v ) < get<2>( w );
+            case 3: return get<3>( v ) < get<3>( w );
+            case 4: return get<4>( v ) < get<4>( w );
+            case 5: return get<5>( v ) < get<5>( w );
+            case 6: return get<6>( v ) < get<6>( w );
+            default: return false;
+        }
+    }
+};
+
+} //namespace detail
+
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr14 bool operator==( 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & w )
+{
+    assert( v.valid() && w.valid() );
+
+    if      ( v.index() != w.index()     ) return false;
+    else if ( v.valueless_by_exception() ) return true;
+    else                                   return detail::Comparator< variant<T0, T1, T2, T3, T4, T5, T6> >::equal( v, w );
+}
+
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr14 bool operator!=( 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & w )
+{
+    return ! ( v == w );
+}
+
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr14 bool operator<( 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & w )
+{
+    assert( v.valid() && w.valid() );
+
+    if      ( w.valueless_by_exception() ) return false;
+    else if ( v.valueless_by_exception() ) return true;
+    else if ( v.index() < w.index()      ) return true;
+    else if ( v.index() > w.index()      ) return false;
+    else                                   return detail::Comparator< variant<T0, T1, T2, T3, T4, T5, T6> >::less_than( v, w );
+}
+
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr14 bool operator>( 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & w )
+{
+    return w < v;
+}
+
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr14 bool operator<=( 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & w )
+{
+    return ! ( v > w ); 
+}
+
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
+inline variant_constexpr14 bool operator>=( 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+    variant<T0, T1, T2, T3, T4, T5, T6> const & w )
+{
+    return ! ( v < w ); 
 }
 
 } // namespace variants

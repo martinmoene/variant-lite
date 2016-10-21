@@ -341,6 +341,24 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 
 CASE( "variant: Allows to compare variants" )
 {
+    typedef variant<int, double> Variant;
+    Variant v = 3, w = 7;
+
+    EXPECT( v == v );
+    EXPECT( v != w );
+    EXPECT( v <  w );
+    EXPECT( w >  v );
+    EXPECT( v <= v );
+    EXPECT( v <= w );
+    EXPECT( v >= v );
+    EXPECT( w >= v );
+
+    EXPECT_NOT( v == w );
+    EXPECT_NOT( v != v );
+    EXPECT_NOT( w <  v );
+    EXPECT_NOT( v >  w );
+    EXPECT_NOT( w <= v );
+    EXPECT_NOT( v >= w );
 }
 
 CASE( "variant: Allows to swap variants (member)" )
