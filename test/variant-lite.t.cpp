@@ -18,14 +18,23 @@ lest::tests & specification()
     return tests; 
 }
 
+CASE( "__cplusplus" "[.stdc++]" )
+{
+    variant_PRESENT( __cplusplus );
+}
+
 CASE( "variant-lite version" "[.version]" )
 {
     variant_PRESENT( variant_lite_VERSION );
 }
 
-CASE( "__cplusplus" "[.stdc++]" )
+CASE( "compiler version" "[.compiler]" )
 {
-    variant_PRESENT( __cplusplus );
+#if variant_COMPILER_MSVC_VERSION 
+    variant_PRESENT( variant_COMPILER_MSVC_VERSION );
+#else
+    variant_ABSENT(  variant_COMPILER_MSVC_VERSION );
+#endif
 }
 
 CASE( "Presence of C++ language features" "[.stdlanguage]" )
