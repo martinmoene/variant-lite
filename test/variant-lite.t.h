@@ -19,12 +19,12 @@ using namespace nonstd;
 
 extern lest::tests & specification();
 
-namespace lest {
+namespace nonstd { namespace variants {
 
 // use oparator<< instead of to_string() overload;
 // see  http://stackoverflow.com/a/10651752/437272
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline std::ostream & operator<<( std::ostream & os, variant<T0, T1, T2, T3, T4, T5, T6> const & v )
+inline std::ostream & operator<<( std::ostream & os, nonstd::variant<T0, T1, T2, T3, T4, T5, T6> const & v )
 {
     os << "[variant:"; 
     switch( v.index() )
@@ -41,10 +41,17 @@ inline std::ostream & operator<<( std::ostream & os, variant<T0, T1, T2, T3, T4,
     return os << "]";
 }
 
-inline std::ostream & operator<<( std::ostream & os, detail::TX const & v )
+template< class  T >
+inline std::ostream & operator<<( std::ostream & os, nonstd::detail::TX<T> const & v )
 {
     return os << "[variant:tx]";
 }
+
+}}
+
+namespace lest {
+
+using ::nonstd::variants::operator<<;
 
 } // namespace lest
 
