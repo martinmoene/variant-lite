@@ -298,7 +298,7 @@ CASE( "variant: Allows to in-place construct element based on index (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows to in-place construct element via intializer-list based on type (C++11)" )
+CASE( "variant: Allows to in-place construct element via intializer-list based on type (C++11, not implemented)" )
 {
 //#if variant_CPP11_OR_GREATER
 //    using var_t = variant< int, long, double, std::string >;
@@ -308,7 +308,7 @@ CASE( "variant: Allows to in-place construct element via intializer-list based o
 //#endif
 }
 
-CASE( "variant: Allows to in-place construct element via intializer-list based on index (C++11)" )
+CASE( "variant: Allows to in-place construct element via intializer-list based on index (C++11, not implemented)" )
 {
 }
 
@@ -338,11 +338,11 @@ CASE( "variant: Allows to emplace element based on index (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows to emplace element via intializer-list based on type (C++11)" )
+CASE( "variant: Allows to emplace element via intializer-list based on type (C++11, not implemented)" )
 {
 }
 
-CASE( "variant: Allows to emplace element via intializer-list based on index (C++11)" )
+CASE( "variant: Allows to emplace element via intializer-list based on index (C++11, not implemented)" )
 {
 }
 
@@ -363,6 +363,7 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 //    v.emplace<1>(S()); // v may be valueless
 //
 //    EXPECT( v.valueless_by_exception() );
+    EXPECT( (false && "implement") );
 }
 
 CASE( "variant: Allows to swap variants (member)" )
@@ -459,8 +460,7 @@ CASE( "variant: Allows to get pointer to element or NULL by index" )
 
 CASE( "variant: Allows to compare variants" )
 {
-    typedef variant<int, double> Variant;
-    Variant v = 3, w = 7;
+    variant<int, double> v = 3, w = 7;
 
     EXPECT( v == v );
     EXPECT( v != w );
