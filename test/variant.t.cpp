@@ -108,9 +108,16 @@ CASE( "variant: Disallows non-default constructible as first type (non-standard)
     EXPECT( true );
 }
 
-CASE( "variant: Allows non-default constructible as second and later type" )
+CASE( "variant: Allows non-default constructible as second and later type (first: int)" )
 {
     variant<int, NoDefaultConstruct> var;
+
+    EXPECT( true );
+}
+
+CASE( "variant: Allows non-default constructible as second and later type (first: monostate)" )
+{
+    variant<monostate, NoDefaultConstruct> var;
 
     EXPECT( true );
 }
