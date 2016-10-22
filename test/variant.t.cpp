@@ -98,19 +98,19 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 
 namespace
 {
-    class NC { NC(){} };
+    class NoDefaultConstruct { NoDefaultConstruct(){} };
 }
 
 CASE( "variant: Disallows non-default constructible as first type (non-standard)" )
 {
-//  variant<NC> var;
+//  variant<NoDefaultConstruct> var;
 
     EXPECT( true );
 }
 
 CASE( "variant: Allows non-default constructible as second and later type" )
 {
-    variant<int, NC> var;
+    variant<int, NoDefaultConstruct> var;
 
     EXPECT( true );
 }
