@@ -70,9 +70,9 @@
 # define variant_COMPILER_NON_MSVC       1
 #endif
 
-#if variant_COMPILER_MSVC_VERSION < 14
+#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 10, 14 )
 # pragma warning( push )
-# pragma warning( disable: 4345 )   // initialization behaviour changed
+# pragma warning( disable: 4345 )   // initialization behavior changed
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
@@ -1212,7 +1212,7 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
-#if variant_COMPILER_MSVC_VERSION < 14
+#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 10, 14 )
 # pragma warning( pop )
 #endif
 
