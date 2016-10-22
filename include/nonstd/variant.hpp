@@ -168,9 +168,8 @@
 #endif
 
 namespace nonstd { namespace variants {
-    
-namespace detail
-{
+
+namespace detail {
 
 // C++11 emulation:
 
@@ -201,12 +200,12 @@ using remove_cv = std::remove_cv<T>;
 
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
- 
+
 template< class T > struct remove_volatile             { typedef T type; };
 template< class T > struct remove_volatile<volatile T> { typedef T type; };
 
 template< class T >
-struct remove_cv 
+struct remove_cv
 {
     typedef typename remove_volatile<typename remove_const<T>::type>::type type;
 };
@@ -225,19 +224,37 @@ struct remove_cv
 
 // variant parameter unused type tags:
 
-struct TX
+template< class T >
+struct TX : T
 {
-    inline bool operator==( TX const & ) const { return true; } 
-    inline bool operator< ( TX const & ) const { return true; } 
+    template< class U > inline TX<T> operator* ( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator/ ( U const & ) const { return TX<T>();  }
+
+    template< class U > inline TX<T> operator% ( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator+ ( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator- ( U const & ) const { return TX<T>();  }
+
+    template< class U > inline TX<T> operator<<( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator>>( U const & ) const { return TX<T>();  }
+
+                        inline bool  operator==( T const & ) const { return false; }
+                        inline bool  operator< ( T const & ) const { return false; }
+
+    template< class U > inline TX<T> operator& ( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator| ( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator^ ( U const & ) const { return TX<T>();  }
+
+    template< class U > inline TX<T> operator&&( U const & ) const { return TX<T>();  }
+    template< class U > inline TX<T> operator||( U const & ) const { return TX<T>();  }
 };
 
-struct T0 : TX {};
-struct T1 : TX {};
-struct T2 : TX {};
-struct T3 : TX {};
-struct T4 : TX {};
-struct T5 : TX {};
-struct T6 : TX {};
+struct S0{}; typedef TX<S0> T0;
+struct S1{}; typedef TX<S1> T1;
+struct S2{}; typedef TX<S2> T2;
+struct S3{}; typedef TX<S3> T3;
+struct S4{}; typedef TX<S4> T4;
+struct S5{}; typedef TX<S5> T5;
+struct S6{}; typedef TX<S6> T6;
 
 struct nulltype{};
 
@@ -635,14 +652,15 @@ inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
 
-namespace detail
-{
-    template< class T >
-    struct in_place_type_tag {};
+namespace detail {
 
-    template< std::size_t I >
-    struct in_place_index_tag {};
-}
+template< class T >
+struct in_place_type_tag {};
+
+template< std::size_t I >
+struct in_place_index_tag {};
+
+} // namespace detail
 
 struct in_place_tag {};
 
@@ -749,7 +767,7 @@ public:
     variant( T4 const & t4 ) : type_index( 4 ) { new( ptr() ) T4( t4 ); }
     variant( T5 const & t5 ) : type_index( 5 ) { new( ptr() ) T5( t5 ); }
     variant( T6 const & t6 ) : type_index( 6 ) { new( ptr() ) T6( t6 ); }
- 
+
 #if variant_CPP11_OR_GREATER
     variant( T0 &&      t0 ) : type_index( 0 ) { new( ptr() ) T0( std::move( t0 ) ); }
     variant( T1 &&      t1 ) : type_index( 1 ) { new( ptr() ) T1( std::move( t1 ) ); }
@@ -982,10 +1000,6 @@ private:
     type_index_t type_index;
 };
 
-// NTS:implement
-//template <class Visitor, class... Variants>
-// visit( Visitor&& vis, Variants&&... vars );
-
 template <class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6> const & v ) variant_noexcept
 {
@@ -1084,9 +1098,30 @@ inline void swap(
     a.swap( b );
 }
 
-namespace detail
+// template <class Visitor, class... Variants>
+// visit( Visitor&& vis, Variants&&... vars );
+
+// The following visit is restricted  with respect to the standard.
+// It uses the common idiom is to return another variant:
+
+template< class Visitor, class Variant >
+inline Variant visit( Visitor const & vis, Variant const & v )
 {
-    
+    switch( v.index() )
+    {
+        case 0: return vis( get<0>( v ) );
+        case 1: return vis( get<1>( v ) );
+        case 2: return vis( get<2>( v ) );
+        case 3: return vis( get<3>( v ) );
+        case 4: return vis( get<4>( v ) );
+        case 5: return vis( get<5>( v ) );
+        case 6: return vis( get<6>( v ) );
+        default: return vis( get<0>( v ) );
+    }
+}
+
+namespace detail {
+
 template< class Variant >
 struct Comparator
 {
@@ -1124,8 +1159,8 @@ struct Comparator
 } //namespace detail
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline bool operator==( 
-    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+inline bool operator==(
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v,
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
     if      ( v.index() != w.index()     ) return false;
@@ -1134,16 +1169,16 @@ inline bool operator==(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline bool operator!=( 
-    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+inline bool operator!=(
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v,
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
     return ! ( v == w );
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline bool operator<( 
-    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+inline bool operator<(
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v,
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
     if      ( w.valueless_by_exception() ) return false;
@@ -1154,27 +1189,27 @@ inline bool operator<(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline bool operator>( 
-    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+inline bool operator>(
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v,
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
     return w < v;
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline bool operator<=( 
-    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+inline bool operator<=(
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v,
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
-    return ! ( v > w ); 
+    return ! ( v > w );
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline bool operator>=( 
-    variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
+inline bool operator>=(
+    variant<T0, T1, T2, T3, T4, T5, T6> const & v,
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
-    return ! ( v < w ); 
+    return ! ( v < w );
 }
 
 } // namespace variants
