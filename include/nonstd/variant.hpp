@@ -865,11 +865,6 @@ public:
     // non-standard:
     //
 
-    bool valid() const variant_noexcept
-    {
-        return type_index != variant_npos_internal();
-    }
-
     template< class T >
     std::size_t index_of() const variant_noexcept
     {
@@ -1133,8 +1128,6 @@ inline bool operator==(
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
-    assert( v.valid() && w.valid() );
-
     if      ( v.index() != w.index()     ) return false;
     else if ( v.valueless_by_exception() ) return true;
     else                                   return detail::Comparator< variant<T0, T1, T2, T3, T4, T5, T6> >::equal( v, w );
@@ -1153,8 +1146,6 @@ inline bool operator<(
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
-    assert( v.valid() && w.valid() );
-
     if      ( w.valueless_by_exception() ) return false;
     else if ( v.valueless_by_exception() ) return true;
     else if ( v.index() < w.index()      ) return true;
