@@ -70,6 +70,11 @@
 # define variant_COMPILER_NON_MSVC       1
 #endif
 
+#if variant_COMPILER_MSVC_VERSION < 14
+# pragma warning( push )
+# pragma warning( disable: 4345 )   // initialization behaviour changed
+#endif
+
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
 # include <initializer_list>
 # include <type_traits>
@@ -1206,5 +1211,9 @@ public:
 } //namespace std
 
 #endif // variant_CPP11_OR_GREATER
+
+#if variant_COMPILER_MSVC_VERSION < 14
+# pragma warning( pop )
+#endif
 
 #endif // NONSTD_VARIANT_LITE_HPP
