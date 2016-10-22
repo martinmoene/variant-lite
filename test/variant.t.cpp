@@ -390,7 +390,7 @@ struct Doubler
 };
 }
 
-CASE( "variant: Allows to be visited" )
+CASE( "variant: Allows to visit contents" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
@@ -403,9 +403,24 @@ CASE( "variant: Allows to be visited" )
     EXPECT( rs == var_t( std::string("hellohello") ) );
 }
 
-CASE( "variant: (holds_alternative)" )
+CASE( "variant: Allows to check for content by type" )
 {
-    EXPECT( (false && "implement") );
+    typedef variant< int, long, double, std::string > var_t;
+    var_t vi = 7;
+    var_t vl = 7L;
+    var_t vd = 7.0;
+    var_t vs = std::string("hello");
+
+    EXPECT(     holds_alternative< int          >( vi ) );
+    EXPECT(     holds_alternative< long         >( vl ) );
+    EXPECT(     holds_alternative< double       >( vd ) );
+    EXPECT(     holds_alternative< std::string  >( vs ) );
+
+    EXPECT_NOT( holds_alternative< char         >( vi ) );
+    EXPECT_NOT( holds_alternative< short        >( vi ) );
+    EXPECT_NOT( holds_alternative< float        >( vd ) );
+
+    EXPECT_NOT( holds_alternative< unsigned int >( vi ) );
 }
 
 CASE( "variant: Allows to get element by type" )
