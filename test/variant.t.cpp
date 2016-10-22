@@ -16,7 +16,7 @@
 #include "variant-lite.t.h"
 
 namespace {
-    
+
 // ensure comparison of pointers for lest:
 
 const void * lest_nullptr = 0;
@@ -43,11 +43,11 @@ struct V
 {
     State state;
     int   value;
-    
+
     V(             ) : state( default_constructed ), value( deflt() ) {}
     V( int       v ) : state( value_constructed   ), value( v       ) {}
     V( V const & v ) : state( copy_constructed    ), value( v.value ) {}
-    
+
     V & operator=( int       v ) { state = value_copy_assigned; value = v; return *this; }
     V & operator=( V const & v ) { state = copy_assigned      ; value = v.value; return *this; }
 
@@ -90,7 +90,7 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
     return os << "[V:" << to_string( v.value ) << "]";
 }
 
-}
+} // anonymous namespace
 
 //
 // variant member operations:
@@ -186,7 +186,7 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
 CASE( "variant: Allows to construct from element value" )
 {
     V v(7);
-    
+
     variant<S> var( v );
 
     EXPECT( get<S>(var).value.value == 7 );
@@ -263,8 +263,7 @@ CASE( "variant: Allows to move-assign from element (C++11)" )
 
 #if variant_CPP11_OR_GREATER
 
-namespace
-{
+namespace {
 
 struct NoCopyMove
 {
@@ -382,9 +381,26 @@ CASE( "variant: Allows to swap variants (member)" )
 // variant non-member functions:
 //
 
-CASE( "variant: (visit)" )
+namespace {
+
+struct Doubler
 {
-    EXPECT( (false && "implement") );
+    template< class T >
+    T operator()( T a ) const { return a + a; }
+};
+}
+
+CASE( "variant: Allows to be visited" )
+{
+    typedef variant< int, std::string > var_t;
+    var_t vi = 7;
+    var_t vs = std::string("hello");
+
+    var_t ri = visit( Doubler(), vi );
+    var_t rs = visit( Doubler(), vs );
+
+    EXPECT( ri == var_t( 14 ) );
+    EXPECT( rs == var_t( std::string("hellohello") ) );
 }
 
 CASE( "variant: (holds_alternative)" )
@@ -474,8 +490,7 @@ CASE( "variant: (bad_variant_access)" )
     EXPECT( (false && "implement") );
 }
 
-namespace 
-{
+namespace {
     struct t1{};
     struct t2{};
     struct t3{};
