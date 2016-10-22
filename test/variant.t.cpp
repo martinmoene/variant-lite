@@ -150,7 +150,7 @@ CASE( "variant: Allows to move-construct from variant (C++11)" )
     EXPECT( get<S>(var).value.value == V::deflt()  );
     EXPECT( get<S>(var).value.state == move_constructed );
     EXPECT( get<S>(var).state       == move_constructed );
- #else
+#else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
 }
@@ -301,6 +301,12 @@ CASE( "variant: Allows to in-place construct element based on index (C++11)" )
 
 CASE( "variant: Allows to in-place construct element via intializer-list based on type (C++11)" )
 {
+//#if variant_CPP11_OR_GREATER
+//    using var_t = variant< int, long, double, std::string >;
+//    std::vector<var_t> vec = { 10, 15L, 1.5, "hello" };
+//#else
+//    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+//#endif
 }
 
 CASE( "variant: Allows to in-place construct element via intializer-list based on index (C++11)" )
@@ -360,28 +366,6 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 //    EXPECT( v.valueless_by_exception() );
 }
 
-CASE( "variant: Allows to compare variants" )
-{
-    typedef variant<int, double> Variant;
-    Variant v = 3, w = 7;
-
-    EXPECT( v == v );
-    EXPECT( v != w );
-    EXPECT( v <  w );
-    EXPECT( w >  v );
-    EXPECT( v <= v );
-    EXPECT( v <= w );
-    EXPECT( v >= v );
-    EXPECT( w >= v );
-
-    EXPECT_NOT( v == w );
-    EXPECT_NOT( v != v );
-    EXPECT_NOT( w <  v );
-    EXPECT_NOT( v >  w );
-    EXPECT_NOT( w <= v );
-    EXPECT_NOT( v >= w );
-}
-
 CASE( "variant: Allows to swap variants (member)" )
 {
     S s( 7 );
@@ -395,40 +379,17 @@ CASE( "variant: Allows to swap variants (member)" )
 }
 
 //
-// variant non-member operations:
+// variant non-member functions:
 //
 
-namespace 
+CASE( "variant: (visit)" )
 {
-    struct t1{};
-    struct t2{};
-    struct t3{};
-    struct t4{};
-    struct t5{};
-    struct t6{};
-    struct t7{};
-    struct t8{};
+    EXPECT( (false && "implement") );
 }
 
-CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" )
+CASE( "variant: (holds_alternative)" )
 {
-    typedef variant<t1> var1;
-    typedef variant<t1, t2> var2;
-    typedef variant<t1, t2, t3> var3;
-    typedef variant<t1, t2, t3, t4> var4;
-    typedef variant<t1, t2, t3, t4, t5> var5;
-    typedef variant<t1, t2, t3, t4, t5, t6> var6;
-    typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
-//  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
-
-    EXPECT( 1 == variant_size<var1>::value );
-    EXPECT( 2 == variant_size<var2>::value );
-    EXPECT( 3 == variant_size<var3>::value );
-    EXPECT( 4 == variant_size<var4>::value );
-    EXPECT( 5 == variant_size<var5>::value );
-    EXPECT( 6 == variant_size<var6>::value );
-    EXPECT( 7 == variant_size<var7>::value );
-//  EXPECT( 8 == variant_size<var8>::value );
+    EXPECT( (false && "implement") );
 }
 
 CASE( "variant: Allows to get element by type" )
@@ -465,6 +426,28 @@ CASE( "variant: Allows to get pointer to element or NULL by index" )
     EXPECT(                 get_if<1>( &var )->value.value == 7 );
 }
 
+CASE( "variant: Allows to compare variants" )
+{
+    typedef variant<int, double> Variant;
+    Variant v = 3, w = 7;
+
+    EXPECT( v == v );
+    EXPECT( v != w );
+    EXPECT( v <  w );
+    EXPECT( w >  v );
+    EXPECT( v <= v );
+    EXPECT( v <= w );
+    EXPECT( v >= v );
+    EXPECT( w >= v );
+
+    EXPECT_NOT( v == w );
+    EXPECT_NOT( v != v );
+    EXPECT_NOT( w <  v );
+    EXPECT_NOT( v >  w );
+    EXPECT_NOT( w <= v );
+    EXPECT_NOT( v >= w );
+}
+
 CASE( "variant: Allows to swap variants (non-member)" )
 {
     S s( 7 );
@@ -477,6 +460,58 @@ CASE( "variant: Allows to swap variants (non-member)" )
     EXPECT(             3 == get<int>( vars )             );
 }
 
+//
+// variant helper classes:
+//
+
+CASE( "variant: (monostate)" )
+{
+    EXPECT( (false && "implement") );
+}
+
+CASE( "variant: (bad_variant_access)" )
+{
+    EXPECT( (false && "implement") );
+}
+
+namespace 
+{
+    struct t1{};
+    struct t2{};
+    struct t3{};
+    struct t4{};
+    struct t5{};
+    struct t6{};
+    struct t7{};
+    struct t8{};
+}
+
+CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" )
+{
+    typedef variant<t1> var1;
+    typedef variant<t1, t2> var2;
+    typedef variant<t1, t2, t3> var3;
+    typedef variant<t1, t2, t3, t4> var4;
+    typedef variant<t1, t2, t3, t4, t5> var5;
+    typedef variant<t1, t2, t3, t4, t5, t6> var6;
+    typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
+//  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
+
+    EXPECT( 1 == variant_size<var1>::value );
+    EXPECT( 2 == variant_size<var2>::value );
+    EXPECT( 3 == variant_size<var3>::value );
+    EXPECT( 4 == variant_size<var4>::value );
+    EXPECT( 5 == variant_size<var5>::value );
+    EXPECT( 6 == variant_size<var6>::value );
+    EXPECT( 7 == variant_size<var7>::value );
+//  EXPECT( 8 == variant_size<var8>::value );
+}
+
+CASE( "variant: (variant_alternative)" )
+{
+    EXPECT( (false && "implement") );
+}
+
 CASE( "variant: Allows to obtain hash (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
@@ -487,4 +522,5 @@ CASE( "variant: Allows to obtain hash (C++11)" )
     EXPECT( !!"variant: std::hash<> is not available (no C++11)" );
 #endif
 }
+
 // end of file
