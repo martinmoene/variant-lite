@@ -735,7 +735,7 @@ public:
     }
 
     template< class T, class... Args >
-    variant_constexpr14 explicit variant( in_place_type_t(T), Args&&... args)
+     explicit variant( in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args...>( args... ) );
@@ -746,7 +746,7 @@ public:
     variant_constexpr explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args );
 
     template< std::size_t I, class... Args >
-    variant_constexpr14 explicit variant( in_place_index_t(I), Args&&... args )
+     explicit variant( in_place_index_t(I), Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args...>( args... ) );
@@ -1089,7 +1089,7 @@ struct Comparator
 } //namespace detail
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr14 bool operator==( 
+inline  bool operator==( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1101,7 +1101,7 @@ inline variant_constexpr14 bool operator==(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr14 bool operator!=( 
+inline  bool operator!=( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1109,7 +1109,7 @@ inline variant_constexpr14 bool operator!=(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr14 bool operator<( 
+inline  bool operator<( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1123,7 +1123,7 @@ inline variant_constexpr14 bool operator<(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr14 bool operator>( 
+inline  bool operator>( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1131,7 +1131,7 @@ inline variant_constexpr14 bool operator>(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr14 bool operator<=( 
+inline  bool operator<=( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1139,7 +1139,7 @@ inline variant_constexpr14 bool operator<=(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr14 bool operator>=( 
+inline  bool operator>=( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
