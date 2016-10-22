@@ -147,8 +147,14 @@
 # define variant_noexcept /*noexcept*/
 #endif
 
-namespace nonstd { namespace variants {
+#if variant_HAVE_NULLPTR
+# define variant_nullptr nullptr
+#else
+# define variant_nullptr NULL
+#endif
 
+namespace nonstd { namespace variants {
+    
 namespace detail
 {
 
@@ -999,7 +1005,7 @@ inline variant_constexpr T *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : NULL;
+    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
@@ -1010,7 +1016,7 @@ inline variant_constexpr const T *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : NULL;
+    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
@@ -1021,7 +1027,7 @@ inline variant_constexpr typename variant_alternative<I, variant<T0, T1, T2, T3,
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
 {
-    return ( pv->index() == I ) ? &get<I>( *pv ) : NULL;
+    return ( pv->index() == I ) ? &get<I>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
@@ -1032,7 +1038,7 @@ inline variant_constexpr const typename variant_alternative<I, variant<T0, T1, T
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
 {
-    return ( pv->index() == I ) ? &get<I>( *pv )  : NULL;
+    return ( pv->index() == I ) ? &get<I>( *pv )  : variant_nullptr;
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5 >

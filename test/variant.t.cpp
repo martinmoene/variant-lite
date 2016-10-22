@@ -16,12 +16,10 @@
 #include "variant-lite.t.h"
 
 namespace {
+    
+// ensure comparison of pointers for lest:
 
-#if variant_CPP11_OR_GREATER
-std::nullptr_t nullptr98 = nullptr;
-#else
-void * nullptr98 = 0;
-#endif
+const void * lest_nullptr = 0;
 
 // The following tracer code originates as Oracle from Optional by
 // Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
@@ -444,20 +442,20 @@ CASE( "variant: Allows to get pointer to element or NULL by type" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( nullptr98 == get_if<int>( &var ) );
+    EXPECT( lest_nullptr == get_if<int>( &var ) );
 
-    EXPECT( nullptr98 != get_if< S >( &var ) );
-    EXPECT(              get_if< S >( &var )->value.value == 7 );
+    EXPECT( lest_nullptr != get_if< S >( &var ) );
+    EXPECT(                 get_if< S >( &var )->value.value == 7 );
 }
 
 CASE( "variant: Allows to get pointer to element or NULL by index" )
 {
     variant<int, S> var( S( 7 ) );
 
-    EXPECT( nullptr98 == get_if<0>( &var ) );
+    EXPECT( lest_nullptr == get_if<0>( &var ) );
 
-    EXPECT( nullptr98 != get_if<1>( &var ) );
-    EXPECT(              get_if<1>( &var )->value.value == 7 );
+    EXPECT( lest_nullptr != get_if<1>( &var ) );
+    EXPECT(                 get_if<1>( &var )->value.value == 7 );
 }
 
 CASE( "variant: Allows to swap variants (non-member)" )
