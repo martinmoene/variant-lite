@@ -735,7 +735,7 @@ public:
     }
 
     template< class T, class... Args >
-     explicit variant( in_place_type_t(T), Args&&... args)
+    explicit variant( in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args...>( args... ) );
@@ -743,10 +743,10 @@ public:
 
     // NTS:implement
     template< class T, class U, class... Args >
-    variant_constexpr explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args );
+    explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args );
 
     template< std::size_t I, class... Args >
-     explicit variant( in_place_index_t(I), Args&&... args )
+    explicit variant( in_place_index_t(I), Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args...>( args... ) );
@@ -754,7 +754,7 @@ public:
 
     // NTS:implement
     template <size_t I, class U, class... Args>
-    variant_constexpr explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args );
+    explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args );
 
 #endif // variant_CPP11_OR_GREATER
 
@@ -777,12 +777,12 @@ public:
     }
 #endif
 
-    variant_constexpr std::size_t index() const
+    std::size_t index() const
     {
         return variant_npos_internal() == type_index ? variant_npos : type_index;
     }
 
-    variant_constexpr bool valueless_by_exception() const
+    bool valueless_by_exception() const
     {
         return type_index == variant_npos_internal();
     }
@@ -825,13 +825,13 @@ public:
     // non-standard:
     //
 
-    variant_constexpr bool valid() const variant_noexcept
+    bool valid() const variant_noexcept
     {
         return type_index != variant_npos_internal();
     }
 
     template< class T >
-    variant_constexpr std::size_t index_of() const variant_noexcept
+    std::size_t index_of() const variant_noexcept
     {
         return detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value;
     }
@@ -949,10 +949,10 @@ private:
 
 // NTS:implement
 //template <class Visitor, class... Variants>
-//variant_constexpr visit( Visitor&& vis, Variants&&... vars );
+// visit( Visitor&& vis, Variants&&... vars );
 
 template <class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline variant_constexpr bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6> const & v ) variant_noexcept
+inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6> const & v ) variant_noexcept
 {
     return v.index() == v.template index_of<T>();
 }
@@ -999,9 +999,9 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 #if variant_CPP11_OR_GREATER
-inline variant_constexpr typename std::add_pointer<T>::type
+inline typename std::add_pointer<T>::type
 #else
-inline variant_constexpr T *
+inline T *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
 {
@@ -1010,9 +1010,9 @@ get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 #if variant_CPP11_OR_GREATER
-inline variant_constexpr typename std::add_pointer< const T >::type
+inline typename std::add_pointer< const T >::type
 #else
-inline variant_constexpr const T *
+inline const T *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
 {
@@ -1021,9 +1021,9 @@ get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 #if variant_CPP11_OR_GREATER
-inline variant_constexpr typename std::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
+inline typename std::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
 #else
-inline variant_constexpr typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
+inline typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
 {
@@ -1032,9 +1032,9 @@ get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 #if variant_CPP11_OR_GREATER
-inline variant_constexpr typename std::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
+inline typename std::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
 #else
-inline variant_constexpr const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
+inline const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
 #endif
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
 {
@@ -1089,7 +1089,7 @@ struct Comparator
 } //namespace detail
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline  bool operator==( 
+inline bool operator==( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1101,7 +1101,7 @@ inline  bool operator==(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline  bool operator!=( 
+inline bool operator!=( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1109,7 +1109,7 @@ inline  bool operator!=(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline  bool operator<( 
+inline bool operator<( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1123,7 +1123,7 @@ inline  bool operator<(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline  bool operator>( 
+inline bool operator>( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1131,7 +1131,7 @@ inline  bool operator>(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline  bool operator<=( 
+inline bool operator<=( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
@@ -1139,7 +1139,7 @@ inline  bool operator<=(
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline  bool operator>=( 
+inline bool operator>=( 
     variant<T0, T1, T2, T3, T4, T5, T6> const & v, 
     variant<T0, T1, T2, T3, T4, T5, T6> const & w )
 {
