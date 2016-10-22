@@ -34,6 +34,14 @@
 
 // variant-lite feature selection:
 
+#ifndef  variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO
+# define variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO  1
+#endif
+
+#ifndef  variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO
+# define variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO  1
+#endif
+
 #ifndef  variant_FEATURE_MAX_ALIGN_HACK
 # define variant_FEATURE_MAX_ALIGN_HACK  0
 #endif
@@ -666,6 +674,10 @@ template< class T >
 constexpr std::size_t variant_size_v = variant_size<T>::value;
 #endif
 
+#if variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO
+# define variant_size_V(T)  variant_size<T>::value
+#endif
+
 // obtain the type of the alternative specified by its index, at compile time:
 
 template< std::size_t I, class T >
@@ -680,6 +692,10 @@ struct variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >
 #if variant_CPP11_OR_GREATER
 template< std::size_t I, class T >
 using variant_alternative_t = typename variant_alternative<I, T>::type;
+#endif
+
+#if variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO
+# define variant_alternative_T(I,T)  typename variant_alternative<I, T>::type
 #endif
 
 // NTS:implement specializes the std::uses_allocator type trait
