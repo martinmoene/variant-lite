@@ -76,7 +76,9 @@
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
+# define variant_HAVE_CONDITIONAL  1
 # define variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG  1
+# define variant_HAVE_REMOVE_CV  1
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
@@ -160,6 +162,31 @@ namespace detail
 
 // C++11 emulation:
 
+#if variant_HAVE_CONDITIONAL
+
+template< bool Cond, class Then, class Else >
+using conditional = std::conditional<Cond, Then, Else>;
+
+#else
+
+template< bool Cond, class Then, class Else >
+struct conditional;
+
+template< class Then, class Else >
+struct conditional< true , Then, Else > { typedef Then type; };
+
+template< class Then, class Else >
+struct conditional< false, Then, Else > { typedef Else type; };
+
+#endif // variant_HAVE_CONDITIONAL
+
+#if variant_HAVE_REMOVE_CV
+
+template< class T >
+using remove_cv = std::remove_cv<T>;
+
+#else
+
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
  
@@ -171,7 +198,9 @@ struct remove_cv
 {
     typedef typename remove_volatile<typename remove_const<T>::type>::type type;
 };
- 
+
+#endif // variant_HAVE_REMOVE_CV
+
 // typelist:
 
 #define variant_TL1( T1                         ) detail::typelist< T1, detail::nulltype >
@@ -181,15 +210,6 @@ struct remove_cv
 #define variant_TL5( T1, T2, T3, T4, T5         ) detail::typelist< T1, variant_TL4( T2, T3, T4, T5 ) >
 #define variant_TL6( T1, T2, T3, T4, T5, T6     ) detail::typelist< T1, variant_TL5( T2, T3, T4, T5, T6 ) >
 #define variant_TL7( T1, T2, T3, T4, T5, T6, T7 ) detail::typelist< T1, variant_TL6( T2, T3, T4, T5, T6, T7 ) >
-
-template< bool condition, class Then, class Else >
-struct select;
-
-template< class Then, class Else >
-struct select< true , Then, Else > { typedef Then type; };
-
-template< class Then, class Else >
-struct select< false, Then, Else > { typedef Else type; };
 
 // variant parameter unused type tags:
 
@@ -239,7 +259,7 @@ private:
 public:
     enum { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
 
-    typedef typename select< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
+    typedef typename conditional< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
 };
 
 #if variant_CPP11_OR_GREATER
@@ -428,7 +448,7 @@ struct alignment_of
 template< typename List, size_t N >
 struct type_of_size
 {
-    typedef typename select<
+    typedef typename conditional<
         N == sizeof( typename List::head ),
             typename List::head,
             typename type_of_size<typename List::tail, N >::type >::type type;
