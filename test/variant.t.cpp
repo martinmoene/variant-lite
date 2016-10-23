@@ -391,7 +391,7 @@ struct Doubler
 };
 }
 
-CASE( "variant: Allows to visit contents" )
+CASE( "variant: Allows to visit contents (non-standard: always returning variant)" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
