@@ -357,13 +357,16 @@ CASE( "variant: Allows to obtain the index of the current type" )
 
 CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 {
-//    struct S { operator int() { throw 42; } };
-//
-//    variant<float, int> v{12.f}; // OK
-//    v.emplace<1>(S()); // v may be valueless
-//
-//    EXPECT( v.valueless_by_exception() );
-    EXPECT( (false && "implement") );
+#if variant_CPP11_OR_GREATER
+    struct S { operator int() { throw 42; } };
+
+    variant< float, int > v{12.f};
+    
+    EXPECT_THROWS( v.emplace<1>( S() )        );
+    EXPECT(        v.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: emplace is not available (no C++11)" );
+#endif
 }
 
 CASE( "variant: Allows to swap variants (member)" )
@@ -495,14 +498,19 @@ CASE( "variant: Allows to swap variants (non-member)" )
 // variant helper classes:
 //
 
-CASE( "variant: (monostate)" )
+CASE( "monostate: Allows to make variant default-constructible" )
 {
-    EXPECT( (false && "implement") );
+    variant<monostate, NoDefaultConstruct> var;
+
+    EXPECT( true );
 }
 
-CASE( "variant: (bad_variant_access)" )
+CASE( "bad_variant_access: Indicates invalid variant access" )
 {
-    EXPECT( (false && "implement") );
+    variant< char, int > v = 7;
+    
+    EXPECT_THROWS_AS( get<  0 >( v ), bad_variant_access );
+    EXPECT_THROWS_AS( get<char>( v ), bad_variant_access );
 }
 
 namespace {
@@ -516,7 +524,7 @@ namespace {
     struct t8{};
 }
 
-CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" )
+CASE( "variant_size<>: Allows to obtain number of element types (non-standard: max 7)" )
 {
     typedef variant<t1> var1;
     typedef variant<t1, t2> var2;
@@ -537,19 +545,115 @@ CASE( "variant: Allows to obtain number of element types (non-standard: max 7)" 
 //  EXPECT( 8 == variant_size<var8>::value );
 }
 
-CASE( "variant: (variant_alternative)" )
+CASE( "variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)" )
 {
-    EXPECT( (false && "implement") );
+#if variant_CPP14_OR_GREATER
+    typedef variant<t1> var1;
+    typedef variant<t1, t2> var2;
+    typedef variant<t1, t2, t3> var3;
+    typedef variant<t1, t2, t3, t4> var4;
+    typedef variant<t1, t2, t3, t4, t5> var5;
+    typedef variant<t1, t2, t3, t4, t5, t6> var6;
+    typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
+//  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
+
+    EXPECT( 1u == variant_size_v<var1> );
+    EXPECT( 2u == variant_size_v<var2> );
+    EXPECT( 3u == variant_size_v<var3> );
+    EXPECT( 4u == variant_size_v<var4> );
+    EXPECT( 5u == variant_size_v<var5> );
+    EXPECT( 6u == variant_size_v<var6> );
+    EXPECT( 7u == variant_size_v<var7> );
+//  EXPECT( 8u == variant_size_v<var8>::value );
+#else
+    EXPECT( !!"variant_size_v<>: variable templates is not available (no C++14)" );
+#endif
 }
 
-CASE( "variant: Allows to obtain hash (C++11)" )
+CASE( "variant_size_V(): Allows to obtain number of element types (non-standard: max 7, macro)" )
+{
+    typedef variant<t1> var1;
+    typedef variant<t1, t2> var2;
+    typedef variant<t1, t2, t3> var3;
+    typedef variant<t1, t2, t3, t4> var4;
+    typedef variant<t1, t2, t3, t4, t5> var5;
+    typedef variant<t1, t2, t3, t4, t5, t6> var6;
+    typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
+//  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
+
+    EXPECT( 1 == variant_size_V( var1 ) );
+    EXPECT( 2 == variant_size_V( var2 ) );
+    EXPECT( 3 == variant_size_V( var3 ) );
+    EXPECT( 4 == variant_size_V( var4 ) );
+    EXPECT( 5 == variant_size_V( var5 ) );
+    EXPECT( 6 == variant_size_V( var6 ) );
+    EXPECT( 7 == variant_size_V( var7 ) );
+//  EXPECT( 8 == variant_size_V( var8 ) );
+}
+
+CASE( "variant_alternative<>: Allows to select type by index" )
+{
+#if variant_HAVE_STATIC_ASSERT
+    static_assert( std::is_same<char, typename variant_alternative< 0, variant<char> >::type >::value, "variant_alternative<0,...>" );
+    static_assert( std::is_same<char, typename variant_alternative< 1, variant<int, char> >::type >::value, "variant_alternative<1,...>" );
+    static_assert( std::is_same<char, typename variant_alternative< 2, variant<int, int, char> >::type >::value, "variant_alternative<2,...>" );
+    static_assert( std::is_same<char, typename variant_alternative< 3, variant<int, int, int, char> >::type >::value, "variant_alternative<3,...>" );
+    static_assert( std::is_same<char, typename variant_alternative< 4, variant<int, int, int, int, char> >::type >::value, "variant_alternative<4,...>" );
+    static_assert( std::is_same<char, typename variant_alternative< 5, variant<int, int, int, int, int, char> >::type >::value, "variant_alternative<5,...>" );
+    static_assert( std::is_same<char, typename variant_alternative< 6, variant<int, int, int, int, int, int, char> >::type >::value, "variant_alternative<6,...>" );
+#else
+    EXPECT( !!"variant_alternative<>: static_assert is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant_alternative_t<>: Allows to select type by index (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    static_assert( std::is_same<char, variant_alternative_t< 0, variant<char> > >::value, "variant_alternative_t<0,...>" );
+    static_assert( std::is_same<char, variant_alternative_t< 1, variant<int, char> > >::value, "variant_alternative_t<1,...>" );
+    static_assert( std::is_same<char, variant_alternative_t< 2, variant<int, int, char> > >::value, "variant_alternative_t<2,...>" );
+    static_assert( std::is_same<char, variant_alternative_t< 3, variant<int, int, int, char> > >::value, "variant_alternative_t<3,...>" );
+    static_assert( std::is_same<char, variant_alternative_t< 4, variant<int, int, int, int, char> > >::value, "variant_alternative_t<4,...>" );
+    static_assert( std::is_same<char, variant_alternative_t< 5, variant<int, int, int, int, int, char> > >::value, "variant_alternative_t<5,...>" );
+    static_assert( std::is_same<char, variant_alternative_t< 6, variant<int, int, int, int, int, int, char> > >::value, "variant_alternative_t<6,...>" );
+#else
+    EXPECT( !!"variant_alternative_t<>: alias template is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant_alternative_T(): Allows to select type by index (non-standard: macro)" )
+{
+#if variant_HAVE_STATIC_ASSERT
+    // cannot use variant<int, char> in macro due to comma:
+    
+    typedef variant<char> var0;
+    typedef variant<int, char> var1;
+    typedef variant<int, int, char> var2;
+    typedef variant<int, int, int, char> var3;
+    typedef variant<int, int, int, int, char> var4;
+    typedef variant<int, int, int, int, int, char> var5;
+    typedef variant<int, int, int, int, int, int, char> var6;
+    
+    static_assert( std::is_same<char, variant_alternative_T( 0, var0 ) >::value, "variant_alternative_T(0, var0)" );
+    static_assert( std::is_same<char, variant_alternative_T( 1, var1 ) >::value, "variant_alternative_T(1, var1)" );
+    static_assert( std::is_same<char, variant_alternative_T( 2, var2 ) >::value, "variant_alternative_T(2, var2)" );
+    static_assert( std::is_same<char, variant_alternative_T( 3, var3 ) >::value, "variant_alternative_T(3, var3)" );
+    static_assert( std::is_same<char, variant_alternative_T( 4, var4 ) >::value, "variant_alternative_T(4, var4)" );
+    static_assert( std::is_same<char, variant_alternative_T( 5, var5 ) >::value, "variant_alternative_T(5, var5)" );
+    static_assert( std::is_same<char, variant_alternative_T( 6, var6 ) >::value, "variant_alternative_T(6, var6)" );
+#else
+    EXPECT( !!"variant_alternative_T(): static_assert is not available (no C++11)" );
+#endif
+}
+
+CASE( "std::hash<>: Allows to obtain hash (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int> var( 7 );
 
     EXPECT( std::hash<variant<int> >()( var ) == std::hash<variant<int> >()( var ) );
 #else
-    EXPECT( !!"variant: std::hash<> is not available (no C++11)" );
+    EXPECT( !!"std::hash<>: std::hash<> is not available (no C++11)" );
 #endif
 }
 

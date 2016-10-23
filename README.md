@@ -56,9 +56,13 @@ variant: Allows to get pointer to element or NULL by type
 variant: Allows to get pointer to element or NULL by index
 variant: Allows to compare variants
 variant: Allows to swap variants (non-member)
-variant: (monostate)
-variant: (bad_variant_access)
-variant: Allows to obtain number of element types (non-standard: max 7)
-variant: (variant_alternative)
-variant: Allows to obtain hash (C++11)
+monostate: Allows to make variant default-constructible
+bad_variant_access: Indicates invalid variant access
+variant_size<>: Allows to obtain number of element types (non-standard: max 7)
+variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)
+variant_size_V(): Allows to obtain number of element types (non-standard: max 7, macro)
+variant_alternative<>: Allows to select type by index
+variant_alternative_t<>: Allows to select type by index (C++11)
+variant_alternative_T(): Allows to select type by index (non-standard: macro)
+std::hash<>: Allows to obtain hash (C++11)
 ```
