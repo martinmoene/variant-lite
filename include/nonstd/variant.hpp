@@ -706,7 +706,7 @@ constexpr std::size_t variant_size_v = variant_size<T>::value;
 #endif
 
 #if variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO
-# define variant_size_V(T)  variant_size<T>::value
+# define variant_size_V(T)  nonstd::variant_size<T>::value
 #endif
 
 // obtain the type of the alternative specified by its index, at compile time:
