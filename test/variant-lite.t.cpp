@@ -51,6 +51,12 @@ CASE( "Presence of C++ language features" "[.stdlanguage]" )
     variant_ABSENT(  variant_HAVE_NULLPTR );
 #endif
 
+#if variant_HAVE_STATIC_ASSERT
+    variant_PRESENT( variant_HAVE_STATIC_ASSERT );
+#else    
+    variant_ABSENT(  variant_HAVE_STATIC_ASSERT );
+#endif
+
 #if variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG 
     variant_PRESENT( variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG );
 #else    
@@ -126,10 +132,22 @@ CASE( "Presence of C++ library features" "[.stdlibrary]" )
     variant_ABSENT(  variant_HAVE_ARRAY );
 #endif
 
+#if variant_HAVE_CONDITIONAL
+    variant_PRESENT( variant_HAVE_CONDITIONAL );
+#else    
+    variant_ABSENT(  variant_HAVE_CONDITIONAL );
+#endif
+
 #if variant_HAVE_CONTAINER_DATA_METHOD
     variant_PRESENT( variant_HAVE_CONTAINER_DATA_METHOD );
 #else    
     variant_ABSENT(  variant_HAVE_CONTAINER_DATA_METHOD );
+#endif
+
+#if variant_HAVE_REMOVE_CV
+    variant_PRESENT( variant_HAVE_REMOVE_CV );
+#else    
+    variant_ABSENT(  variant_HAVE_REMOVE_CV );
 #endif
 
 #if variant_HAVE_SIZED_TYPES

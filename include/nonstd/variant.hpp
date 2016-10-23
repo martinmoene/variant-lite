@@ -88,10 +88,8 @@
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_CONDITIONAL  1
 # define variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG  1
 # define variant_HAVE_INITIALIZER_LIST  1
-# define variant_HAVE_REMOVE_CV  1
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
@@ -122,8 +120,16 @@
 # define variant_HAVE_ARRAY  1
 #endif
 
+#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
+# define variant_HAVE_CONDITIONAL  1
+#endif
+
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14 || (variant_COMPILER_MSVC_VERSION >= 9 && _HAS_CPP0X)
 # define variant_HAVE_CONTAINER_DATA_METHOD  1
+#endif
+
+#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
+# define variant_HAVE_REMOVE_CV  1
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
