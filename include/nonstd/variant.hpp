@@ -1115,6 +1115,11 @@ inline void swap(
 template< class Visitor, class Variant >
 inline Variant visit( Visitor const & vis, Variant const & v )
 {
+    if ( v.valueless_by_exception() )
+    {
+        throw bad_variant_access();
+    }
+
     switch( v.index() )
     {
         case 0: return vis( get<0>( v ) );
@@ -1124,7 +1129,7 @@ inline Variant visit( Visitor const & vis, Variant const & v )
         case 4: return vis( get<4>( v ) );
         case 5: return vis( get<5>( v ) );
         case 6: return vis( get<6>( v ) );
-        default: return vis( get<0>( v ) );
+        default: return Variant();
     }
 }
 
