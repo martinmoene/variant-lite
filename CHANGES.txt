@@ -1,0 +1,5 @@
+Changes for Variant Lite – A single-file header-only version of a C++17-like variant, a type-safe union for C++98, C++03 and later
+
+version 0.0.0 2016-10-xx
+
+- Initial release.
