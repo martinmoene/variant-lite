@@ -23,10 +23,17 @@ namespace nonstd { namespace variants {
 
 // use oparator<< instead of to_string() overload;
 // see  http://stackoverflow.com/a/10651752/437272
+
+template< class  T >
+inline std::ostream & operator<<( std::ostream & os, nonstd::detail::TX<T> const & v )
+{
+    return os << "[variant:tx]";
+}
+
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline std::ostream & operator<<( std::ostream & os, nonstd::variant<T0, T1, T2, T3, T4, T5, T6> const & v )
 {
-    os << "[variant:"; 
+    os << "[variant:";
     switch( v.index() )
     {
         case 0: os << get<0>( v ); break;
@@ -39,12 +46,6 @@ inline std::ostream & operator<<( std::ostream & os, nonstd::variant<T0, T1, T2,
         default: os << "unexpected index";
     }
     return os << "]";
-}
-
-template< class  T >
-inline std::ostream & operator<<( std::ostream & os, nonstd::detail::TX<T> const & v )
-{
-    return os << "[variant:tx]";
 }
 
 }}
