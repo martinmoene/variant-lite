@@ -1,5 +1,4 @@
 // ToDo
-// visit
 // some emplace
 // some forwarding ctors (std::initializer_list<U>)
 
@@ -227,6 +226,14 @@ struct remove_cv
 template< class T >
 struct TX : T
 {
+                        inline TX<T> operator+ (           ) const { return TX<T>();  }
+                        inline TX<T> operator- (           ) const { return TX<T>();  }
+
+                        inline TX<T> operator! (           ) const { return TX<T>();  }
+                        inline TX<T> operator~ (           ) const { return TX<T>();  }
+
+                        inline TX<T>*operator& (           ) const { return variant_nullptr; }
+
     template< class U > inline TX<T> operator* ( U const & ) const { return TX<T>();  }
     template< class U > inline TX<T> operator/ ( U const & ) const { return TX<T>();  }
 
