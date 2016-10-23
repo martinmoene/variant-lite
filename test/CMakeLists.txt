@@ -66,7 +66,7 @@ elseif( ${CMAKE_CXX_COMPILER_ID} MATCHES GNU OR
         target_compile_options( variant-lite-cpp17.t  PUBLIC -std=c++17 )
     endif()
 
-    add_compile_options( -Wall -Wno-missing-braces -fno-elide-constructors )
+    add_compile_options( -Wall -Wno-missing-braces -Wno-unnamed-type-template-args -fno-elide-constructors )
 
 elseif( ${CMAKE_CXX_COMPILER_ID} MATCHES Intel )
 # as is
