@@ -4,7 +4,7 @@
 #
 # This code is licensed under the MIT License (MIT).
 
-cmake_minimum_required( VERSION 2.8 )
+cmake_minimum_required( VERSION 2.8.12 )
 
 project( test )
 
