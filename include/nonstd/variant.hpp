@@ -84,6 +84,7 @@
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 10
 # define variant_HAVE_AUTO  1
 # define variant_HAVE_NULLPTR  1
+# define variant_HAVE_STATIC_ASSERT  1
 #endif
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
@@ -725,7 +726,7 @@ using variant_alternative_t = typename variant_alternative<I, T>::type;
 #endif
 
 #if variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO
-# define variant_alternative_T(I,T)  typename variant_alternative<I, T>::type
+# define variant_alternative_T(I,T)  typename nonstd::variant_alternative<I,T >::type
 #endif
 
 // NTS:implement specializes the std::uses_allocator type trait
