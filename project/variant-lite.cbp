@@ -27,6 +27,8 @@
 		<Unit filename="../CMakeLists.txt" />
 		<Unit filename="../README.md" />
 		<Unit filename="../appveyor.yml" />
+		<Unit filename="../example/01-basic.cpp" />
+		<Unit filename="../example/02-iostream.cpp" />
 		<Unit filename="../include/nonstd/optional.hpp" />
 		<Unit filename="../include/nonstd/variant.hpp" />
 		<Unit filename="../spike/type-select.cpp" />
