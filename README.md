@@ -83,12 +83,12 @@ To build the tests you need:
 
 The [*lest* test framework](https://github.com/martinmoene/lest)  is included in the [test folder](test).
 
-The following steps assume that the [*variant lite* source code](https://github.com/martinmoene/variant lite) has been cloned into a directory named `c:\variant lite`.
+The following steps assume that the [*variant lite* source code](https://github.com/martinmoene/variant-lite) has been cloned into a directory named `c:\variant-lite`.
 
 1. Create a directory for the build outputs for a particular architecture.
-Here we use c:\variant lite\build-win-x86-vc10.
+Here we use c:\variant-lite\build-win-x86-vc10.
 
-        cd c:\variant lite
+        cd c:\variant-lite
         md build-win-x86-vc10
         cd build-win-x86-vc10
 
@@ -205,7 +205,7 @@ Define this to 1 to use the max align hack for alignment. Default is 0.
 Define this to the pod-type you want to align to (no default).
 
 \-D<b>variant\_CONFIG\_ALIGN\_AS\_FALLBACK</b>=*pod_type*  
-Define this to the pod-type to use for alignment if the algorithm of variant lite cannot find a suitable POD type to use for alignment. Default is `double`.
+Define this to the pod-type to use for alignment if the algorithm of *variant lite* cannot find a suitable POD type to use for alignment. Default is `double`.
 
 
 Reported to work with
