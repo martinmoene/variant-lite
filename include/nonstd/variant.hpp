@@ -991,7 +991,7 @@ private:
 
 #elif variant_CONFIG_MAX_ALIGN_HACK
 
-    typedef struct { unsigned char data[ data_size ]; } aligned_storage_t;
+    typedef union { unsigned char data[ data_size ]; } aligned_storage_t;
 
     detail::max_align_t hack;
     aligned_storage_t data;
@@ -1001,7 +1001,7 @@ private:
 
     typedef variant_ALIGN_AS( max_type ) align_as_type;
 
-    typedef struct { align_as_type data[ 1 + ( data_size - 1 ) / sizeof(align_as_type) ]; } aligned_storage_t;
+    typedef union { align_as_type data[ 1 + ( data_size - 1 ) / sizeof(align_as_type) ]; } aligned_storage_t;
     aligned_storage_t data;
 
 // #   undef variant_ALIGN_AS
