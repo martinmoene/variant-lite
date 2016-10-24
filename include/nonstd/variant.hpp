@@ -69,7 +69,7 @@
 # define variant_COMPILER_NON_MSVC       1
 #endif
 
-#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 10, 14 )
+#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 7, 14 )
 # pragma warning( push )
 # pragma warning( disable: 4345 )   // initialization behavior changed
 #endif
