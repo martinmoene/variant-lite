@@ -41,16 +41,18 @@
 # define variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO  1
 #endif
 
-#ifndef  variant_FEATURE_MAX_ALIGN_HACK
-# define variant_FEATURE_MAX_ALIGN_HACK  0
+// variant-lite configuration:
+
+#ifndef  variant_CONFIG_MAX_ALIGN_HACK
+# define variant_CONFIG_MAX_ALIGN_HACK  0
 #endif
 
-#ifndef variant_FEATURE_ALIGN_AS
+#ifndef  variant_CONFIG_ALIGN_AS
 // used in #if defined(), so no default...
 #endif
 
-#ifndef  variant_FEATURE_ALIGN_AS_FALLBACK
-# define variant_FEATURE_ALIGN_AS_FALLBACK  double
+#ifndef  variant_CONFIG_ALIGN_AS_FALLBACK
+# define variant_CONFIG_ALIGN_AS_FALLBACK  double
 #endif
 
 // Compiler detection (C++17 is speculative):
@@ -397,7 +399,7 @@ struct typelist_type_at< typelist<Head, Tail>, i >
     typedef typename typelist_type_at<Tail, i - 1>::type type;
 };
 
-#if variant_FEATURE_MAX_ALIGN_HACK
+#if variant_CONFIG_MAX_ALIGN_HACK
 
 // Max align, use most restricted type for alignment:
 
@@ -450,14 +452,14 @@ union max_align_t
 
 #undef variant_ALIGN_TYPE
 
-#elif defined( variant_FEATURE_ALIGN_AS ) // variant_FEATURE_MAX_ALIGN_HACK
+#elif defined( variant_CONFIG_ALIGN_AS ) // variant_CONFIG_MAX_ALIGN_HACK
 
 // Use user-specified type for alignment:
 
 #define variant_ALIGN_AS( unused ) \
-    variant_FEATURE_ALIGN_AS
+    variant_CONFIG_ALIGN_AS
 
-#else // variant_FEATURE_MAX_ALIGN_HACK
+#else // variant_CONFIG_MAX_ALIGN_HACK
 
 // Determine POD type to use for alignment:
 
@@ -500,7 +502,7 @@ struct type_of_size
 template< size_t N >
 struct type_of_size< nulltype, N >
 {
-    typedef variant_FEATURE_ALIGN_AS_FALLBACK type;
+    typedef variant_CONFIG_ALIGN_AS_FALLBACK type;
 };
 
 template< typename T>
@@ -540,7 +542,7 @@ typedef
 
 #undef variant_ALIGN_TYPE
 
-#endif // variant_FEATURE_MAX_ALIGN_HACK
+#endif // variant_CONFIG_MAX_ALIGN_HACK
 
 template< typename T>
 inline std::size_t hash( T const & v )
@@ -992,7 +994,7 @@ private:
     using aligned_storage_t = typename std::aligned_storage< data_size, data_align >::type;
     aligned_storage_t data;
 
-#elif variant_FEATURE_MAX_ALIGN_HACK
+#elif variant_CONFIG_MAX_ALIGN_HACK
 
     typedef struct { unsigned char data[ data_size ]; } aligned_storage_t;
 
@@ -1009,7 +1011,7 @@ private:
 
 // #   undef variant_ALIGN_AS
 
-#endif // variant_FEATURE_MAX_ALIGN_HACK
+#endif // variant_CONFIG_MAX_ALIGN_HACK
 
     type_index_t type_index;
 };
