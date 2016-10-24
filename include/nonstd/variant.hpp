@@ -1,7 +1,3 @@
-// ToDo
-// some emplace
-// some forwarding ctors (std::initializer_list<U>)
-
 //
 // Copyright (c) 2016 Martin Moene
 //
@@ -22,7 +18,6 @@
 #ifndef NONSTD_VARIANT_LITE_HPP
 #define NONSTD_VARIANT_LITE_HPP
 
-#include <cassert>
 #include <cstddef>
 #include <limits>
 #include <new>
