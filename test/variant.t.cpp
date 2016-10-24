@@ -101,7 +101,7 @@ namespace
     class NoDefaultConstruct { NoDefaultConstruct(){} };
 }
 
-CASE( "variant: Disallows non-default constructible as first type (non-standard)" )
+CASE( "variant: Disallows non-default constructible as first type" )
 {
 //  variant<NoDefaultConstruct> var;
 
