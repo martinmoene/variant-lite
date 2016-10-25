@@ -118,7 +118,7 @@
 # define variant_HAVE_TR1_ADD_POINTER  1
 #endif
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 7
+#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 9
 # define variant_HAVE_TYPE_TRAITS  1
 # define variant_HAVE_STD_ADD_POINTER  1
 #endif
@@ -141,10 +141,6 @@
 
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
 # define variant_HAVE_SIZED_TYPES  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 7
-# define variant_HAVE_TYPE_TRAITS  1
 #endif
 
 // For the rest, consider VC14 as C++11 for variant-lite:
@@ -211,9 +207,9 @@ using std::tr1::add_pointer;
 template< class T > struct remove_reference     { typedef T type; };
 template< class T > struct remove_reference<T&> { typedef T type; };
 
-template< class T > struct add_pointer 
-{ 
-    typedef typename std::remove_reference<T>::type * type; 
+template< class T > struct add_pointer
+{
+    typedef typename remove_reference<T>::type * type;
 };
 
 #endif // variant_HAVE_STD_ADD_POINTER
