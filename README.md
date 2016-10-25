@@ -173,18 +173,17 @@ Synopsis
 | get by type (const)       |&nbsp;| template< class R, ...><br>R const &<br>get( variant<...> const & v, in_place_type_t(R) = in_place<R> ) |
 | get by index              |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &<br>get( variant<...> & v, in_place_index_t(I) = in_place<I> ) |
 | get by index (const)      |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &<br>get( variant<...> const & v, in_place_index_t(I) = in_place<I> ) |
-| get_if by type            |Note&nbsp;1| template< class T, ...><br>[T \*]<br>get_if( variant<...> * pv, in_place_type_t(T) = in_place<T> ) |
-| get_if by type (const)    |Note&nbsp;1| template< class T, ...><br>[T const \*]<br>get_if( variant<...> const * pv, in_place_type_t(T) = in_place<T>) |
-| get_if by index           |Note&nbsp;1| template< std::size_t I, ...><br>[typename variant_alternative< I, variant<...> >::type \*]<br>get_if( variant<...> * pv, in_place_index_t(I) = in_place<I> ) |
-| get_if by index (const)   |Note&nbsp;1| template< std::size_t I, ...><br>[typename variant_alternative< I, variant<...> >::type const \*]<br>get_if( variant<...> const * pv, in_place_index_t(I) = in_place<I> ) |
+| get_if by type            |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;T>::type<br>get_if( variant<...> * pv, in_place_type_t(T) = in_place<T> ) |
+| get_if by type (const)    |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;const T>::type<br>get_if( variant<...> const * pv, in_place_type_t(T) = in_place<T>) |
+| get_if by index           |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>get_if( variant<...> * pv, in_place_index_t(I) = in_place<I> ) |
+| get_if by index (const)   |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>get_if( variant<...> const * pv, in_place_index_t(I) = in_place<I> ) |
 | swap                      |&nbsp;| template<...><br>void swap( variant<...> & x, variant<...> & y ) |
-| visit                     |Note&nbsp;2| template< class Visitor, class Variant ><br>Variant visit( Visitor const & vis, Variant const & v ) |
+| visit                     |Note&nbsp;1| template< class Visitor, class Variant ><br>Variant visit( Visitor const & vis, Variant const & v ) |
 | Hash support              |&nbsp;| &nbsp;   | 
 | variant                   |C++11 | template<...> struct hash< variant<...> >; |
 | monostate                 |C++11 | template<> struct hash< monostate >;       |
 
-Note 1: [X \*] may be `X *` or `typename std::add_pointer<X>::type`.  
-Note 2: visitor is limited to always return a Variant.
+Note 1: visitor is limited to always return a Variant.
 
 ### Feature selection macros
 
