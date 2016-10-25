@@ -43,7 +43,7 @@
 #endif
 
 #ifndef  variant_CONFIG_ALIGN_AS
-// used in #if defined(), so no default...
+// no default, used in #if defined()
 #endif
 
 #ifndef  variant_CONFIG_ALIGN_AS_FALLBACK
@@ -63,17 +63,17 @@
 # define variant_COMPILER_MSVC_VERSION   (_MSC_VER / 100 - 5 - (_MSC_VER < 1900))
 #else
 # define variant_COMPILER_MSVC_VERSION   0
-# define variant_COMPILER_NON_MSVC       1
+#endif
+
+#if defined __GNUC__
+# define variant_COMPILER_GNUC_VERSION  __GNUC__
+#else
+# define variant_COMPILER_GNUC_VERSION    0
 #endif
 
 #if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 7, 14 )
 # pragma warning( push )
 # pragma warning( disable: 4345 )   // initialization behavior changed
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# include <initializer_list>
-# include <type_traits>
 #endif
 
 // Presence of C++11 language features:
@@ -113,6 +113,16 @@
 
 // Presence of C++ library features:
 
+#if variant_COMPILER_GNUC_VERSION
+# define variant_HAVE_TR1_TYPE_TRAITS  1
+# define variant_HAVE_TR1_ADD_POINTER  1
+#endif
+
+#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 7
+# define variant_HAVE_TYPE_TRAITS  1
+# define variant_HAVE_STD_ADD_POINTER  1
+#endif
+
 #if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 11
 # define variant_HAVE_ARRAY  1
 #endif
@@ -133,7 +143,7 @@
 # define variant_HAVE_SIZED_TYPES  1
 #endif
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 11
+#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 7
 # define variant_HAVE_TYPE_TRAITS  1
 #endif
 
@@ -170,34 +180,47 @@
 # define variant_nullptr NULL
 #endif
 
+// additional includes:
+
+#if variant_HAVE_INITIALIZER_LIST
+# include <initializer_list>
+#endif
+
+#if variant_HAVE_TYPE_TRAITS
+# include <type_traits>
+#elif variant_HAVE_TR1_TYPE_TRAITS
+# include <tr1/type_traits>
+#endif
+
 namespace nonstd { namespace variants {
 
 namespace detail {
 
 // C++11 emulation:
 
-#if variant_HAVE_CONDITIONAL
+#if variant_HAVE_STD_ADD_POINTER
 
-template< bool Cond, class Then, class Else >
-using conditional = std::conditional<Cond, Then, Else>;
+using std::add_pointer;
+
+#elif variant_HAVE_TR1_ADD_POINTER
+
+using std::tr1::add_pointer;
 
 #else
 
-template< bool Cond, class Then, class Else >
-struct conditional;
+template< class T > struct remove_reference     { typedef T type; };
+template< class T > struct remove_reference<T&> { typedef T type; };
 
-template< class Then, class Else >
-struct conditional< true , Then, Else > { typedef Then type; };
+template< class T > struct add_pointer 
+{ 
+    typedef typename std::remove_reference<T>::type * type; 
+};
 
-template< class Then, class Else >
-struct conditional< false, Then, Else > { typedef Else type; };
-
-#endif // variant_HAVE_CONDITIONAL
+#endif // variant_HAVE_STD_ADD_POINTER
 
 #if variant_HAVE_REMOVE_CV
 
-template< class T >
-using remove_cv = std::remove_cv<T>;
+using std::remove_cv;
 
 #else
 
@@ -214,6 +237,23 @@ struct remove_cv
 };
 
 #endif // variant_HAVE_REMOVE_CV
+
+#if variant_HAVE_CONDITIONAL
+
+using std::conditional;
+
+#else
+
+template< bool Cond, class Then, class Else >
+struct conditional;
+
+template< class Then, class Else >
+struct conditional< true , Then, Else > { typedef Then type; };
+
+template< class Then, class Else >
+struct conditional< false, Then, Else > { typedef Else type; };
+
+#endif // variant_HAVE_CONDITIONAL
 
 // typelist:
 
@@ -1058,44 +1098,28 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-#if variant_CPP11_OR_GREATER
-inline typename std::add_pointer<T>::type
-#else
-inline T *
-#endif
+inline typename detail::add_pointer<T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-#if variant_CPP11_OR_GREATER
-inline typename std::add_pointer< const T >::type
-#else
-inline const T *
-#endif
+inline typename detail::add_pointer<const T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-#if variant_CPP11_OR_GREATER
-inline typename std::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
-#else
-inline typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
-#endif
+inline typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &get<I>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-#if variant_CPP11_OR_GREATER
-inline typename std::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
-#else
-inline const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type *
-#endif
+inline typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &get<I>( *pv )  : variant_nullptr;
