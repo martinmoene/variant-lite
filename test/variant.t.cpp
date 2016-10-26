@@ -301,9 +301,10 @@ namespace {
 
 struct NoCopyMove
 {
-    char letter;
-    int  value;
-    NoCopyMove( char c, int v      ) : letter( c ), value( v ) {}
+    S s; int  value;
+    
+    NoCopyMove( S const& s, int v  ) : s( s ), value( v ) {}
+    NoCopyMove( S && s    , int v  ) : s( std::move(s) ), value( v ) {}
     NoCopyMove(                    ) = delete;
     NoCopyMove( NoCopyMove const & ) = delete;
     NoCopyMove( NoCopyMove &&      ) = delete;
@@ -311,74 +312,277 @@ struct NoCopyMove
 }
 #endif
 
-CASE( "variant: Allows to in-place construct element based on type (C++11)" )
+CASE( "variant: Allows to in-place copy-construct element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, NoCopyMove> var( in_place<NoCopyMove>, 'a', 7 );
+    S s( 7 );
+    variant<int, NoCopyMove> var( in_place<NoCopyMove>, s, 7 );
 
     EXPECT( get<NoCopyMove>( var ).value == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.value .value == 7  );
+    EXPECT( get<NoCopyMove>( var ).s.state == copy_constructed );
 #else
     EXPECT( !!"variant: in-place construction is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows to in-place construct element based on index (C++11)" )
+CASE( "variant: Allows to in-place move-construct element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, NoCopyMove> var( in_place<1>, 'a', 7 );
+    variant<int, NoCopyMove> var( in_place<NoCopyMove>, S( 7 ), 7 );
 
-    EXPECT( get<1>( var ).value == 7 );
+    EXPECT( get<NoCopyMove>( var ).value == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.value .value == 7  );
+    EXPECT( get<NoCopyMove>( var ).s.state == move_constructed );
 #else
     EXPECT( !!"variant: in-place construction is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows to in-place construct element via intializer-list based on type (C++11, not implemented)" )
+CASE( "variant: Allows to in-place copy-construct element based on index (C++11)" )
 {
-//#if variant_CPP11_OR_GREATER
-//    using var_t = variant< int, long, double, std::string >;
-//    std::vector<var_t> vec = { 10, 15L, 1.5, "hello" };
-//#else
-//    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
-//#endif
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+    variant<int, NoCopyMove> var( in_place<1>, s, 7 );
+
+    EXPECT( get<1>( var ).value == 7 );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == copy_constructed );
+#else
+    EXPECT( !!"variant: in-place construction is not available (no C++11)" );
+#endif
 }
 
-CASE( "variant: Allows to in-place construct element via intializer-list based on index (C++11, not implemented)" )
+CASE( "variant: Allows to in-place move-construct element based on index (C++11)" )
 {
+#if variant_CPP11_OR_GREATER
+    variant<int, NoCopyMove> var( in_place<1>, S( 7 ), 7 );
+
+    EXPECT( get<1>( var ).value == 7 );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == move_constructed );
+#else
+    EXPECT( !!"variant: in-place construction is not available (no C++11)" );
+#endif
 }
 
-CASE( "variant: Allows to emplace element based on type (C++11)" )
+#if variant_CPP11_OR_GREATER
+struct InitList
+{
+    std::vector<int> vec;
+    char c;
+    S s;
+    
+    InitList( std::initializer_list<int> il, char c, S const & s)
+    : vec( il ), c( c ), s( s ) {}
+
+    InitList( std::initializer_list<int> il, char c, S && s)
+    : vec( il ), c( c ), s( std::forward<S>(s) ) {}
+};
+#endif
+
+CASE( "variant: Allows to in-place copy-construct elements from intializer-list based on type (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+    
+    variant< int, InitList> var( in_place<InitList>, { 7, 8, 9, }, 'a', s );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == copy_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to in-place move-construct elements from intializer-list based on type (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    variant< int, InitList> var( in_place<InitList>, { 7, 8, 9, }, 'a', S( 7 ) );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == move_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to in-place copy-construct elements from intializer-list based on index (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+
+    variant< int, InitList> var( in_place<1>, { 7, 8, 9, }, 'a', s );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == copy_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to in-place move-construct elements from intializer-list based on index (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    variant< int, InitList> var( in_place<1>, { 7, 8, 9, }, 'a', S( 7 ) );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == move_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to copy-emplace element based on type (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+    variant<int, NoCopyMove> var;
+
+    var.emplace<NoCopyMove>( s, 7 );
+
+    EXPECT( get<NoCopyMove>( var ).value         == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.value.value == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.state       == copy_constructed );
+#else
+    EXPECT( !!"variant: in-place construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-emplace element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var;
 
-    var.emplace<NoCopyMove>( 'a', 7 );
+    var.emplace<NoCopyMove>( S( 7 ), 7 );
 
-    EXPECT( get<NoCopyMove>( var ).value == 7 );
+    EXPECT( get<NoCopyMove>( var ).value         == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.value.value == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.state       == move_constructed );
 #else
     EXPECT( !!"variant: in-place construction is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows to emplace element based on index (C++11)" )
+CASE( "variant: Allows to copy-emplace element based on index (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+    variant<int, NoCopyMove> var;
+
+    var.emplace<1>( s, 7 );
+
+    EXPECT( get<NoCopyMove>( var ).value         == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.value.value == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.state       == copy_constructed );
+#else
+    EXPECT( !!"variant: in-place construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-emplace element based on index (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var;
 
-    var.emplace<1>( 'a', 7 );
+    var.emplace<1>( S( 7 ), 7 );
 
-    EXPECT( get<1>( var ).value == 7 );
+    EXPECT( get<NoCopyMove>( var ).value         == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.value.value == 7 );
+    EXPECT( get<NoCopyMove>( var ).s.state       == move_constructed );
 #else
     EXPECT( !!"variant: in-place construction is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows to emplace element via intializer-list based on type (C++11, not implemented)" )
+CASE( "variant: Allows to copy-emplace elements from intializer-list based on type (C++11)" )
 {
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+    variant< int, InitList> var;
+    
+    var.emplace<InitList>( { 7, 8, 9, }, 'a', s );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == copy_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
 }
 
-CASE( "variant: Allows to emplace element via intializer-list based on index (C++11, not implemented)" )
+CASE( "variant: Allows to move-emplace elements from intializer-list based on type (C++11)" )
 {
+#if variant_CPP11_OR_GREATER
+    variant< int, InitList> var;
+    
+    var.emplace<InitList>( { 7, 8, 9, }, 'a', S( 7 ) );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == move_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to copy-emplace elements from intializer-list based on index (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    S s( 7 );
+    variant< int, InitList> var;
+    
+    var.emplace<1>( { 7, 8, 9, }, 'a', s );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == copy_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-emplace elements from intializer-list based on index (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    variant< int, InitList> var;
+    
+    var.emplace<1>( { 7, 8, 9, }, 'a', S( 7 ) );
+
+    EXPECT( get<1>( var ).vec[0]  ==  7  );
+    EXPECT( get<1>( var ).vec[1]  ==  8  );
+    EXPECT( get<1>( var ).vec[2]  ==  9  );
+    EXPECT( get<1>( var ).c       == 'a' );
+    EXPECT( get<1>( var ).s.value .value == 7  );
+    EXPECT( get<1>( var ).s.state == move_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
 }
 
 CASE( "variant: Allows to obtain the index of the current type" )
