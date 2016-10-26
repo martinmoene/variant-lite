@@ -301,8 +301,9 @@ namespace {
 
 struct NoCopyMove
 {
-    int value;
-    NoCopyMove( int v ) : value( v ) {}
+    char letter;
+    int  value;
+    NoCopyMove( char c, int v      ) : letter( c ), value( v ) {}
     NoCopyMove(                    ) = delete;
     NoCopyMove( NoCopyMove const & ) = delete;
     NoCopyMove( NoCopyMove &&      ) = delete;
@@ -313,7 +314,7 @@ struct NoCopyMove
 CASE( "variant: Allows to in-place construct element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, NoCopyMove> var( in_place<NoCopyMove>, 7 );
+    variant<int, NoCopyMove> var<NoCopyMove>( 'a', 7 );
 
     EXPECT( get<NoCopyMove>( var ).value == 7 );
 #else
@@ -324,7 +325,7 @@ CASE( "variant: Allows to in-place construct element based on type (C++11)" )
 CASE( "variant: Allows to in-place construct element based on index (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, NoCopyMove> var( in_place<1>, 7 );
+    variant<int, NoCopyMove> var<1>( 'a', 7 );
 
     EXPECT( get<1>( var ).value == 7 );
 #else
@@ -351,7 +352,7 @@ CASE( "variant: Allows to emplace element based on type (C++11)" )
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var;
 
-    var.emplace<NoCopyMove>( 7 );
+    var.emplace<NoCopyMove>( 'a', 7 );
 
     EXPECT( get<NoCopyMove>( var ).value == 7 );
 #else
@@ -364,7 +365,7 @@ CASE( "variant: Allows to emplace element based on index (C++11)" )
 #if variant_CPP11_OR_GREATER
     variant<int, NoCopyMove> var;
 
-    var.emplace<1>( 7 );
+    var.emplace<1>( 'a', 7 );
 
     EXPECT( get<1>( var ).value == 7 );
 #else
