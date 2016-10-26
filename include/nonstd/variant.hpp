@@ -192,8 +192,6 @@ namespace nonstd { namespace variants {
 
 namespace detail {
 
-template< int I > struct to_type { enum { value = I }; };
-
 // C++11 emulation:
 
 #if variant_HAVE_STD_ADD_POINTER
@@ -804,6 +802,8 @@ template<
 >
 class variant
 {
+    typedef variant_TL7( T0, T1, T2, T3, T4, T5, T6 ) variant_types;
+
     typedef detail::helper<T0, T1, T2, T3, T4, T5, T6> helper_type;
 
 public:
@@ -850,7 +850,11 @@ public:
 
     template< class T, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible<T, std::initializer_list<U>&, Args&&...>::value>::type >
-    explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args );
+    explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
+    {
+        type_index = variant_npos_internal();
+        type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
+    }
 
     template< std::size_t I, class... Args >
     explicit variant( in_place_index_t(I), Args&&... args )
@@ -859,10 +863,16 @@ public:
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
     }
 
-    // NTS:implement
+    template< int I >
+    using to_type_t = typename detail::typelist_type_at< variant_types, I >::type;
+    
     template <size_t I, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< detail::to_type<I>, std::initializer_list<U>&, Args&&...>::value >::type >
-    explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args );
+        typename = typename std::enable_if< std::is_constructible< to_type_t<I>, std::initializer_list<U>&, Args&&...>::value >::type >
+    explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
+    {
+        type_index = variant_npos_internal();
+        type_index = helper_type::template construct_i<I>( ptr(), il, std::forward<Args>(args)... );
+    }
 
 #endif // variant_CPP11_OR_GREATER
 
@@ -907,20 +917,28 @@ public:
     template< class T, class U, class... Args >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
-        this->emplace< index_of<T>() > ( il, std::forward<Args>(args)... );
+        helper_type::destroy( type_index, ptr() );
+        type_index = variant_npos_internal();
+        type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
     }
 
     template< size_t I, class... Args >
     void emplace( Args&&... args )
     {
-        helper_type::destroy( type_index, ptr() );
-        type_index = variant_npos_internal();
-        type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
+        this->emplace< typename detail::typelist_type_at< variant_types, I >::type > 
+        ( 
+            std::forward<Args>(args)... 
+        );        
     }
 
-    // NTS:implement
     template< size_t I, class U, class... Args >
-    void emplace( std::initializer_list<U> il, Args&&... args );
+    void emplace( std::initializer_list<U> il, Args&&... args )
+    {
+        this->emplace< typename detail::typelist_type_at< variant_types, I >::type > 
+        ( 
+            il, std::forward<Args>(args)... 
+        );        
+    }
 
 #endif // variant_CPP11_OR_GREATER
 
@@ -1019,8 +1037,6 @@ private:
 #endif
 
 private:
-    typedef variant_TL7( T0, T1, T2, T3, T4, T5, T6 ) variant_types;
-
     enum { data_size  = detail::typelist_max< variant_types >::value };
 
 #if variant_CPP11_OR_GREATER
