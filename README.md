@@ -263,38 +263,44 @@ If *variant lite* is compiled as C++11 or later, C++11 alignment facilities are 
 
 Note that the algorithm of 5. differs from the one Andrei Alexandrescu uses in [7, part 2].
 
-The class template `alignment_of<>` is gleaned from [Boost.TypeTraits, alignment_of](http://www.boost.org/doc/libs/1_57_0/libs/type_traits/doc/html/boost_typetraits/reference/alignment_of.html) [11].
+The class template `alignment_of<>` is gleaned from [Boost.TypeTraits, alignment_of](http://www.boost.org/doc/libs/1_57_0/libs/type_traits/doc/html/boost_typetraits/reference/alignment_of.html) [13].
 
 For more information on constructed unions and alignment, see [6-11].
 
 
 Notes and References
 --------------------
+
 ### References
+
 [1] CppReference. [Variant](http://en.cppreference.com/w/cpp/utility/variant).  
 
-[2] ISO/IEC WG21. [N4606, section 20.7 Variants](wg21.link/n4606). 12 July 2016.
+[2] ISO/IEC WG21. [N4606, section 20.7 Variants](wg21.link/n4606). July 2016.
 
-[3] Andrzej Krzemieński. [Constexpr unions](https://akrzemi1.wordpress.com/2012/12/13/constexpr-unions/). December 2012.
+[3] Axel Naumann. [Variant: a type-safe union for C++17 (v8)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0088r3.html). June 2016.
 
-[4] Agustín Bergé. [Eggs.Variant - Part I](http://talesofcpp.fusionfenix.com/post-17/eggs.variant---part-i). August 2014.
+[4] Peter Dimov. [Valueless Variants Considered Harmful](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0308r0.html). March 2016.
 
-[5] Agustín Bergé. [Eggs.Variant - Part II (the constexpr experience)](http://talesofcpp.fusionfenix.com/post-20/eggs.variant---part-ii-the-constexpr-experience). March 2015.
+[5] Andrzej Krzemieński. [Constexpr unions](https://akrzemi1.wordpress.com/2012/12/13/constexpr-unions/). December 2012.
 
-[6] Andrei Alexandrescu. [An Implementation of Discriminated Unions in C++](https://www.researchgate.net/publication/2522635_An_Implementation_of_Discriminated_Unions_in_C). August 2002.
+[6] Agustín Bergé. [Eggs.Variant - Part I](http://talesofcpp.fusionfenix.com/post-17/eggs.variant---part-i). August 2014.
 
-[7] Andrei Alexandrescu. [Generic<Programming>: Discriminated Unions part 1](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/cexp2004/alexandr/alexandr.htm), [part 2](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/cexp2006/alexandr/alexandr.htm), [part 3](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/cexp2008/alexandr/alexandr.htm). April 2002. 
+[7] Agustín Bergé. [Eggs.Variant - Part II (the constexpr experience)](http://talesofcpp.fusionfenix.com/post-20/eggs.variant---part-ii-the-constexpr-experience). March 2015.
 
-[8] Herb Sutter. [Style Case Study #3: Construction Unions](http://www.gotw.ca/gotw/085.htm). GotW #85. 2009
+[8] Andrei Alexandrescu. [An Implementation of Discriminated Unions in C++](https://www.researchgate.net/publication/2522635_An_Implementation_of_Discriminated_Unions_in_C). August 2002.
 
-[9] Kevin T. Manley. [Using Constructed Types in C++ Unions](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/0208/manley/manley.htm). C/C++ Users Journal, 20(8), August 2002.
+[9] Andrei Alexandrescu. [Generic<Programming>: Discriminated Unions part 1](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/cexp2004/alexandr/alexandr.htm), [part 2](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/cexp2006/alexandr/alexandr.htm), [part 3](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/cexp2008/alexandr/alexandr.htm). April 2002.
 
-[10] StackOverflow. [Determining maximum possible alignment in C++](http://stackoverflow.com/a/3126992).
+[10] Herb Sutter. [Style Case Study #3: Construction Unions](http://www.gotw.ca/gotw/085.htm). GotW #85. 2009
 
-[11] [Boost.TypeTraits, alignment_of](http://www.boost.org/doc/libs/1_57_0/libs/type_traits/doc/html/boost_typetraits/reference/alignment_of.html) ( [code](http://www.boost.org/doc/libs/1_57_0/boost/type_traits/alignment_of.hpp) ).
+[11] Kevin T. Manley. [Using Constructed Types in C++ Unions](http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/CUJ/2002/0208/manley/manley.htm). C/C++ Users Journal, 20(8), August 2002.
+
+[12] StackOverflow. [Determining maximum possible alignment in C++](http://stackoverflow.com/a/3126992).
+
+[13] [Boost.TypeTraits, alignment_of](http://www.boost.org/doc/libs/1_57_0/libs/type_traits/doc/html/boost_typetraits/reference/alignment_of.html) ( [code](http://www.boost.org/doc/libs/1_57_0/boost/type_traits/alignment_of.hpp) ).
 
 ### Presentations
-[12] Ben Deane. [Using Types Effectively](https://youtu.be/ojZbFIQSdl8?list=PLHTh1InhhwT7J5jl4vAhO1WvGHUUFgUQH). CppCon 2016.  
+[14] Ben Deane. [Using Types Effectively](https://youtu.be/ojZbFIQSdl8?list=PLHTh1InhhwT7J5jl4vAhO1WvGHUUFgUQH). CppCon 2016.
 
 
 Appendix
