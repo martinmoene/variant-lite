@@ -56,8 +56,6 @@ In a nutshell
 
 *variant lite* may provide class template `optional` for nullable objects that is based on `variant`. 
 
-**Not provided** are construction or emplacement via `initializer_list`s.
-
 
 License
 -------
@@ -143,19 +141,23 @@ Synopsis
 | &nbsp;       |&nbsp;| variant(variant const & other)               | copy-construct from other variant |
 | &nbsp;       |C++11 | variant( variant && other )                  | move-construct from other variant |
 | &nbsp;       |C++11 | template< class T, class... Args ><br>explicit variant( in_place_type_t(T), Args&&... args) | in-place-construct type T |
-| &nbsp;       |C++11 | template< class T, class U, class... Args ><br>explicit variant( in_place_type_t(T),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type T<br>Note: not implemented |
+| &nbsp;       |C++11 | template< class T, class U, class... Args ><br>explicit variant( in_place_type_t(T),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type T|
 | &nbsp;       |C++11 | template< std::size_t I, class... Args ><br>explicit variant( in_place_index_t(I), Args&&... args ) | in-place-construct type at index I | 
-| &nbsp;       |C++11 | template< size_t I, class U, class... Args><br>explicit variant( in_place_index_t(I),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type at index I<br>Note: not implemented |
+| &nbsp;       |C++11 | template< size_t I, class U, class... Args><br>explicit variant( in_place_index_t(I),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type at index I|
 | Destruction  |&nbsp;| ~variant()                                   | destruct current content |
 | Assignment   |&nbsp;| variant & operator=( variant const & rhs )   | copy-assign from other;<br>destruct current content |
 | &nbsp;       |C++11 | variant & operator=( variant && other )      | move-assign from other;<br>destruct current content |
 | State        |&nbsp;| std::size_t index() const                    | index of current content's type |
 | &nbsp;       |&nbsp;| bool valueless_by_exception() const          | true if no content is present |
 | Emplace      |C++11 | template< class T, class... Args ><br>void emplace( Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template< class T, class U, class... Args ><br>void emplace( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T;<br>Note: not implemented |
+| &nbsp;       |C++11 | template< class T, class U, class... Args ><br>void emplace( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
 | &nbsp;       |C++11 | template< size_t I, class... Args ><br>void emplace( Args&&... args ); | emplace type at index I |
+| &nbsp;       |C++11 | template< size_t I, class U, class... Args ><br>void emplace( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
 | Swap         |&nbsp;| void swap( variant & other );                | swap with other |
  
+
+
+
 ### Algorithms for *variant lite*
 
 | Kind                      | Std  | Function |
@@ -321,14 +323,24 @@ variant: Allows to copy-construct from element
 variant: Allows to move-construct from element (C++11)
 variant: Allows to copy-assign from element
 variant: Allows to move-assign from element (C++11)
-variant: Allows to in-place construct element based on type (C++11)
-variant: Allows to in-place construct element based on index (C++11)
-variant: Allows to in-place construct element via intializer-list based on type (C++11, not implemented)
-variant: Allows to in-place construct element via intializer-list based on index (C++11, not implemented)
-variant: Allows to emplace element based on type (C++11)
-variant: Allows to emplace element based on index (C++11)
-variant: Allows to emplace element via intializer-list based on type (C++11, not implemented)
-variant: Allows to emplace element via intializer-list based on index (C++11, not implemented)
+variant: Allows to copy-construct from elements in intializer-list based on type (C++11)
+variant: Allows to move-construct from elements in intializer-list based on type (C++11)
+variant: Allows to in-place copy-construct element based on type (C++11)
+variant: Allows to in-place move-construct element based on type (C++11)
+variant: Allows to in-place copy-construct element based on index (C++11)
+variant: Allows to in-place move-construct element based on index (C++11)
+variant: Allows to in-place copy-construct elements from intializer-list based on type (C++11)
+variant: Allows to in-place move-construct elements from intializer-list based on type (C++11)
+variant: Allows to in-place copy-construct elements from intializer-list based on index (C++11)
+variant: Allows to in-place move-construct elements from intializer-list based on index (C++11)
+variant: Allows to copy-emplace element based on type (C++11)
+variant: Allows to move-emplace element based on type (C++11)
+variant: Allows to copy-emplace element based on index (C++11)
+variant: Allows to move-emplace element based on index (C++11)
+variant: Allows to copy-emplace elements from intializer-list based on type (C++11)
+variant: Allows to move-emplace elements from intializer-list based on type (C++11)
+variant: Allows to copy-emplace elements from intializer-list based on index (C++11)
+variant: Allows to move-emplace elements from intializer-list based on index (C++11)
 variant: Allows to obtain the index of the current type
 variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to swap variants (member)
