@@ -261,6 +261,40 @@ CASE( "variant: Allows to move-assign from element (C++11)" )
 #endif
 }
 
+CASE( "variant: Allows to copy-construct from elements in intializer-list based on type (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    S s{ 7 };
+    std::string hello = "hello";
+    using var_t = variant< int, long, double, std::string, S >;
+
+    std::vector<var_t> vec = { 10, 15L, 1.5, hello, s };
+
+    EXPECT( get<0>( vec[0] ) == 10    );
+    EXPECT( get<1>( vec[1] ) == 15L   );
+    EXPECT( get<2>( vec[2] ) == 1.5   );
+    EXPECT( get<3>( vec[3] ) == hello );
+    EXPECT( get<4>( vec[4] ).value.value == 7 );
+    EXPECT( get<4>( vec[4] ).state       == copy_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-construct from elements in intializer-list based on type (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    using var_t = variant<S>;
+
+    std::vector<var_t> vec = { S{7} };
+
+    EXPECT( get<0>( vec[0] ).value.value == 7 );
+    EXPECT( get<0>( vec[0] ).state       == copy_constructed );
+#else
+    EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
+#endif
+}
+
 #if variant_CPP11_OR_GREATER
 
 namespace {
