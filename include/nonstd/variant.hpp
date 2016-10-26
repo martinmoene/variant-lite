@@ -802,9 +802,8 @@ template<
 >
 class variant
 {
-    typedef variant_TL7( T0, T1, T2, T3, T4, T5, T6 ) variant_types;
-
-    typedef detail::helper<T0, T1, T2, T3, T4, T5, T6> helper_type;
+    typedef detail::helper< T0, T1, T2, T3, T4, T5, T6 > helper_type;
+    typedef variant_TL7(    T0, T1, T2, T3, T4, T5, T6 ) variant_types;
 
 public:
     variant() : type_index( 0 ) { new( ptr() ) T0(); }
@@ -841,6 +840,9 @@ public:
         helper_type::move( other.type_index, other.ptr(), ptr() );
     }
 
+    template< std::size_t I >
+    using type_at_t = typename detail::typelist_type_at< variant_types, I >::type;
+    
     template< class T, class... Args >
     explicit variant( in_place_type_t(T), Args&&... args)
     {
@@ -863,11 +865,8 @@ public:
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
     }
 
-    template< int I >
-    using to_type_t = typename detail::typelist_type_at< variant_types, I >::type;
-    
     template <size_t I, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< to_type_t<I>, std::initializer_list<U>&, Args&&...>::value >::type >
+        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args&&...>::value >::type >
     explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
@@ -925,19 +924,13 @@ public:
     template< size_t I, class... Args >
     void emplace( Args&&... args )
     {
-        this->emplace< typename detail::typelist_type_at< variant_types, I >::type > 
-        ( 
-            std::forward<Args>(args)... 
-        );        
+        this->emplace< type_at_t<I> >( std::forward<Args>(args)... );        
     }
 
     template< size_t I, class U, class... Args >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
-        this->emplace< typename detail::typelist_type_at< variant_types, I >::type > 
-        ( 
-            il, std::forward<Args>(args)... 
-        );        
+        this->emplace< type_at_t<I> >( il, std::forward<Args>(args)... );        
     }
 
 #endif // variant_CPP11_OR_GREATER
