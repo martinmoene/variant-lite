@@ -314,7 +314,7 @@ struct NoCopyMove
 CASE( "variant: Allows to in-place construct element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, NoCopyMove> var<NoCopyMove>( 'a', 7 );
+    variant<int, NoCopyMove> var( in_place<NoCopyMove>, 'a', 7 );
 
     EXPECT( get<NoCopyMove>( var ).value == 7 );
 #else
@@ -325,7 +325,7 @@ CASE( "variant: Allows to in-place construct element based on type (C++11)" )
 CASE( "variant: Allows to in-place construct element based on index (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, NoCopyMove> var<1>( 'a', 7 );
+    variant<int, NoCopyMove> var( in_place<1>, 'a', 7 );
 
     EXPECT( get<1>( var ).value == 7 );
 #else
@@ -396,7 +396,7 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
     struct S { operator int() { throw 42; } };
 
     variant< float, int > v{12.f};
-    
+
     EXPECT_THROWS( v.emplace<1>( S() )        );
     EXPECT(        v.valueless_by_exception() );
 #else
@@ -543,7 +543,7 @@ CASE( "monostate: Allows to make variant default-constructible" )
 CASE( "bad_variant_access: Indicates invalid variant access" )
 {
     variant< char, int > v = 7;
-    
+
     EXPECT_THROWS_AS( get<  0 >( v ), bad_variant_access );
     EXPECT_THROWS_AS( get<char>( v ), bad_variant_access );
 }
@@ -660,7 +660,7 @@ CASE( "variant_alternative_T(): Allows to select type by index (non-standard: ma
 {
 #if variant_HAVE_STATIC_ASSERT
     // cannot use variant<int, char> in macro due to comma:
-    
+
     typedef variant<char> var0;
     typedef variant<int, char> var1;
     typedef variant<int, int, char> var2;
@@ -668,7 +668,7 @@ CASE( "variant_alternative_T(): Allows to select type by index (non-standard: ma
     typedef variant<int, int, int, int, char> var4;
     typedef variant<int, int, int, int, int, char> var5;
     typedef variant<int, int, int, int, int, int, char> var6;
-    
+
     static_assert( std::is_same<char, variant_alternative_T( 0, var0 ) >::value, "variant_alternative_T(0, var0)" );
     static_assert( std::is_same<char, variant_alternative_T( 1, var1 ) >::value, "variant_alternative_T(1, var1)" );
     static_assert( std::is_same<char, variant_alternative_T( 2, var2 ) >::value, "variant_alternative_T(2, var2)" );
