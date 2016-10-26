@@ -275,11 +275,11 @@ Notes and References
 
 [1] CppReference. [Variant](http://en.cppreference.com/w/cpp/utility/variant).  
 
-[2] ISO/IEC WG21. [N4606, section 20.7 Variants](wg21.link/n4606). July 2016.
+[2] ISO/IEC WG21. [N4606, section 20.7 Variants](http://wg21.link/n4606). July 2016.
 
-[3] Axel Naumann. [Variant: a type-safe union for C++17 (v8)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0088r3.html). June 2016.
+[3] Axel Naumann. [Variant: a type-safe union for C++17 (v8)](http://wg21.link/p0088r3). June 2016.
 
-[4] Peter Dimov. [Valueless Variants Considered Harmful](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0308r0.html). March 2016.
+[4] Peter Dimov. [Valueless Variants Considered Harmful](http://wg21.link/p0308r0.html). March 2016.
 
 [5] Andrzej Krzemieński. [Constexpr unions](https://akrzemi1.wordpress.com/2012/12/13/constexpr-unions/). December 2012.
 
