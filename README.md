@@ -223,7 +223,7 @@ OS X      | ?          | ?   |
 
 Other variant implementations
 -----------------------------
-- Anthony Williams. [C++ variant class, matching the C++17 draft]().
+- Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
 - Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union.](https://github.com/eggs-cpp/variant).
 - Mapbox. [C++11/C++14 Variant](https://github.com/mapbox/variant).
 - Michael Park. [Variant: A type-safe union (C++14)](https://github.com/mpark/variant).
