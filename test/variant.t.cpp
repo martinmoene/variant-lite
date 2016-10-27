@@ -96,10 +96,31 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 // variant member operations:
 //
 
-namespace
+namespace {
+
+class NoDefaultConstruct { NoDefaultConstruct(){} };
+
+
+#if variant_CPP11_OR_GREATER
+
+variant<char, int> make_empty_variant()
 {
-    class NoDefaultConstruct { NoDefaultConstruct(){} };
+    struct Blow { operator int() { throw 42; } };
+
+    variant<char, int> var;
+
+    try { var.emplace<1>( Blow() ); } catch(...) {}
+
+    return var;
 }
+
+variant<char, int> make_non_empty_variant()
+{
+    return { 7 };
+}
+#endif
+
+} // anonymous namespace
 
 CASE( "variant: Disallows non-default constructible as first type" )
 {
@@ -167,6 +188,71 @@ CASE( "variant: Allows to copy-assign from variant" )
     EXPECT( get<S>(var2).state       == copy_constructed );
 }
 
+CASE( "variant: Allows to obtain the index of the current type" )
+{
+    variant<int, S> vari(   3  );
+    variant<int, S> vars( S(7) );
+
+    EXPECT( 0u == vari.index() );
+    EXPECT( 1u == vars.index() );
+}
+
+CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var{ make_empty_variant() };
+
+    EXPECT( var.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: emplace is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to copy-assign mutually empty variant" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var1{ make_empty_variant() };
+    auto var2{ make_empty_variant() };
+
+    var1 = var2;
+
+    EXPECT( var1.valueless_by_exception() );
+    EXPECT( var2.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to copy-assign from empty variant" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var1{ make_non_empty_variant() };
+    auto var2{ make_empty_variant()     };
+
+    var1 = var2;
+
+    EXPECT( var1.valueless_by_exception() );
+    EXPECT( var2.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to copy-assign to empty variant" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var1{ make_empty_variant()     };
+    auto var2{ make_non_empty_variant() };
+
+    var1 = var2;
+
+    EXPECT_NOT( var1.valueless_by_exception() );
+    EXPECT_NOT( var2.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+#endif
+}
+
 CASE( "variant: Allows to move-assign from variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
@@ -179,6 +265,45 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
     EXPECT( get<S>(var).state       == move_constructed );
 #else
     EXPECT( !!"variant: move-assignment is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-assign mutually empty variant" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var1{ make_empty_variant() };
+
+    var1 = make_empty_variant() ;
+
+    EXPECT( var1.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-assign from empty variant" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var{ make_non_empty_variant() };
+
+    var = make_empty_variant() ;
+
+    EXPECT( var.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-assign to empty variant" )
+{
+#if variant_CPP11_OR_GREATER
+    auto var{ make_empty_variant() };
+
+    var = make_non_empty_variant();
+
+    EXPECT_NOT( var.valueless_by_exception() );
+#else
+    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
 #endif
 }
 
@@ -302,7 +427,7 @@ namespace {
 struct NoCopyMove
 {
     S s; int  value;
-    
+
     NoCopyMove( S const& s, int v  ) : s( s ), value( v ) {}
     NoCopyMove( S && s    , int v  ) : s( std::move(s) ), value( v ) {}
     NoCopyMove(                    ) = delete;
@@ -372,7 +497,7 @@ struct InitList
     std::vector<int> vec;
     char c;
     S s;
-    
+
     InitList( std::initializer_list<int> il, char c, S const & s)
     : vec( il ), c( c ), s( s ) {}
 
@@ -385,7 +510,7 @@ CASE( "variant: Allows to in-place copy-construct elements from intializer-list 
 {
 #if variant_CPP11_OR_GREATER
     S s( 7 );
-    
+
     variant< int, InitList> var( in_place<InitList>, { 7, 8, 9, }, 'a', s );
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -516,7 +641,7 @@ CASE( "variant: Allows to copy-emplace elements from intializer-list based on ty
 #if variant_CPP11_OR_GREATER
     S s( 7 );
     variant< int, InitList> var;
-    
+
     var.emplace<InitList>( { 7, 8, 9, }, 'a', s );
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -534,7 +659,7 @@ CASE( "variant: Allows to move-emplace elements from intializer-list based on ty
 {
 #if variant_CPP11_OR_GREATER
     variant< int, InitList> var;
-    
+
     var.emplace<InitList>( { 7, 8, 9, }, 'a', S( 7 ) );
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -553,7 +678,7 @@ CASE( "variant: Allows to copy-emplace elements from intializer-list based on in
 #if variant_CPP11_OR_GREATER
     S s( 7 );
     variant< int, InitList> var;
-    
+
     var.emplace<1>( { 7, 8, 9, }, 'a', s );
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -571,7 +696,7 @@ CASE( "variant: Allows to move-emplace elements from intializer-list based on in
 {
 #if variant_CPP11_OR_GREATER
     variant< int, InitList> var;
-    
+
     var.emplace<1>( { 7, 8, 9, }, 'a', S( 7 ) );
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -582,29 +707,6 @@ CASE( "variant: Allows to move-emplace elements from intializer-list based on in
     EXPECT( get<1>( var ).s.state == move_constructed );
 #else
     EXPECT( !!"variant: initializer_list construction is not available (no C++11)" );
-#endif
-}
-
-CASE( "variant: Allows to obtain the index of the current type" )
-{
-    variant<int, S> vari(   3  );
-    variant<int, S> vars( S(7) );
-
-    EXPECT( 0u == vari.index() );
-    EXPECT( 1u == vars.index() );
-}
-
-CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
-{
-#if variant_CPP11_OR_GREATER
-    struct S { operator int() { throw 42; } };
-
-    variant< float, int > v{12.f};
-
-    EXPECT_THROWS( v.emplace<1>( S() )        );
-    EXPECT(        v.valueless_by_exception() );
-#else
-    EXPECT( !!"variant: emplace is not available (no C++11)" );
 #endif
 }
 
