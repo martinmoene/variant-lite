@@ -38,6 +38,10 @@
 
 // variant-lite configuration:
 
+#ifndef  variant_CONFIG_OMIT_IN_PLACE_TYPES
+# define variant_CONFIG_OMIT_IN_PLACE_TYPES  0
+#endif
+
 #ifndef  variant_CONFIG_MAX_ALIGN_HACK
 # define variant_CONFIG_MAX_ALIGN_HACK  0
 #endif
@@ -699,6 +703,8 @@ inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
 
+#if ! variant_CONFIG_OMIT_IN_PLACE_TYPES
+
 namespace detail {
 
 template< class T >
@@ -709,24 +715,26 @@ struct in_place_index_tag {};
 
 } // namespace detail
 
-struct in_place_tag {};
+struct in_place_t {};
 
 template< class T >
-inline in_place_tag in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+inline in_place_t in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
 {
-    return in_place_tag();
+    return in_place_t();
 }
 
 template< std::size_t I >
-inline in_place_tag in_place( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
+inline in_place_t in_place( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
 {
-    return in_place_tag();
+    return in_place_t();
 }
 
 // mimic templated typedef:
 
-#define in_place_type_t( T)  in_place_tag(&)( detail::in_place_type_tag<T>  )
-#define in_place_index_t(T)  in_place_tag(&)( detail::in_place_index_tag<I> )
+#define in_place_type_t( T)  in_place_t(&)( detail::in_place_type_tag<T>  )
+#define in_place_index_t(T)  in_place_t(&)( detail::in_place_index_tag<I> )
+
+#endif // variant_CONFIG_OMIT_IN_PLACE_TYPES
 
 // obtain the size of the variant's list of alternatives at compile time
 
