@@ -90,16 +90,7 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
     return os << "[V:" << to_string( v.value ) << "]";
 }
 
-} // anonymous namespace
-
-//
-// variant member operations:
-//
-
-namespace {
-
 class NoDefaultConstruct { NoDefaultConstruct(){} };
-
 
 #if variant_CPP11_OR_GREATER
 
@@ -123,6 +114,10 @@ empty_variant_t make_non_empty_variant()
 #endif
 
 } // anonymous namespace
+
+//
+// variant member operations:
+//
 
 CASE( "variant: Disallows non-default constructible as first type" )
 {
