@@ -26,21 +26,21 @@
 
 #define  variant_lite_VERSION "0.0.0"
 
-// variant-lite feature selection:
-
-#ifndef  variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO
-# define variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO  1
-#endif
-
-#ifndef  variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO
-# define variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO  1
-#endif
-
 // variant-lite configuration:
+
+#ifndef  variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
+# define variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO  0
+#endif
+
+#ifndef  variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO
+# define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
+#endif
 
 #ifndef  variant_CONFIG_OMIT_IN_PLACE_TYPES
 # define variant_CONFIG_OMIT_IN_PLACE_TYPES  0
 #endif
+
+// variant-lite alignment configuration:
 
 #ifndef  variant_CONFIG_MAX_ALIGN_HACK
 # define variant_CONFIG_MAX_ALIGN_HACK  0
@@ -752,7 +752,7 @@ template< class T >
 constexpr std::size_t variant_size_v = variant_size<T>::value;
 #endif
 
-#if variant_FEATURE_HAVE_VARIANT_SIZE_V_MACRO
+#if ! variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
 # define variant_size_V(T)  nonstd::variant_size<T>::value
 #endif
 
@@ -772,7 +772,7 @@ template< std::size_t I, class T >
 using variant_alternative_t = typename variant_alternative<I, T>::type;
 #endif
 
-#if variant_FEATURE_HAVE_VARIANT_ALTERNATIVE_T_MACRO
+#if ! variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO
 # define variant_alternative_T(I,T)  typename nonstd::variant_alternative<I,T >::type
 #endif
 

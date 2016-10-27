@@ -79,7 +79,6 @@ Synopsis
 - [Types in namespace nonstd](#types-in-namespace-nonstd)  
 - [Interface of *variant lite*](#interface-of-variant-lite)  
 - [Algorithms for *variant lite*](#algorithms-for-variant-lite)  
-- [Feature selection macros](#feature-selection-macros)
 - [Configuration macros](#configuration-macros)
 - [Macros to control alignment](#macros-to-control-alignment)  
 
@@ -155,15 +154,13 @@ Synopsis
 
 Note 1: visitor is limited to always return a Variant.
 
-### Feature selection macros
-
-\-D<b>variant\_FEATURE\_HAVE\_VARIANT\_SIZE\_V\_MACRO</b>=1  
-Define this macro to 0 to omit the `variant_size_V(T)` macro. Default is 1.
-
-\-D<b>variant\_FEATURE\_HAVE\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=1  
-Define this macro to 0 to omit the `variant_alternative_T(I,T)` macro. Default is 1.
-
 ### Configuration macros
+
+\-D<b>variant\_CONFIG\_OMIT\_VARIANT\_SIZE\_V\_MACRO</b>=0  
+Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
+
+\-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
+Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
 \-D<b>variant\_CONFIG\_OMIT\_IN\_PLACE\_TYPES</b>=0  
 Define this to 1 to omit definition of `in_place_type_t`, `in_place_index_t`, `in_place_t` and `in_place` when they are already defined elsewhere. Default is 0.
