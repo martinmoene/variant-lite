@@ -52,9 +52,9 @@ In a nutshell
 -------------
 **variant lite** is a single-file header-only library to represent a type-safe union. The library aims to provide a [C++17-like variant](http://en.cppreference.com/w/cpp/utility/variant) for use with C++98 and later.
 
-**Features and properties of variant lite** are ease of installation (single header), ...
+**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).
 
-*variant lite* may provide class template `optional` for nullable objects that is based on `variant`. 
+**Limitations of variant lite** are the maximum of seven alternative types that all must have a different type. Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. The visitor only takes a single variant and can only return a variant. *variant lite* does not provide allocator-extended constructors.
 
 
 License
@@ -80,6 +80,7 @@ Synopsis
 - [Interface of *variant lite*](#interface-of-variant-lite)  
 - [Algorithms for *variant lite*](#algorithms-for-variant-lite)  
 - [Feature selection macros](#feature-selection-macros)
+- [Configuration macros](#configuration-macros)
 - [Macros to control alignment](#macros-to-control-alignment)  
 
 ### Types in namespace nonstd
@@ -87,8 +88,10 @@ Synopsis
 | Purpose               | Type | Notes |
 |-----------------------|------|-------|
 | Type-safe union       | template< class T0...T6 ><br>class variant | non-standard: may hold up to seven types |
+| Default constructible | class monostate                  |Type to make variant default constructible |
 | Error reporting       | class bad_variant_access         |&nbsp; |
 | In-place construction | struct in_place_tag              |&nbsp;             |
+| &nbsp;                | in_place                         | select type or index for in-place construction |
 | &nbsp;                | in_place_type_t( T)              | macro for alias template in_place_type_t&lt;T>  |
 | &nbsp;                | in_place_index_t( T )            | macro for alias template in_place_index_t&lt;T> |
 | Variant size          | template<...><br>struct variant_size< variant<...> > | &nbsp;|
@@ -122,8 +125,6 @@ Synopsis
 | &nbsp;       |C++11 | template< size_t I, class U, class... Args ><br>void emplace( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
 | Swap         |&nbsp;| void swap( variant & other );                | swap with other |
  
-
-
 
 ### Algorithms for *variant lite*
 
@@ -161,6 +162,11 @@ Define this macro to 0 to omit the `variant_size_V(T)` macro. Default is 1.
 
 \-D<b>variant\_FEATURE\_HAVE\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=1  
 Define this macro to 0 to omit the `variant_alternative_T(I,T)` macro. Default is 1.
+
+### Configuration macros
+
+\-D<b>variant\_CONFIG\_OMIT\_IN\_PLACE\_TYPES</b>=0  
+Define this to 1 to omit definition of `in_place_type_t`, `in_place_index_t`, `in_place_t` and `in_place` when they are already defined elsewhere. Default is 0.
 
 ### Macros to control alignment
 
