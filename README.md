@@ -316,8 +316,16 @@ variant: Allows non-default constructible as second and later type (first: monos
 variant: Allows to default-construct variant
 variant: Allows to copy-construct from variant
 variant: Allows to move-construct from variant (C++11)
+variant: Allows to obtain the index of the current type
+variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to copy-assign from variant
+variant: Allows to copy-assign mutually empty variant
+variant: Allows to copy-assign from empty variant
+variant: Allows to copy-assign to empty variant
 variant: Allows to move-assign from variant (C++11)
+variant: Allows to move-assign mutually empty variant (C++11)
+variant: Allows to move-assign from empty variant (C++11)
+variant: Allows to move-assign to empty variant (C++11)
 variant: Allows to construct from element value
 variant: Allows to copy-construct from element
 variant: Allows to move-construct from element (C++11)
@@ -341,8 +349,6 @@ variant: Allows to copy-emplace elements from intializer-list based on type (C++
 variant: Allows to move-emplace elements from intializer-list based on type (C++11)
 variant: Allows to copy-emplace elements from intializer-list based on index (C++11)
 variant: Allows to move-emplace elements from intializer-list based on index (C++11)
-variant: Allows to obtain the index of the current type
-variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to swap variants (member)
 variant: Allows to visit contents (non-standard: always returning variant)
 variant: Allows to check for content by type
