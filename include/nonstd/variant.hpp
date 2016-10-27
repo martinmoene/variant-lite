@@ -842,7 +842,7 @@ public:
 
     template< std::size_t I >
     using type_at_t = typename detail::typelist_type_at< variant_types, I >::type;
-    
+
     template< class T, class... Args >
     explicit variant( in_place_type_t(T), Args&&... args)
     {
@@ -924,13 +924,13 @@ public:
     template< size_t I, class... Args >
     void emplace( Args&&... args )
     {
-        this->emplace< type_at_t<I> >( std::forward<Args>(args)... );        
+        this->emplace< type_at_t<I> >( std::forward<Args>(args)... );
     }
 
     template< size_t I, class U, class... Args >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
-        this->emplace< type_at_t<I> >( il, std::forward<Args>(args)... );        
+        this->emplace< type_at_t<I> >( il, std::forward<Args>(args)... );
     }
 
 #endif // variant_CPP11_OR_GREATER
@@ -1015,17 +1015,51 @@ private:
 
     void copy_assign( variant const & rhs )
     {
-        helper_type::destroy( type_index, ptr() );
-        type_index = variant_npos_internal();
-        type_index = helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        {
+            // no effect
+        }
+        else if ( ! valueless_by_exception() && rhs.valueless_by_exception() )
+        {
+            helper_type::destroy( type_index, ptr() );
+            type_index = variant_npos_internal();
+        }
+        else if ( index() == rhs.index() )
+        {
+            type_index = helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+        }
+        else
+        {
+            // NTS: must buffer this' value in temporary
+            helper_type::destroy( type_index, ptr() );
+            type_index = variant_npos_internal();
+            type_index = helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+        }
     }
 
 #if variant_CPP11_OR_GREATER
     void move_assign( variant && rhs )
     {
-        helper_type::destroy( type_index, ptr() );
-        type_index = variant_npos_internal();
-        type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        {
+            // no effect
+        }
+        else if ( ! valueless_by_exception() && rhs.valueless_by_exception() )
+        {
+            helper_type::destroy( type_index, ptr() );
+            type_index = variant_npos_internal();
+        }
+        else if ( index() == rhs.index() )
+        {
+            type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+        }
+        else
+        {
+            // NTS: must buffer this' value in temporary
+            helper_type::destroy( type_index, ptr() );
+            type_index = variant_npos_internal();
+            type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+        }
     }
 #endif
 
