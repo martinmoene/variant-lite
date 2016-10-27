@@ -30,6 +30,12 @@ CASE( "variant-lite version" "[.version]" )
 
 CASE( "compiler version" "[.compiler]" )
 {
+#if variant_COMPILER_GNUC_VERSION 
+    variant_PRESENT( variant_COMPILER_GNUC_VERSION );
+#else
+    variant_ABSENT(  variant_COMPILER_GNUC_VERSION );
+#endif
+
 #if variant_COMPILER_MSVC_VERSION 
     variant_PRESENT( variant_COMPILER_MSVC_VERSION );
 #else
