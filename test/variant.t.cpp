@@ -103,18 +103,20 @@ class NoDefaultConstruct { NoDefaultConstruct(){} };
 
 #if variant_CPP11_OR_GREATER
 
-variant<char, int> make_empty_variant()
+using empty_variant_t = variant<char, int>;
+
+empty_variant_t make_empty_variant()
 {
     struct Blow { operator int() { throw 42; } };
 
-    variant<char, int> var;
+    empty_variant_t var;
 
     try { var.emplace<1>( Blow() ); } catch(...) {}
 
     return var;
 }
 
-variant<char, int> make_non_empty_variant()
+empty_variant_t make_non_empty_variant()
 {
     return { 7 };
 }
@@ -176,18 +178,6 @@ CASE( "variant: Allows to move-construct from variant (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows to copy-assign from variant" )
-{
-    variant<S> var1;
-    variant<S> var2;
-
-    var2 = var1;
-
-    EXPECT( get<S>(var2).value.value == V::deflt() );
-    EXPECT( get<S>(var2).value.state == copy_constructed );
-    EXPECT( get<S>(var2).state       == copy_constructed );
-}
-
 CASE( "variant: Allows to obtain the index of the current type" )
 {
     variant<int, S> vari(   3  );
@@ -200,7 +190,7 @@ CASE( "variant: Allows to obtain the index of the current type" )
 CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var{ make_empty_variant() };
+    empty_variant_t var{ make_empty_variant() };
 
     EXPECT( var.valueless_by_exception() );
 #else
@@ -208,11 +198,23 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 #endif
 }
 
+CASE( "variant: Allows to copy-assign from variant" )
+{
+    variant<S> var1;
+    variant<S> var2;
+
+    var2 = var1;
+
+    EXPECT( get<S>(var2).value.value == V::deflt() );
+    EXPECT( get<S>(var2).value.state == copy_constructed );
+    EXPECT( get<S>(var2).state       == copy_constructed );
+}
+
 CASE( "variant: Allows to copy-assign mutually empty variant" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var1{ make_empty_variant() };
-    auto var2{ make_empty_variant() };
+    empty_variant_t var1{ make_empty_variant() };
+    empty_variant_t var2{ make_empty_variant() };
 
     var1 = var2;
 
@@ -226,8 +228,8 @@ CASE( "variant: Allows to copy-assign mutually empty variant" )
 CASE( "variant: Allows to copy-assign from empty variant" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var1{ make_non_empty_variant() };
-    auto var2{ make_empty_variant()     };
+    empty_variant_t var1{ make_non_empty_variant() };
+    empty_variant_t var2{ make_empty_variant()     };
 
     var1 = var2;
 
@@ -241,8 +243,8 @@ CASE( "variant: Allows to copy-assign from empty variant" )
 CASE( "variant: Allows to copy-assign to empty variant" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var1{ make_empty_variant()     };
-    auto var2{ make_non_empty_variant() };
+    empty_variant_t var1{ make_empty_variant()     };
+    empty_variant_t var2{ make_non_empty_variant() };
 
     var1 = var2;
 
@@ -268,42 +270,42 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
 #endif
 }
 
-CASE( "variant: Allows to move-assign mutually empty variant" )
+CASE( "variant: Allows to move-assign mutually empty variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var1{ make_empty_variant() };
+    empty_variant_t var1{ make_empty_variant() };
 
     var1 = make_empty_variant() ;
 
     EXPECT( var1.valueless_by_exception() );
 #else
-    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+    EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows to move-assign from empty variant" )
+CASE( "variant: Allows to move-assign from empty variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var{ make_non_empty_variant() };
+    empty_variant_t var{ make_non_empty_variant() };
 
     var = make_empty_variant() ;
 
     EXPECT( var.valueless_by_exception() );
 #else
-    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+    EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
 }
 
-CASE( "variant: Allows to move-assign to empty variant" )
+CASE( "variant: Allows to move-assign to empty variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    auto var{ make_empty_variant() };
+    empty_variant_t var{ make_empty_variant() };
 
     var = make_non_empty_variant();
 
     EXPECT_NOT( var.valueless_by_exception() );
 #else
-    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
+    EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
 }
 
