@@ -8,10 +8,10 @@
 - [License](#license)
 - [Dependencies](#dependencies)
 - [Installation](#installation)
-- [Building the tests](#building-the-tests)
 - [Synopsis](#synopsis)
 - [Features](#features)
 - [Reported to work with](#reported-to-work-with)
+- [Building the tests](#building-the-tests)
 - [Other variant implementations](#other-variant-implementations)
 - [Notes and references](#notes-and-references)
 - [Appendix](#appendix)
@@ -70,39 +70,6 @@ Dependencies
 Installation
 ------------
 *variant lite* is a single-file header-only library. Put `variant.hpp` in the [include](include) folder directly into the project source tree or somewhere reachable from your project.
-
-
-Building the tests
-------------------
-To build the tests you need:
-
-- [CMake](http://cmake.org), version 2.8.12 or later to be installed and in your PATH.
-- A [suitable compiler](#reported-to-work-with).
-
-The [*lest* test framework](https://github.com/martinmoene/lest)  is included in the [test folder](test).
-
-The following steps assume that the [*variant lite* source code](https://github.com/martinmoene/variant-lite) has been cloned into a directory named `c:\variant-lite`.
-
-1. Create a directory for the build outputs for a particular architecture.
-Here we use c:\variant-lite\build-win-x86-vc10.
-
-        cd c:\variant-lite
-        md build-win-x86-vc10
-        cd build-win-x86-vc10
-
-2. Configure CMake to use the compiler of your choice (run `cmake --help` for a list).
-
-        cmake -G "Visual Studio 10 2010" ..
-
-3. Build the test suite in the Debug configuration (alternatively use Release).    
-
-        cmake --build . --config Debug
-
-4. Run the test suite.    
-
-        ctest -V -C Debug
-
-All tests should pass, indicating your platform is supported and you are ready to use *variant lite*.
 
 
 Synopsis
@@ -223,14 +190,37 @@ GNU/Linux | Clang/LLVM | 3.5.0 |
 OS X      | ?          | ?   |
 
 
-Other variant implementations
------------------------------
-- Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
-- Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union.](https://github.com/eggs-cpp/variant).
-- Mapbox. [C++11/C++14 Variant](https://github.com/mapbox/variant).
-- Michael Park. [Variant: A type-safe union (C++14)](https://github.com/mpark/variant).
-- Gregor Burger. [Typesafe tagged union with "don't call us, we'll call you" feature (C++14)](https://github.com/gregorburger/variant).
-- Anatoliy Tomilov. [C++1z variant, never empty, constexpr-enabled visit/multivisit, ... relational](https://github.com/tomilov/variant).
+Building the tests
+------------------
+To build the tests you need:
+
+- [CMake](http://cmake.org), version 2.8.12 or later to be installed and in your PATH.
+- A [suitable compiler](#reported-to-work-with).
+
+The [*lest* test framework](https://github.com/martinmoene/lest)  is included in the [test folder](test).
+
+The following steps assume that the [*variant lite* source code](https://github.com/martinmoene/variant-lite) has been cloned into a directory named `c:\variant-lite`.
+
+1. Create a directory for the build outputs for a particular architecture.
+Here we use c:\variant-lite\build-win-x86-vc10.
+
+        cd c:\variant-lite
+        md build-win-x86-vc10
+        cd build-win-x86-vc10
+
+2. Configure CMake to use the compiler of your choice (run `cmake --help` for a list).
+
+        cmake -G "Visual Studio 10 2010" ..
+
+3. Build the test suite in the Debug configuration (alternatively use Release).    
+
+        cmake --build . --config Debug
+
+4. Run the test suite.    
+
+        ctest -V -C Debug
+
+All tests should pass, indicating your platform is supported and you are ready to use *variant lite*.
 
 
 Implementation notes
@@ -268,6 +258,16 @@ Note that the algorithm of 5. differs from the one Andrei Alexandrescu uses in [
 The class template `alignment_of<>` is gleaned from [Boost.TypeTraits, alignment_of](http://www.boost.org/doc/libs/1_57_0/libs/type_traits/doc/html/boost_typetraits/reference/alignment_of.html) [13].
 
 For more information on constructed unions and alignment, see [6-11].
+
+
+Other variant implementations
+-----------------------------
+- Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
+- Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union.](https://github.com/eggs-cpp/variant).
+- Mapbox. [C++11/C++14 Variant](https://github.com/mapbox/variant).
+- Michael Park. [Variant: A type-safe union (C++14)](https://github.com/mpark/variant).
+- Gregor Burger. [Typesafe tagged union with "don't call us, we'll call you" feature (C++14)](https://github.com/gregorburger/variant).
+- Anatoliy Tomilov. [C++1z variant, never empty, constexpr-enabled visit/multivisit, ... relational](https://github.com/tomilov/variant).
 
 
 Notes and References
