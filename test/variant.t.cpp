@@ -203,11 +203,11 @@ CASE( "variant: Allows to copy-assign from variant" )
     variant<S> var1;
     variant<S> var2;
 
-    var2 = var1;
+    var1 = var2;
 
-    EXPECT( get<S>(var2).value.value == V::deflt() );
-    EXPECT( get<S>(var2).value.state == copy_constructed );
-    EXPECT( get<S>(var2).state       == copy_constructed );
+    EXPECT( get<S>(var1).value.value == V::deflt() );
+    EXPECT( get<S>(var1).value.state == copy_constructed );
+    EXPECT( get<S>(var1).state       == copy_constructed );
 }
 
 CASE( "variant: Allows to copy-assign mutually empty variant" )
@@ -273,11 +273,11 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
 CASE( "variant: Allows to move-assign mutually empty variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    empty_variant_t var1{ make_empty_variant() };
+    empty_variant_t var{ make_empty_variant() };
 
-    var1 = make_empty_variant() ;
+    var = make_empty_variant() ;
 
-    EXPECT( var1.valueless_by_exception() );
+    EXPECT( var.valueless_by_exception() );
 #else
     EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
