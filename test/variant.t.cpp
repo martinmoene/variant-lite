@@ -304,7 +304,6 @@ CASE( "variant: Allows to move-assign to empty variant (C++11)" )
 #endif
 }
 
-// NTS:fix
 CASE( "variant: Allows to construct from element value" )
 {
     V v(7);
@@ -312,13 +311,7 @@ CASE( "variant: Allows to construct from element value" )
     variant<S> var( v );
 
     EXPECT( get<S>(var).value.value == 7 );
-#if variant_CPP11_OR_GREATER
-    EXPECT( get<S>(var).value.state == move_constructed );
-    EXPECT( get<S>(var).state       == move_constructed );
-#else
-    EXPECT( get<S>(var).value.state == copy_constructed );
-    EXPECT( get<S>(var).state       == copy_constructed );
-#endif
+    EXPECT(                 v.state != moved_from );
 }
 
 CASE( "variant: Allows to copy-construct from element" )
@@ -343,30 +336,77 @@ CASE( "variant: Allows to move-construct from element (C++11)" )
 #endif
 }
 
-//CASE( "variant: Allows to copy-assign from element value" )
-//{
-//    V v( 7 );
-//    variant<int, S> var;
-//
-//    var = v;
-//
-//    EXPECT( get<S>(var).value.value == 7 );
-//    EXPECT( get<S>(var).state       == copy_assigned );
-//}
+CASE( "variant: Allows to convert-copy-construct from element" )
+{
+    int i = 7;
+
+    variant<double, std::string> var1(  i    );
+    variant<double, std::string> var2(  7    );
+
+    EXPECT( var1.index() == 0u );
+    EXPECT( get<0>(var1) == 7  );
+
+    EXPECT( var2.index() == 0u );
+    EXPECT( get<0>(var2) == 7  );
+}
+
+CASE( "variant: Allows to convert-move-construct from element (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    struct Int { operator int() { return 7; } };
+
+    variant<double, std::string> var( Int{} );
+
+    EXPECT( var.index() == 0u );
+    EXPECT( get<0>(var) == 7  );
+#else
+    EXPECT( !!"variant: move-construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to copy-assign from element value" )
+{
+    V v( 7 );
+    variant<int, S> var1;
+    variant<int, S> var2;
+
+    var1 = v;
+    var2 = V( 7 );  // copy for pre-C++11
+
+    EXPECT( get<S>(var1).value.value == 7 );
+    EXPECT(                 v.state != moved_from );
+
+    EXPECT( get<S>(var1).value.value == 7 );
+}
+
+CASE( "variant: Allows to move-assign from element value" )
+{
+#if variant_CPP11_OR_GREATER
+    variant<int, S> var;
+
+    var = V( 7 );
+
+    EXPECT( get<S>(var).value.value == 7 );
+    EXPECT( get<S>(var).value.state == move_constructed );
+    EXPECT( get<S>(var).state       == move_constructed );
+#else
+    EXPECT( !!"variant: move-construction is not available (no C++11)" );
+#endif
+}
 
 CASE( "variant: Allows to copy-assign from element" )
 {
     S s( 7 );
-    variant<int, S> var;
+    variant<int, S> var1;
+    variant<int, S> var2;
 
-    var = s;
+    var1 = s;
+    var2 = S( 7 );  // copy for pre-C++11
 
-    EXPECT( get<S>(var).value.value == 7 );
-#if variant_CPP11_OR_GREATER
-    EXPECT( get<S>(var).state       == move_constructed );
-#else
-    EXPECT( get<S>(var).state       == copy_constructed );
-#endif
+    EXPECT( get<S>(var1).value.value == 7 );
+    EXPECT(                  s.state != moved_from );
+
+    EXPECT( get<S>(var2).value.value == 7 );
 }
 
 CASE( "variant: Allows to move-assign from element (C++11)" )
@@ -381,6 +421,19 @@ CASE( "variant: Allows to move-assign from element (C++11)" )
 #else
     EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
+}
+
+CASE( "variant: Allows to convert-copy-assign from element value" )
+{
+    char const * hello = "hello, world";
+    variant<int, std::string> var1;
+    variant<int, std::string> var2;
+
+    var1 = hello;
+    var2 = "hello, world";
+
+    EXPECT( get<1>(var1) ==  hello         );
+    EXPECT( get<1>(var2) == "hello, world" );
 }
 
 CASE( "variant: Allows to copy-construct from elements in intializer-list based on type (C++11)" )

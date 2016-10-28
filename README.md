@@ -334,8 +334,13 @@ variant: Allows to move-assign to empty variant (C++11)
 variant: Allows to construct from element value
 variant: Allows to copy-construct from element
 variant: Allows to move-construct from element (C++11)
+variant: Allows to convert-copy-construct from element
+variant: Allows to convert-move-construct from element (C++11)
+variant: Allows to copy-assign from element value
+variant: Allows to move-assign from element value
 variant: Allows to copy-assign from element
 variant: Allows to move-assign from element (C++11)
+variant: Allows to convert-copy-assign from element value
 variant: Allows to copy-construct from elements in intializer-list based on type (C++11)
 variant: Allows to move-construct from elements in intializer-list based on type (C++11)
 variant: Allows to in-place copy-construct element based on type (C++11)
