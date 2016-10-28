@@ -892,16 +892,14 @@ public:
 
     variant & operator=( variant const & other )
     {
-        copy_assign( other );
-        return *this;
+        return copy_assign( other );
     }
 
 #if variant_CPP11_OR_GREATER
 
     variant & operator=( variant && other )
     {
-        move_assign( std::forward<variant>( other ) );
-        return *this;
+        return move_assign( std::forward<variant>( other ) );
     }
 
     variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::forward<T0>( t0 ) ); }
@@ -1044,7 +1042,7 @@ private:
         return static_cast<type_index_t>( -1 );
     }
 
-    void copy_assign( variant const & rhs )
+    variant & copy_assign( variant const & rhs )
     {
         if ( valueless_by_exception() && rhs.valueless_by_exception() )
         {
@@ -1072,11 +1070,12 @@ private:
             type_index = helper_type::copy( rhs.type_index, tmp.ptr(), ptr() );
 #endif
         }
+        return *this;
     }
 
 #if variant_CPP11_OR_GREATER
 
-    void move_assign( variant && rhs )
+    variant & move_assign( variant && rhs )
     {
         if ( valueless_by_exception() && rhs.valueless_by_exception() )
         {
@@ -1097,6 +1096,7 @@ private:
             type_index = variant_npos_internal();
             type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
         }
+        return *this;
     }
 
     template< class T, std::size_t I >
