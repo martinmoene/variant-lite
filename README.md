@@ -114,8 +114,10 @@ Synopsis
 | &nbsp;       |C++11 | template< std::size_t I, class... Args ><br>explicit variant( in_place_index_t(I), Args&&... args ) | in-place-construct type at index I | 
 | &nbsp;       |C++11 | template< size_t I, class U, class... Args><br>explicit variant( in_place_index_t(I),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type at index I|
 | Destruction  |&nbsp;| ~variant()                                   | destruct current content |
-| Assignment   |&nbsp;| variant & operator=( variant const & rhs )   | copy-assign from other;<br>destruct current content |
-| &nbsp;       |C++11 | variant & operator=( variant && other )      | move-assign from other;<br>destruct current content |
+| Assignment   |&nbsp;| variant & operator=( variant const & rhs )   | copy-assign from other |
+| &nbsp;       |C++11 | variant & operator=( variant && other )      | move-assign from other |
+| &nbsp;       |C++11 | template< class Tx ><br>variant & operator=( Tx && t ) | move-assign from value |
+| &nbsp;       |< C++11 | template< class Tx ><br>variant & operator=( Tx const & t ) | copy-assign from value;<br>non-standard |
 | State        |&nbsp;| std::size_t index() const                    | index of current content's type |
 | &nbsp;       |&nbsp;| bool valueless_by_exception() const          | true if no content is present |
 | Emplace      |C++11 | template< class T, class... Args ><br>void emplace( Args&&... args ) | emplace type T |

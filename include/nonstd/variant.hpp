@@ -895,12 +895,29 @@ public:
     }
 
 #if variant_CPP11_OR_GREATER
+
     variant & operator=( variant && other )
     {
         move_assign( std::forward<variant>( other ) );
         return *this;
     }
-#endif
+
+    variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::forward<T0>( t0 ) ); }
+    variant & operator=( T1 &&      t1 ) { return move_assign_value<T1,1>( std::forward<T1>( t1 ) ); }
+    variant & operator=( T2 &&      t2 ) { return move_assign_value<T2,2>( std::forward<T2>( t2 ) ); }
+    variant & operator=( T3 &&      t3 ) { return move_assign_value<T3,3>( std::forward<T3>( t3 ) ); }
+    variant & operator=( T4 &&      t4 ) { return move_assign_value<T4,4>( std::forward<T4>( t4 ) ); }
+    variant & operator=( T5 &&      t5 ) { return move_assign_value<T5,5>( std::forward<T5>( t5 ) ); }
+    variant & operator=( T6 &&      t6 ) { return move_assign_value<T6,6>( std::forward<T6>( t6 ) ); }
+#else
+    variant & operator=( T0 const & t0 ) { return copy_assign_value<T0,0>( t0 ); }
+    variant & operator=( T1 const & t1 ) { return copy_assign_value<T1,1>( t1 ); }
+    variant & operator=( T2 const & t2 ) { return copy_assign_value<T2,2>( t2 ); }
+    variant & operator=( T3 const & t3 ) { return copy_assign_value<T3,3>( t3 ); }
+    variant & operator=( T4 const & t4 ) { return copy_assign_value<T4,4>( t4 ); }
+    variant & operator=( T5 const & t5 ) { return copy_assign_value<T5,5>( t5 ); }
+    variant & operator=( T6 const & t6 ) { return copy_assign_value<T6,6>( t6 ); }
+#endif 
 
     std::size_t index() const
     {
@@ -1046,6 +1063,7 @@ private:
     }
 
 #if variant_CPP11_OR_GREATER
+
     void move_assign( variant && rhs )
     {
         if ( valueless_by_exception() && rhs.valueless_by_exception() )
@@ -1069,6 +1087,41 @@ private:
             type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
         }
     }
+
+    template< class T, std::size_t I >
+    variant & move_assign_value( T && value )
+    {
+        if( index() == I ) 
+        {
+            *as<T>() = std::forward<T>( value );
+        }
+        else
+        {
+            helper_type::destroy( type_index, ptr() ); 
+            type_index = variant_npos_internal();
+            new( ptr() ) T( std::forward<T>( value ) ); 
+            type_index = I; 
+        }
+        return *this; 
+    }
+#else
+    template< class T, std::size_t I >
+    variant & copy_assign_value( T const & value )
+    {
+        if( index() == I ) 
+        {
+            *as<T>() = value;
+        }
+        else
+        {
+            helper_type::destroy( type_index, ptr() ); 
+            type_index = variant_npos_internal();
+            new( ptr() ) T( value ); 
+            type_index = I; 
+        }
+        return *this; 
+    }
+        
 #endif
 
 private:
