@@ -837,7 +837,7 @@ public:
     variant(variant const & other)
     : type_index( other.type_index )
     {
-        helper_type::copy( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::copy( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
@@ -845,7 +845,7 @@ public:
     variant( variant && other )
     : type_index( other.type_index )
     {
-        helper_type::move( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::move( other.type_index, other.ptr(), ptr() );
     }
 
     template< std::size_t I >
