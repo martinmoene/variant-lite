@@ -1061,10 +1061,16 @@ private:
         }
         else
         {
-            // NTS: must buffer this' value in temporary
-            helper_type::destroy( type_index, ptr() );
+            // alas exception safety with pre-C++11 needs an extra copy:
+            
+            variant tmp( rhs );            
+            helper_type::destroy( type_index, ptr() );            
             type_index = variant_npos_internal();
-            type_index = helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+#if variant_CPP11_OR_GREATER
+            type_index = helper_type::move( rhs.type_index, tmp.ptr(), ptr() );
+#else
+            type_index = helper_type::copy( rhs.type_index, tmp.ptr(), ptr() );
+#endif
         }
     }
 
@@ -1087,7 +1093,6 @@ private:
         }
         else
         {
-            // NTS: must buffer this' value in temporary
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
             type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
