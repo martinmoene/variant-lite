@@ -851,7 +851,8 @@ public:
     template< std::size_t I >
     using type_at_t = typename detail::typelist_type_at< variant_types, I >::type;
 
-    template< class T, class... Args >
+    template< class T, class... Args,
+        typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
     explicit variant( in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
@@ -859,14 +860,15 @@ public:
     }
 
     template< class T, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible<T, std::initializer_list<U>&, Args&&...>::value>::type >
+        typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
     explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
     }
 
-    template< std::size_t I, class... Args >
+    template< std::size_t I, class... Args,
+        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, Args...>::value>::type >
     explicit variant( in_place_index_t(I), Args&&... args )
     {
         type_index = variant_npos_internal();
@@ -874,7 +876,7 @@ public:
     }
 
     template <size_t I, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args&&...>::value >::type >
+        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
     explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
@@ -930,7 +932,8 @@ public:
     }
 
 #if variant_CPP11_OR_GREATER
-    template< class T, class... Args >
+    template< class T, class... Args,
+        typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
     void emplace( Args&&... args )
     {
         helper_type::destroy( type_index, ptr() );
@@ -938,7 +941,8 @@ public:
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
     }
 
-    template< class T, class U, class... Args >
+    template< class T, class U, class... Args,
+        typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
         helper_type::destroy( type_index, ptr() );
@@ -946,13 +950,15 @@ public:
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
     }
 
-    template< size_t I, class... Args >
+    template< size_t I, class... Args,
+        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, Args...>::value>::type >
     void emplace( Args&&... args )
     {
         this->emplace< type_at_t<I> >( std::forward<Args>(args)... );
     }
 
-    template< size_t I, class U, class... Args >
+    template< size_t I, class U, class... Args, 
+        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
         this->emplace< type_at_t<I> >( il, std::forward<Args>(args)... );
