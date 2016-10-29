@@ -92,26 +92,32 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 
 class NoDefaultConstruct { NoDefaultConstruct(){} };
 
+struct BlowOnAssign
+{ 
+    BlowOnAssign() {}
+    BlowOnAssign( BlowOnAssign const & ) { throw 42; }
+    BlowOnAssign & operator=( BlowOnAssign const & ) { return *this; }
 #if variant_CPP11_OR_GREATER
+    BlowOnAssign( BlowOnAssign && ) { throw 42; }
+    BlowOnAssign & operator=( BlowOnAssign && ) = default;
+#endif
+};
 
-using empty_variant_t = variant<char, int>;
+typedef variant<char, BlowOnAssign> empty_variant_t;
 
 empty_variant_t make_empty_variant()
 {
-    struct Blow { operator int() { throw 42; } };
+    empty_variant_t var = 'a';
 
-    empty_variant_t var;
-
-    try { var.emplace<1>( Blow() ); } catch(...) {}
+    try { var = BlowOnAssign(); } catch(...) {}
 
     return var;
 }
 
 empty_variant_t make_non_empty_variant()
 {
-    return { 7 };
+    return empty_variant_t( 'a' );
 }
-#endif
 
 } // anonymous namespace
 
