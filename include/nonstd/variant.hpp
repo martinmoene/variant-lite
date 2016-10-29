@@ -966,9 +966,20 @@ public:
 
     void swap( variant & other ) variant_noexcept
     {
-        variant temp = *this;
-        *this = other;
-        other = temp;
+        if ( valueless_by_exception() && other.valueless_by_exception() )
+        {
+            // no effect
+        }
+        else if ( index() == other.index() )
+        {
+            this->swap_value( index(), other );
+        }
+        else
+        {
+            variant tmp( *this );
+            *this = other;
+            other = tmp;
+        }
     }
 
     //
@@ -1005,6 +1016,20 @@ public:
         }
 
         return *as<const T>();
+    }
+
+    template< std::size_t I >
+    typename variant_alternative< I, variant >::type &
+    get()
+    {
+        return this->template get< typename detail::typelist_type_at< variant_types, I >::type >();
+    }
+
+    template< std::size_t I >
+    typename variant_alternative< I, variant >::type const &
+    get() const
+    {
+        return this->template get< typename detail::typelist_type_at< variant_types, I >::type >();
     }
 
 private:
@@ -1132,8 +1157,23 @@ private:
         }
         return *this; 
     }
-        
-#endif
+    
+#endif // variant_CPP11_OR_GREATER
+
+    void swap_value( std::size_t index, variant & other )
+    {
+        using std::swap;
+        switch( index )
+        {
+            case 0: swap( this->template get<0>(), other.template get<0>() ); break;
+            case 1: swap( this->template get<1>(), other.template get<1>() ); break;
+            case 2: swap( this->template get<2>(), other.template get<2>() ); break;
+            case 3: swap( this->template get<3>(), other.template get<3>() ); break;
+            case 4: swap( this->template get<4>(), other.template get<4>() ); break;
+            case 5: swap( this->template get<5>(), other.template get<5>() ); break;
+            case 6: swap( this->template get<6>(), other.template get<6>() ); break;
+        }
+    }
 
 private:
     enum { data_size  = detail::typelist_max< variant_types >::value };
@@ -1194,9 +1234,7 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> & v, in_place_index_t(I) = in_place<I> 
         throw bad_variant_access();
     }
 
-    typedef variant_TL7(T0, T1, T2, T3, T4, T5, T6) variant_types;
-
-    return v.template get< typename detail::typelist_type_at< variant_types, I >::type >();
+    return v.template get<I>();
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
@@ -1208,9 +1246,7 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
         throw bad_variant_access();
     }
 
-    typedef variant_TL7(T0, T1, T2, T3, T4, T5, T6) variant_types;
-
-    return v.template get< typename detail::typelist_type_at< variant_types, I >::type >();
+    return v.template get<I>();
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >

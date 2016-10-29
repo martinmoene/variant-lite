@@ -760,7 +760,18 @@ CASE( "variant: Allows to move-emplace elements from intializer-list based on in
 #endif
 }
 
-CASE( "variant: Allows to swap variants (member)" )
+CASE( "variant: Allows to swap variants, same index (member)" )
+{
+    variant<int, S> var1( 1 );
+    variant<int, S> var2( 2 );
+
+    var1.swap( var2 );
+
+    EXPECT( get<int>( var1 ) == 2 );
+    EXPECT( get<int>( var2 ) == 1 );
+}
+
+CASE( "variant: Allows to swap variants, different index (member)" )
 {
     S s( 7 );
     variant<int, S> vari( 3 );
@@ -873,7 +884,18 @@ CASE( "variant: Allows to compare variants" )
     EXPECT_NOT( v >= w );
 }
 
-CASE( "variant: Allows to swap variants (non-member)" )
+CASE( "variant: Allows to swap variants, same index (non-member)" )
+{
+    variant<int, S> var1( 1 );
+    variant<int, S> var2( 2 );
+
+    swap( var1, var2 );
+
+    EXPECT( get<int>( var1 ) == 2 );
+    EXPECT( get<int>( var2 ) == 1 );
+}
+
+CASE( "variant: Allows to swap variants, different index (non-member)" )
 {
     S s( 7 );
     variant<int, S> vari( 3 );

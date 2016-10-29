@@ -359,7 +359,8 @@ variant: Allows to copy-emplace elements from intializer-list based on type (C++
 variant: Allows to move-emplace elements from intializer-list based on type (C++11)
 variant: Allows to copy-emplace elements from intializer-list based on index (C++11)
 variant: Allows to move-emplace elements from intializer-list based on index (C++11)
-variant: Allows to swap variants (member)
+variant: Allows to swap variants, same index (member)
+variant: Allows to swap variants, different index (member)
 variant: Allows to visit contents (non-standard: always returning variant)
 variant: Allows to check for content by type
 variant: Allows to get element by type
@@ -367,7 +368,8 @@ variant: Allows to get element by index
 variant: Allows to get pointer to element or NULL by type
 variant: Allows to get pointer to element or NULL by index
 variant: Allows to compare variants
-variant: Allows to swap variants (non-member)
+variant: Allows to swap variants, same index (non-member)
+variant: Allows to swap variants, different index (non-member)
 monostate: Allows to make variant default-constructible
 bad_variant_access: Indicates invalid variant access
 variant_size<>: Allows to obtain number of element types (non-standard: max 7)
