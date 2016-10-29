@@ -92,24 +92,24 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 
 class NoDefaultConstruct { NoDefaultConstruct(){} };
 
-struct BlowOnAssign
+struct BlowCopyMove
 { 
-    BlowOnAssign() {}
-    BlowOnAssign( BlowOnAssign const & ) { throw 42; }
-    BlowOnAssign & operator=( BlowOnAssign const & ) { return *this; }
+    BlowCopyMove() {}
+    BlowCopyMove( BlowCopyMove const & ) { throw 42; }
+    BlowCopyMove & operator=( BlowCopyMove const & ) { return *this; }
 #if variant_CPP11_OR_GREATER
-    BlowOnAssign( BlowOnAssign && ) { throw 42; }
-    BlowOnAssign & operator=( BlowOnAssign && ) = default;
+    BlowCopyMove( BlowCopyMove && ) { throw 42; }
+    BlowCopyMove & operator=( BlowCopyMove && ) = default;
 #endif
 };
 
-typedef variant<char, BlowOnAssign> empty_variant_t;
+typedef variant<char, BlowCopyMove> empty_variant_t;
 
 empty_variant_t make_empty_variant()
 {
     empty_variant_t var = 'a';
 
-    try { var = BlowOnAssign(); } catch(...) {}
+    try { var = BlowCopyMove(); } catch(...) {}
 
     return var;
 }
