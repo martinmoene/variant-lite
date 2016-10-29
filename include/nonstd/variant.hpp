@@ -834,18 +834,18 @@ public:
     variant( T6 &&      t6 ) : type_index( 6 ) { new( ptr() ) T6( std::move( t6 ) ); }
 #endif
 
-    variant(variant const & other)
-    : type_index( other.type_index )
+    variant(variant const & rhs)
+    : type_index( rhs.type_index )
     {
-        (void) helper_type::copy( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
 
-    variant( variant && other )
-    : type_index( other.type_index )
+    variant( variant && rhs )
+    : type_index( rhs.type_index )
     {
-        (void) helper_type::move( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
     }
 
     template< std::size_t I >
@@ -890,16 +890,16 @@ public:
         helper_type::destroy( index(), ptr() );
     }
 
-    variant & operator=( variant const & other )
+    variant & operator=( variant const & rhs )
     {
-        return copy_assign( other );
+        return copy_assign( rhs );
     }
 
 #if variant_CPP11_OR_GREATER
 
-    variant & operator=( variant && other )
+    variant & operator=( variant && rhs )
     {
-        return move_assign( std::forward<variant>( other ) );
+        return move_assign( std::forward<variant>( rhs ) );
     }
 
     variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::forward<T0>( t0 ) ); }
@@ -964,21 +964,21 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap( variant & other ) variant_noexcept
+    void swap( variant & rhs ) variant_noexcept
     {
-        if ( valueless_by_exception() && other.valueless_by_exception() )
+        if ( valueless_by_exception() && rhs.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( index() == other.index() )
+        else if ( index() == rhs.index() )
         {
-            this->swap_value( index(), other );
+            this->swap_value( index(), rhs );
         }
         else
         {
             variant tmp( *this );
-            *this = other;
-            other = tmp;
+            *this = rhs;
+            rhs = tmp;
         }
     }
 
@@ -1160,18 +1160,18 @@ private:
     
 #endif // variant_CPP11_OR_GREATER
 
-    void swap_value( std::size_t index, variant & other )
+    void swap_value( std::size_t index, variant & rhs )
     {
         using std::swap;
         switch( index )
         {
-            case 0: swap( this->template get<0>(), other.template get<0>() ); break;
-            case 1: swap( this->template get<1>(), other.template get<1>() ); break;
-            case 2: swap( this->template get<2>(), other.template get<2>() ); break;
-            case 3: swap( this->template get<3>(), other.template get<3>() ); break;
-            case 4: swap( this->template get<4>(), other.template get<4>() ); break;
-            case 5: swap( this->template get<5>(), other.template get<5>() ); break;
-            case 6: swap( this->template get<6>(), other.template get<6>() ); break;
+            case 0: swap( this->template get<0>(), rhs.template get<0>() ); break;
+            case 1: swap( this->template get<1>(), rhs.template get<1>() ); break;
+            case 2: swap( this->template get<2>(), rhs.template get<2>() ); break;
+            case 3: swap( this->template get<3>(), rhs.template get<3>() ); break;
+            case 4: swap( this->template get<4>(), rhs.template get<4>() ); break;
+            case 5: swap( this->template get<5>(), rhs.template get<5>() ); break;
+            case 6: swap( this->template get<6>(), rhs.template get<6>() ); break;
         }
     }
 
@@ -1289,7 +1289,7 @@ inline void swap(
 // visit( Visitor&& vis, Variants&&... vars );
 
 // The following visit is restricted  with respect to the standard.
-// It uses the common idiom is to return another variant:
+// It uses the common idiom is to return anrhs variant:
 
 template< class Visitor, class Variant >
 inline Variant visit( Visitor const & vis, Variant const & v )
