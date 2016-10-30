@@ -36,10 +36,6 @@
 # define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
 #endif
 
-#ifndef  variant_CONFIG_OMIT_IN_PLACE_TYPES
-# define variant_CONFIG_OMIT_IN_PLACE_TYPES  0
-#endif
-
 // variant-lite alignment configuration:
 
 #ifndef  variant_CONFIG_MAX_ALIGN_HACK
@@ -703,7 +699,7 @@ inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
 
-#if ! variant_CONFIG_OMIT_IN_PLACE_TYPES
+#if ! nonstd_lite_HAVE_IN_PLACE_TYPES 
 
 namespace detail {
 
@@ -734,7 +730,9 @@ inline in_place_t in_place( detail::in_place_index_tag<I> = detail::in_place_ind
 #define in_place_type_t( T)  in_place_t(&)( detail::in_place_type_tag<T>  )
 #define in_place_index_t(T)  in_place_t(&)( detail::in_place_index_tag<I> )
 
-#endif // variant_CONFIG_OMIT_IN_PLACE_TYPES
+#define nonstd_lite_HAVE_IN_PLACE_TYPES  1
+
+#endif // nonstd_lite_HAVE_IN_PLACE_TYPES
 
 // obtain the size of the variant's list of alternatives at compile time
 

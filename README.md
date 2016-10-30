@@ -164,9 +164,6 @@ Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
-\-D<b>variant\_CONFIG\_OMIT\_IN\_PLACE\_TYPES</b>=0  
-Define this to 1 to omit definition of `in_place_type_t`, `in_place_index_t`, `in_place_t` and `in_place` when they are already defined elsewhere. Default is 0.
-
 ### Macros to control alignment
 
 If *variant lite* is compiled as C++11 or later, C++11 alignment facilities are used for storage of the underlying object. When compiled as pre-C++11, *variant lite* tries to determine proper alignment itself. If this doesn't work out, you can control alignment via the following macros. See also section [Implementation notes](#implementation-notes).
