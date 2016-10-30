@@ -91,8 +91,8 @@ Synopsis
 | Error reporting       | class bad_variant_access         |&nbsp; |
 | In-place construction | struct in_place_tag              |&nbsp;             |
 | &nbsp;                | in_place                         | select type or index for in-place construction |
-| &nbsp;                | in_place_type_t( T)              | macro for alias template in_place_type_t&lt;T>  |
-| &nbsp;                | in_place_index_t( T )            | macro for alias template in_place_index_t&lt;T> |
+| &nbsp;                | nonstd_lite_in_place_type_t( T)  | macro for alias template in_place_type_t&lt;T>  |
+| &nbsp;                | nonstd_lite_in_place_index_t( T )| macro for alias template in_place_index_t&lt;T> |
 | Variant size          | template<...><br>struct variant_size< variant<...> > | &nbsp;|
 | &nbsp;                | variant_size_v&lt; T >           | C++14 |
 | &nbsp;                | variant_size_V( T )              | macro for nonstd::variant_size<T>::value |

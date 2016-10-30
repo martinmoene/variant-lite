@@ -727,8 +727,8 @@ inline in_place_t in_place( detail::in_place_index_tag<I> = detail::in_place_ind
 
 // mimic templated typedef:
 
-#define in_place_type_t( T)  in_place_t(&)( detail::in_place_type_tag<T>  )
-#define in_place_index_t(T)  in_place_t(&)( detail::in_place_index_tag<I> )
+#define nonstd_lite_in_place_type_t( T)  nonstd::variants::in_place_t(&)( detail::in_place_type_tag<T>  )
+#define nonstd_lite_in_place_index_t(T)  nonstd::variants::in_place_t(&)( detail::in_place_index_tag<I> )
 
 #define nonstd_lite_HAVE_IN_PLACE_TYPES  1
 
@@ -851,7 +851,7 @@ public:
 
     template< class T, class... Args,
         typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
-    explicit variant( in_place_type_t(T), Args&&... args)
+    explicit variant( nonstd_lite_in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
@@ -859,7 +859,7 @@ public:
 
     template< class T, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
-    explicit variant( in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
+    explicit variant( nonstd_lite_in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
@@ -867,7 +867,7 @@ public:
 
     template< std::size_t I, class... Args,
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, Args...>::value>::type >
-    explicit variant( in_place_index_t(I), Args&&... args )
+    explicit variant( nonstd_lite_in_place_index_t(I), Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
@@ -875,7 +875,7 @@ public:
 
     template <size_t I, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
-    explicit variant( in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
+    explicit variant( nonstd_lite_in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_i<I>( ptr(), il, std::forward<Args>(args)... );
@@ -1212,20 +1212,20 @@ inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6> const & v ) v
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-inline R & get( variant<T0, T1, T2, T3, T4, T5, T6> & v, in_place_type_t(R) = in_place<R> )
+inline R & get( variant<T0, T1, T2, T3, T4, T5, T6> & v, nonstd_lite_in_place_type_t(R) = in_place<R> )
 {
     return v.template get<R>();
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6  >
-inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_type_t(R) = in_place<R> )
+inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, nonstd_lite_in_place_type_t(R) = in_place<R> )
 {
     return v.template get<R>();
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >::type &
-get( variant<T0, T1, T2, T3, T4, T5, T6> & v, in_place_index_t(I) = in_place<I> )
+get( variant<T0, T1, T2, T3, T4, T5, T6> & v, nonstd_lite_in_place_index_t(I) = in_place<I> )
 {
     if ( I != v.index() )
     {
@@ -1237,7 +1237,7 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> & v, in_place_index_t(I) = in_place<I> 
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6> >::type const &
-get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_place<I> )
+get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, nonstd_lite_in_place_index_t(I) = in_place<I> )
 {
     if ( I != v.index() )
     {
@@ -1249,28 +1249,28 @@ get( variant<T0, T1, T2, T3, T4, T5, T6> const & v, in_place_index_t(I) = in_pla
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename detail::add_pointer<T>::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_type_t(T) = in_place<T> )
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, nonstd_lite_in_place_type_t(T) = in_place<T> )
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename detail::add_pointer<const T>::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_type_t(T) = in_place<T>)
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, nonstd_lite_in_place_type_t(T) = in_place<T>)
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, in_place_index_t(I) = in_place<I> )
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> * pv, nonstd_lite_in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &get<I>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 inline typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, in_place_index_t(I) = in_place<I> )
+get_if( variant<T0, T1, T2, T3, T4, T5, T6> const * pv, nonstd_lite_in_place_index_t(I) = in_place<I> )
 {
     return ( pv->index() == I ) ? &get<I>( *pv )  : variant_nullptr;
 }
