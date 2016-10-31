@@ -8,11 +8,11 @@ cmake_minimum_required( VERSION 2.8.12 )
 
 project( test )
 
-include_directories  ( "${PROJECT_SOURCE_DIR}/../include/nonstd" )
+include_directories( "${PROJECT_SOURCE_DIR}/../include/nonstd" )
 
 set( SOURCES variant-lite.t.cpp variant.t.cpp optional.t.cpp )
 
-add_executable (   variant-lite.t ${SOURCES} )
+add_executable( variant-lite.t ${SOURCES} )
 
 set( HAS_STD_FLAGS  FALSE )
 set( HAS_CPP11_FLAG FALSE )
@@ -42,6 +42,25 @@ elseif( ${CMAKE_CXX_COMPILER_ID} MATCHES GNU OR
             if( NOT GCC_VERSION VERSION_LESS 5.0.0 )
                 set( HAS_CPP17_FLAG TRUE )
             endif()
+        endif()
+    endif()
+
+    # Clang: available -std flags depends on version
+    if( ${CMAKE_CXX_COMPILER_ID} MATCHES Clang )
+        execute_process(
+            COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE CLANG_VERSION)
+
+        if( CLANG_VERSION )
+            if( NOT CLANG_VERSION VERSION_LESS 3.3.0 )
+                set( HAS_CPP11_FLAG TRUE )
+            endif()
+# clang 3.5.0 -std=c++14: no member named 'gets' in the global namespace: using ::gets;
+#            if( NOT CLANG_VERSION VERSION_LESS 3.4.0 )
+#                set( HAS_CPP14_FLAG TRUE )
+#            endif()
+#            if( NOT CLANG_VERSION VERSION_LESS 3.5.0 )
+#                set( HAS_CPP17_FLAG TRUE )
+#            endif()
         endif()
     endif()
 
