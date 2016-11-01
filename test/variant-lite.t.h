@@ -25,7 +25,7 @@ namespace nonstd { namespace variants {
 // see  http://stackoverflow.com/a/10651752/437272
 
 template< class  T >
-inline std::ostream & operator<<( std::ostream & os, nonstd::detail::TX<T> const & v )
+inline std::ostream & operator<<( std::ostream & os, nonstd::variants::detail::TX<T> const & v )
 {
     return os << "[variant:tx]";
 }
