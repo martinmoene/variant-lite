@@ -107,15 +107,15 @@ Synopsis
 | Construction |&nbsp;| variant()                                    | default-construct first type      |
 | &nbsp;       |&nbsp;| variant( Tx const & x )                      | copy-construct with value type Tx |
 | &nbsp;       |C++11 | variant( Tx && x )                           | move-construct with value type Tx |
-| &nbsp;       |&nbsp;| variant(variant const & other)               | copy-construct from other variant |
-| &nbsp;       |C++11 | variant( variant && other )                  | move-construct from other variant |
+| &nbsp;       |&nbsp;| variant( variant const & rhs )               | copy-construct from other variant |
+| &nbsp;       |C++11 | variant( variant && rhs )                    | move-construct from other variant |
 | &nbsp;       |C++11 | template< class T, class... Args ><br>explicit variant( in_place_type_t(T), Args&&... args) | in-place-construct type T |
 | &nbsp;       |C++11 | template< class T, class U, class... Args ><br>explicit variant( in_place_type_t(T),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type T|
 | &nbsp;       |C++11 | template< std::size_t I, class... Args ><br>explicit variant( in_place_index_t(I), Args&&... args ) | in-place-construct type at index I | 
 | &nbsp;       |C++11 | template< size_t I, class U, class... Args><br>explicit variant( in_place_index_t(I),<br>&emsp;std::initializer_list&lt;U> il, Args&&... args ) | in-place-construct type at index I|
 | Destruction  |&nbsp;| ~variant()                                   | destruct current content |
 | Assignment   |&nbsp;| variant & operator=( variant const & rhs )   | copy-assign from other |
-| &nbsp;       |C++11 | variant & operator=( variant && other )      | move-assign from other |
+| &nbsp;       |C++11 | variant & operator=( variant && rhs )        | move-assign from other |
 | &nbsp;       |C++11 | template< class Tx ><br>variant & operator=( Tx && t ) | move-assign from value |
 | &nbsp;       |< C++11 | template< class Tx ><br>variant & operator=( Tx const & t ) | copy-assign from value;<br>non-standard |
 | State        |&nbsp;| std::size_t index() const                    | index of current content's type |
