@@ -189,13 +189,13 @@
 #endif
 
 //
-// in_place: code duplicated in any-lite and optional-lite (todo):
+// in_place: code duplicated in any-lite, optional-lite, variant-lite:
 //
 
 #if ! nonstd_lite_HAVE_IN_PLACE_TYPES
 
-namespace nonstd { 
-    
+namespace nonstd {
+
 namespace detail {
 
 template< class T >
@@ -799,6 +799,7 @@ static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
 
 class bad_variant_access : public std::exception
 {
+public:
 #if variant_CPP11_OR_GREATER
     virtual const char* what() const variant_noexcept
 #else
@@ -927,7 +928,7 @@ public:
     variant & operator=( T4 const & t4 ) { return copy_assign_value<T4,4>( t4 ); }
     variant & operator=( T5 const & t5 ) { return copy_assign_value<T5,5>( t5 ); }
     variant & operator=( T6 const & t6 ) { return copy_assign_value<T6,6>( t6 ); }
-#endif 
+#endif
 
     std::size_t index() const
     {
@@ -965,7 +966,7 @@ public:
         this->emplace< type_at_t<I> >( std::forward<Args>(args)... );
     }
 
-    template< size_t I, class U, class... Args, 
+    template< size_t I, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
@@ -1095,9 +1096,9 @@ private:
         else
         {
             // alas exception safety with pre-C++11 needs an extra copy:
-            
-            variant tmp( rhs );            
-            helper_type::destroy( type_index, ptr() );            
+
+            variant tmp( rhs );
+            helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
 #if variant_CPP11_OR_GREATER
             type_index = helper_type::move( rhs.type_index, tmp.ptr(), ptr() );
@@ -1137,37 +1138,37 @@ private:
     template< class T, std::size_t I >
     variant & move_assign_value( T && value )
     {
-        if( index() == I ) 
+        if( index() == I )
         {
             *as<T>() = std::forward<T>( value );
         }
         else
         {
-            helper_type::destroy( type_index, ptr() ); 
+            helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-            new( ptr() ) T( std::forward<T>( value ) ); 
-            type_index = I; 
+            new( ptr() ) T( std::forward<T>( value ) );
+            type_index = I;
         }
-        return *this; 
+        return *this;
     }
 #else
     template< class T, std::size_t I >
     variant & copy_assign_value( T const & value )
     {
-        if( index() == I ) 
+        if( index() == I )
         {
             *as<T>() = value;
         }
         else
         {
-            helper_type::destroy( type_index, ptr() ); 
+            helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-            new( ptr() ) T( value ); 
-            type_index = I; 
+            new( ptr() ) T( value );
+            type_index = I;
         }
-        return *this; 
+        return *this;
     }
-    
+
 #endif // variant_CPP11_OR_GREATER
 
     void swap_value( std::size_t index, variant & rhs )
