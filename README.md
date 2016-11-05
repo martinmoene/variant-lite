@@ -52,7 +52,7 @@ In a nutshell
 -------------
 **variant lite** is a single-file header-only library to represent a type-safe union. The library aims to provide a [C++17-like variant](http://en.cppreference.com/w/cpp/utility/variant) for use with C++98 and later.
 
-**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).
+**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite) and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
 
 **Limitations of variant lite** are the maximum of seven alternative types that all must have a different type. Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. The visitor only takes a single variant and can only return a variant. *variant lite* does not provide allocator-extended constructors.
 
