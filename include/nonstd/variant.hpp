@@ -1183,13 +1183,13 @@ private:
         using std::swap;
         switch( index )
         {
-            case 0: swap( this->template get<0>(), rhs.template get<0>() ); break;
-            case 1: swap( this->template get<1>(), rhs.template get<1>() ); break;
-            case 2: swap( this->template get<2>(), rhs.template get<2>() ); break;
-            case 3: swap( this->template get<3>(), rhs.template get<3>() ); break;
-            case 4: swap( this->template get<4>(), rhs.template get<4>() ); break;
-            case 5: swap( this->template get<5>(), rhs.template get<5>() ); break;
-            case 6: swap( this->template get<6>(), rhs.template get<6>() ); break;
+            case 0: swap( this->get<0>(), rhs.get<0>() ); break;
+            case 1: swap( this->get<1>(), rhs.get<1>() ); break;
+            case 2: swap( this->get<2>(), rhs.get<2>() ); break;
+            case 3: swap( this->get<3>(), rhs.get<3>() ); break;
+            case 4: swap( this->get<4>(), rhs.get<4>() ); break;
+            case 5: swap( this->get<5>(), rhs.get<5>() ); break;
+            case 6: swap( this->get<6>(), rhs.get<6>() ); break;
         }
     }
 
