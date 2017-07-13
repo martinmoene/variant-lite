@@ -97,6 +97,7 @@
 # define variant_HAVE_IS_DEFAULT  1
 # define variant_HAVE_IS_DELETE  1
 # define variant_HAVE_NOEXCEPT  1
+# define variant_HAVE_OVERRIDE  1
 #endif
 
 // Presence of C++14 language features:
@@ -174,6 +175,12 @@
 # define variant_nullptr nullptr
 #else
 # define variant_nullptr NULL
+#endif
+
+#if variant_HAVE_OVERRIDE
+# define variant_override override
+#else
+# define variant_override /*override*/
 #endif
 
 // additional includes:
@@ -801,7 +808,7 @@ class bad_variant_access : public std::exception
 {
 public:
 #if variant_CPP11_OR_GREATER
-    virtual const char* what() const variant_noexcept
+    virtual const char* what() const variant_noexcept variant_override
 #else
     virtual const char* what() const throw()
 #endif
