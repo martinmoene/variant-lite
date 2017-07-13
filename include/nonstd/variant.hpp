@@ -970,14 +970,14 @@ public:
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, Args...>::value>::type >
     void emplace( Args&&... args )
     {
-        this->emplace< type_at_t<I> >( std::forward<Args>(args)... );
+        this->template emplace< type_at_t<I> >( std::forward<Args>(args)... );
     }
 
     template< size_t I, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
     void emplace( std::initializer_list<U> il, Args&&... args )
     {
-        this->emplace< type_at_t<I> >( il, std::forward<Args>(args)... );
+        this->template emplace< type_at_t<I> >( il, std::forward<Args>(args)... );
     }
 
 #endif // variant_CPP11_OR_GREATER
