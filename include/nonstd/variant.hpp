@@ -1435,9 +1435,8 @@ using namespace variants;
 namespace std {
 
 template<>
-class hash< nonstd::monostate >
+struct hash< nonstd::monostate >
 {
-public:
     std::size_t operator()( nonstd::monostate ) const variant_noexcept
     {
         return 42;
@@ -1445,9 +1444,8 @@ public:
 };
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
-class hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6> >
+struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6> >
 {
-public:
     std::size_t operator()( nonstd::variant<T0, T1, T2, T3, T4, T5, T6> const & v ) const variant_noexcept
     {
         return nonstd::variants::detail::hash( v );
