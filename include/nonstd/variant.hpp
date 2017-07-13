@@ -805,7 +805,7 @@ public:
 #else
     virtual const char* what() const throw()
 #endif
-	{
+    {
         return "bad variant access";
     }
 };
