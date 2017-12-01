@@ -24,7 +24,7 @@
 #include <stdexcept>
 #include <utility>
 
-#define  variant_lite_VERSION "0.0.0"
+#define  variant_lite_VERSION "0.1.0"
 
 // variant-lite configuration:
 
