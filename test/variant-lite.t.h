@@ -19,6 +19,20 @@ using namespace nonstd;
 
 extern lest::tests & specification();
 
+#if variant_HAVE_STD_VARIANT
+
+namespace lest {
+
+template< class...  Types >
+inline std::ostream & operator<<( std::ostream & os, nonstd::variant<Types...> const & v )
+{
+    return os << "[variant:?]";
+}
+
+}
+
+#else  // variant_HAVE_STD_VARIANT
+
 namespace nonstd { namespace variants {
 
 // use oparator<< instead of to_string() overload;
@@ -55,6 +69,8 @@ namespace lest {
 using ::nonstd::variants::operator<<;
 
 } // namespace lest
+
+#endif // variant_HAVE_STD_VARIANT
 
 #endif // TEST_VARIANT_LITE_H_INCLUDED
 

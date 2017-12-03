@@ -18,13 +18,7 @@
 #ifndef NONSTD_VARIANT_LITE_HPP
 #define NONSTD_VARIANT_LITE_HPP
 
-#include <cstddef>
-#include <limits>
-#include <new>
-#include <stdexcept>
-#include <utility>
-
-#define  variant_lite_VERSION "0.1.0"
+#define  variant_lite_VERSION "0.2.0"
 
 // variant-lite configuration:
 
@@ -35,6 +29,73 @@
 #ifndef  variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO
 # define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
 #endif
+
+// Compiler detection:
+
+#define variant_CPP11_OR_GREATER  ( __cplusplus >= 201103L )
+#define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L )
+#define variant_CPP17_OR_GREATER  ( __cplusplus >= 201703L )
+
+// use C++17 std::variant if available:
+
+#if defined( __has_include )
+# define variant_HAS_INCLUDE( arg )  __has_include( arg )
+#else
+# define variant_HAS_INCLUDE( arg )  0
+#endif
+
+#if variant_HAS_INCLUDE( <variant> ) && variant_CPP17_OR_GREATER
+
+#define variant_HAVE_STD_VARIANT  1
+
+#include <variant>
+
+#if ! variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
+# define variant_size_V(T)  nonstd::variant_size<T>::value
+#endif
+
+#if ! variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO
+# define variant_alternative_T(I,T)  typename nonstd::variant_alternative<I,T >::type
+#endif
+
+namespace nonstd {
+
+    using std::variant;
+    using std::monostate;
+    using std::bad_variant_access;
+    using std::variant_size;
+    using std::variant_size_v;
+    using std::variant_alternative;
+    using std::variant_alternative_t;
+    using std::hash;
+
+    using std::in_place;
+    using std::in_place_type;
+    using std::in_place_index;
+    using std::in_place_t;
+    using std::in_place_type_t;
+    using std::in_place_index_t;
+
+    using std::visit;
+    using std::holds_alternative;
+    using std::get;
+    using std::get_if;
+    using std::operator==;
+    using std::operator!=;
+    using std::operator<;
+    using std::operator<=;
+    using std::operator>;
+    using std::operator>=;
+    using std::swap;
+}
+
+#else // C++17 std::variant
+
+#include <cstddef>
+#include <limits>
+#include <new>
+#include <stdexcept>
+#include <utility>
 
 // variant-lite alignment configuration:
 
@@ -49,12 +110,6 @@
 #ifndef  variant_CONFIG_ALIGN_AS_FALLBACK
 # define variant_CONFIG_ALIGN_AS_FALLBACK  double
 #endif
-
-// Compiler detection (C++17 is speculative):
-
-#define variant_CPP11_OR_GREATER  ( __cplusplus >= 201103L )
-#define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L )
-#define variant_CPP17_OR_GREATER  ( __cplusplus >= 201700L )
 
 // half-open range [lo..hi):
 #define variant_BETWEEN( v, lo, hi ) ( lo <= v && v < hi )
@@ -223,6 +278,18 @@ inline in_place_t in_place( detail::in_place_type_tag<T> = detail::in_place_type
 
 template< std::size_t I >
 inline in_place_t in_place( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
+{
+    return in_place_t();
+}
+
+template< class T >
+inline in_place_t in_place_type( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+{
+    return in_place_t();
+}
+
+template< std::size_t I >
+inline in_place_t in_place_index( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
 {
     return in_place_t();
 }
@@ -1459,5 +1526,7 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6> >
 #if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 10, 14 )
 # pragma warning( pop )
 #endif
+
+#endif // have C++17 std::variant
 
 #endif // NONSTD_VARIANT_LITE_HPP
