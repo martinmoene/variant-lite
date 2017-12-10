@@ -12,7 +12,7 @@
 - [Features](#features)
 - [Reported to work with](#reported-to-work-with)
 - [Building the tests](#building-the-tests)
-- [Other variant implementations](#other-variant-implementations)
+- [Other implementations of variant](#other-implementations-of-variant)
 - [Notes and references](#notes-and-references)
 - [Appendix](#appendix)
 
@@ -279,8 +279,9 @@ The class template `alignment_of<>` is gleaned from [Boost.TypeTraits, alignment
 For more information on constructed unions and alignment, see [10-14].
 
 
-Other variant implementations
------------------------------
+Other implementations of variant
+--------------------------------
+- Isabella Muerte. [MNMLSTC Core](https://github.com/mnmlstc/core) (C++11).
 - Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
 - Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union.](https://github.com/eggs-cpp/variant).
 - Mapbox. [C++11/C++14 Variant](https://github.com/mapbox/variant).
