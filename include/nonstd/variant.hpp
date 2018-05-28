@@ -32,9 +32,15 @@
 
 // Compiler detection:
 
-#define variant_CPP11_OR_GREATER  ( __cplusplus >= 201103L )
-#define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L )
-#define variant_CPP17_OR_GREATER  ( __cplusplus >= 201703L )
+#ifdef _MSVC_LANG
+# define variant_MSVC_LANG  _MSVC_LANG
+#else
+# define variant_MSVC_LANG  0
+#endif
+
+#define variant_CPP11_OR_GREATER  ( __cplusplus >= 201103L || variant_MSVC_LANG >= 201103L )
+#define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L || variant_MSVC_LANG >= 201703L )
+#define variant_CPP17_OR_GREATER  ( __cplusplus >= 201703L || variant_MSVC_LANG >= 201703L )
 
 // use C++17 std::variant if available:
 
