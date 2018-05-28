@@ -93,6 +93,9 @@ namespace nonstd {
     using std::operator>;
     using std::operator>=;
     using std::swap;
+
+    constexpr auto variant_npos = std::variant_npos;
+
 }
 
 #else // C++17 std::variant
