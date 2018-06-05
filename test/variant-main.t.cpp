@@ -182,15 +182,15 @@ int main( int argc, char * argv[] )
 }
 
 #if 0
-g++            -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
-g++ -std=c++98 -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
-g++ -std=c++03 -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
-g++ -std=c++0x -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
-g++ -std=c++11 -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
-g++ -std=c++14 -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
-g++ -std=c++17 -I../include/nonstd -o variant-lite.t.exe variant-lite.t.cpp && variant-lite.t.exe --pass
+g++            -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
+g++ -std=c++98 -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
+g++ -std=c++03 -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
+g++ -std=c++0x -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
+g++ -std=c++11 -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
+g++ -std=c++14 -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
+g++ -std=c++17 -I../include/nonstd -o variant-main.t.exe variant-main.t.cpp && variant-main.t.exe --pass
 
-cl -EHsc -I../include/nonstd variant-lite.t.cpp && variant-lite.t.exe --pass
+cl -EHsc -I../include/nonstd variant-main.t.cpp && variant-main.t.exe --pass
 #endif
 
 // end of file
