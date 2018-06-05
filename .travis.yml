@@ -104,6 +104,11 @@ matrix:
           packages: ["clang-6.0", "g++-7", "python3-pip", "lcov"]
           sources: *apt_sources
 
+  allow_failures:
+    # std::variant has bug in libstdc++:
+    - env: COMPILER=clang++-5.0
+    - env: COMPILER=clang++-6.0
+        
 script:
   - export CXX=$COMPILER
   - mkdir build && cd build
