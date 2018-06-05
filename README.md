@@ -151,8 +151,8 @@ Synopsis
 | **Relational operators**  |&nbsp;| &nbsp;   | 
 | ==                        |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
 | !=                        |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
-| <                         |&nbsp;| template<...><br>bool **operator< **( variant<...> const & v, variant<...> const & w ) |
-| >                         |&nbsp;| template<...><br>bool **operator> **( variant<...> const & v, variant<...> const & w ) |
+| <                         |&nbsp;| template<...><br>bool **operator<**( variant<...> const & v, variant<...> const & w ) |
+| >                         |&nbsp;| template<...><br>bool **operator>**( variant<...> const & v, variant<...> const & w ) |
 | <=                        |&nbsp;| template<...><br>bool **operator<=**( variant<...> const & v, variant<...> const & w ) |
 | >=                        |&nbsp;| template<...><br>bool **operator>=**( variant<...> const & v, variant<...> const & w ) |
 | **Content**               |&nbsp;| &nbsp;   |
