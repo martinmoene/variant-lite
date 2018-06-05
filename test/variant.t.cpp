@@ -5,7 +5,7 @@
 // Distributed under the Boost Software License, Version 1.0. 
 // (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "variant-lite.t.h"
+#include "variant-main.t.hpp"
 
 namespace {
 
@@ -1002,14 +1002,14 @@ CASE( "variant_size<>: Allows to obtain number of element types (non-standard: m
     typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
 //  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
 
-    EXPECT( 1 == variant_size<var1>::value );
-    EXPECT( 2 == variant_size<var2>::value );
-    EXPECT( 3 == variant_size<var3>::value );
-    EXPECT( 4 == variant_size<var4>::value );
-    EXPECT( 5 == variant_size<var5>::value );
-    EXPECT( 6 == variant_size<var6>::value );
-    EXPECT( 7 == variant_size<var7>::value );
-//  EXPECT( 8 == variant_size<var8>::value );
+    EXPECT( 1u == variant_size<var1>::value );
+    EXPECT( 2u == variant_size<var2>::value );
+    EXPECT( 3u == variant_size<var3>::value );
+    EXPECT( 4u == variant_size<var4>::value );
+    EXPECT( 5u == variant_size<var5>::value );
+    EXPECT( 6u == variant_size<var6>::value );
+    EXPECT( 7u == variant_size<var7>::value );
+//  EXPECT( 8u == variant_size<var8>::value );
 }
 
 CASE( "variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)" )
@@ -1048,14 +1048,14 @@ CASE( "variant_size_V(): Allows to obtain number of element types (non-standard:
     typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
 //  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
 
-    EXPECT( 1 == variant_size_V( var1 ) );
-    EXPECT( 2 == variant_size_V( var2 ) );
-    EXPECT( 3 == variant_size_V( var3 ) );
-    EXPECT( 4 == variant_size_V( var4 ) );
-    EXPECT( 5 == variant_size_V( var5 ) );
-    EXPECT( 6 == variant_size_V( var6 ) );
-    EXPECT( 7 == variant_size_V( var7 ) );
-//  EXPECT( 8 == variant_size_V( var8 ) );
+    EXPECT( 1u == variant_size_V( var1 ) );
+    EXPECT( 2u == variant_size_V( var2 ) );
+    EXPECT( 3u == variant_size_V( var3 ) );
+    EXPECT( 4u == variant_size_V( var4 ) );
+    EXPECT( 5u == variant_size_V( var5 ) );
+    EXPECT( 6u == variant_size_V( var6 ) );
+    EXPECT( 7u == variant_size_V( var7 ) );
+//  EXPECT( 8u == variant_size_V( var8 ) );
 }
 
 CASE( "variant_alternative<>: Allows to select type by index" )

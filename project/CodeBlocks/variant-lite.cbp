@@ -44,8 +44,8 @@
 		<Unit filename="../../test/t.bat" />
 		<Unit filename="../../test/tg-all.bat" />
 		<Unit filename="../../test/tg.bat" />
-		<Unit filename="../../test/variant-lite.t.cpp" />
-		<Unit filename="../../test/variant-lite.t.h" />
+		<Unit filename="../../test/variant-main.t.cpp" />
+		<Unit filename="../../test/variant-main.t.hpp" />
 		<Unit filename="../../test/variant.t.cpp" />
 		<Extensions>
 			<code_completion />
