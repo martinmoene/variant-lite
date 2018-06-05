@@ -829,7 +829,7 @@ struct variant_size; /* undefined */
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6 >
 struct variant_size< variant<T0, T1, T2, T3, T4, T5, T6> >
 {
-    enum { value = detail::typelist_size< variant_TL7(T0, T1, T2, T3, T4, T5, T6) >::value };
+    enum _ { value = detail::typelist_size< variant_TL7(T0, T1, T2, T3, T4, T5, T6) >::value };
 };
 
 #if variant_CPP14_OR_GREATER
