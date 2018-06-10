@@ -12,7 +12,7 @@ cmake_minimum_required( VERSION 3.0 )
 option( VARIANT_LITE_OPT_BUILD_TESTS    "Build and perform variant-lite tests" ON )
 option( VARIANT_LITE_OPT_BUILD_EXAMPLES "Build variant-lite examples" OFF )
 
-project( variant_lite )
+project( variant_lite LANGUAGES CXX )
 
 set( package_name "variant-lite" )
 
