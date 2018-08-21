@@ -2,7 +2,7 @@
 //
 // https://github.com/martinmoene/variant-lite
 //
-// Distributed under the Boost Software License, Version 1.0. 
+// Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "variant-main.t.hpp"
@@ -848,17 +848,42 @@ struct Doubler
 };
 }
 
-CASE( "variant: Allows to visit contents (non-standard: always returning variant)" )
+struct GenericVisitor1
+{
+    std::string operator()(int val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    std::string operator()(const std::string& val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+};
+#if variant_CPP11_OR_GREATER
+#else
+struct Cpp03Visitor
+#endif
+
+CASE( "variant: Allows to visit contents (args: 1)" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
     var_t vs = std::string("hello");
-
-//    var_t ri = visit( Doubler(), vi );
-//    var_t rs = visit( Doubler(), vs );
-
-//    EXPECT( ri == var_t( 14 ) );
-//    EXPECT( rs == var_t( std::string("hellohello") ) );
+#if variant_CPP11_OR_GREATER
+    std::string ri = visit(GenericVisitor1(), vi);
+    std::string rs = visit(GenericVisitor1(), vs);
+    EXPECT( ri == "7" );
+    EXPECT( rs == "hello" );
+#else
+    std::string ri = visit<std::string>(GenericVisitor(), vi);
+    std::string rs = visit<std::string>(GenericVisitor(), vs);
+    EXPECT( ri == "7" );
+    EXPECT( rs == "hello" );
+#endif
 }
 
 CASE( "variant: Allows to check for content by type" )
