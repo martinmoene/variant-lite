@@ -792,7 +792,7 @@ struct helper
         case 13: as<T13>( data )->~T13(); break;
         case 14: as<T14>( data )->~T14(); break;
         case 15: as<T15>( data )->~T15(); break;
-        
+
         }
     }
 
@@ -835,7 +835,7 @@ struct helper
         case 13: new( to_value ) T13( std::forward<T13>( *as<T13>( from_value ) ) ); break;
         case 14: new( to_value ) T14( std::forward<T14>( *as<T14>( from_value ) ) ); break;
         case 15: new( to_value ) T15( std::forward<T15>( *as<T15>( from_value ) ) ); break;
-        
+
         }
         return to_index_t( from_index );
     }
@@ -861,7 +861,7 @@ struct helper
         case 13: new( to_value ) T13( *as<T13>( from_value ) ); break;
         case 14: new( to_value ) T14( *as<T14>( from_value ) ); break;
         case 15: new( to_value ) T15( *as<T15>( from_value ) ); break;
-        
+
         }
         return to_index_t( from_index );
     }
@@ -991,7 +991,7 @@ public:
     variant( T13 const & t13 ) : type_index( 13 ) { new( ptr() ) T13( t13 ); }
     variant( T14 const & t14 ) : type_index( 14 ) { new( ptr() ) T14( t14 ); }
     variant( T15 const & t15 ) : type_index( 15 ) { new( ptr() ) T15( t15 ); }
-    
+
 
 #if variant_CPP11_OR_GREATER
     variant( T0 && t0 ) : type_index( 0 ) { new( ptr() ) T0( std::move(t0) ); }
@@ -1010,7 +1010,7 @@ public:
     variant( T13 && t13 ) : type_index( 13 ) { new( ptr() ) T13( std::move(t13) ); }
     variant( T14 && t14 ) : type_index( 14 ) { new( ptr() ) T14( std::move(t14) ); }
     variant( T15 && t15 ) : type_index( 15 ) { new( ptr() ) T15( std::move(t15) ); }
-    
+
 #endif
 
     variant(variant const & rhs)
@@ -1097,7 +1097,7 @@ public:
     variant & operator=( T13 &&      t13 ) { return move_assign_value<T13,13>( std::forward<T13>( t13 ) ); }
     variant & operator=( T14 &&      t14 ) { return move_assign_value<T14,14>( std::forward<T14>( t14 ) ); }
     variant & operator=( T15 &&      t15 ) { return move_assign_value<T15,15>( std::forward<T15>( t15 ) ); }
-    
+
 #else
     variant & operator=( T0 const & t0 ) { return copy_assign_value<T0,0>( t0 ); }
     variant & operator=( T1 const & t1 ) { return copy_assign_value<T1,1>( t1 ); }
@@ -1115,7 +1115,7 @@ public:
     variant & operator=( T13 const & t13 ) { return copy_assign_value<T13,13>( t13 ); }
     variant & operator=( T14 const & t14 ) { return copy_assign_value<T14,14>( t14 ); }
     variant & operator=( T15 const & t15 ) { return copy_assign_value<T15,15>( t15 ); }
-    
+
 #endif
 
     std::size_t index() const
@@ -1380,7 +1380,7 @@ private:
             case 13: swap( this->get<13>(), rhs.get<13>() ); break;
             case 14: swap( this->get<14>(), rhs.get<14>() ); break;
             case 15: swap( this->get<15>(), rhs.get<15>() ); break;
-            
+
         }
     }
 
@@ -1500,6 +1500,75 @@ inline void swap(
 // The following visit is restricted  with respect to the standard.
 // It uses the common idiom is to return anrhs variant:
 
+namespace detail
+{
+
+template<typename R, typename VT>
+struct VisitorApplicatorImpl
+{
+    template<typename Visitor, typename T>
+    static R apply(Visitor&& v, T&& arg)
+    {
+        return v(arg);
+    }
+};
+
+template<typename R, typename VT>
+struct VisitorApplicatorImpl<R, TX<VT>>
+{
+    template<typename Visitor, typename T>
+    static R apply(Visitor&&, T&&)
+    {
+        return R();
+    }
+};
+
+template<size_t NumVars, typename R, typename Visitor, typename ... V>
+struct VisitorApplicator;
+
+template<typename R, typename Visitor, typename V1>
+struct VisitorApplicator<1, R, Visitor, V1>
+{
+    template<typename Visitor_, typename V1_>
+    static R apply(Visitor_&& v, V1_&& arg)
+    {
+        switch( arg.index() )
+        {
+            case 0: return apply_visitor<0>( std::forward<Visitor_>(v), std::forward<V1_>(arg) );
+            case 1: return apply_visitor<1>( std::forward<Visitor_>(v), std::forward<V1_>(arg) );
+
+            default: return R();
+        }
+    }
+
+    template<size_t Idx, typename Visitor_, typename V1_>
+    static R apply_visitor(Visitor_&& v, V1_&& arg)
+    {
+        typedef typename variant_alternative<Idx, typename std::decay<V1_>::type>::type value_type;
+        return VisitorApplicatorImpl<R, value_type>::apply(std::forward<Visitor_>(v), get<Idx>(arg));
+    }
+};
+
+template<size_t NumVars, typename Visitor, typename ... V>
+struct VisitorImpl
+{
+    typedef decltype(std::declval<Visitor>()(get<0>(std::declval<V>())...)) result_type;
+    typedef VisitorApplicator<NumVars, result_type, Visitor, V...> applicator_type;
+};
+} // detail
+
+#if variant_CPP11_OR_GREATER
+template<typename Visitor, typename ... V>
+inline auto visit(Visitor&& v, V&& ... vars) -> typename detail::VisitorImpl<sizeof ... (V), Visitor, V... > ::result_type
+{
+    typedef detail::VisitorImpl<sizeof ... (V), Visitor, V... > impl_type;
+    // typedef typename detail::VisitorImpl<sizeof ... (V), Visitor, V... > ::result_type result_type;
+    return impl_type::applicator_type::apply(std::forward<Visitor>(v), std::forward<V>(vars)...);
+}
+#else
+#endif
+
+#if 0
 template< class Visitor, class Variant >
 inline Variant visit( Visitor const & vis, Variant const & v )
 {
@@ -1526,10 +1595,11 @@ inline Variant visit( Visitor const & vis, Variant const & v )
         case 13: return vis( get<13>( v ) );
         case 14: return vis( get<14>( v ) );
         case 15: return vis( get<15>( v ) );
-        
+
         default: return Variant();
     }
 }
+#endif
 
 namespace detail {
 
@@ -1556,7 +1626,7 @@ struct Comparator
             case 13: return get<13>( v ) == get<13>( w );
             case 14: return get<14>( v ) == get<14>( w );
             case 15: return get<15>( v ) == get<15>( w );
-            
+
             default: return false;
         }
     }
@@ -1581,7 +1651,7 @@ struct Comparator
             case 13: return get<13>( v ) < get<13>( w );
             case 14: return get<14>( v ) < get<14>( w );
             case 15: return get<15>( v ) < get<15>( w );
-            
+
             default: return false;
         }
     }
