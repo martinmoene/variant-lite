@@ -1494,12 +1494,6 @@ inline void swap(
     a.swap( b );
 }
 
-// template <class Visitor, class... Variants>
-// visit( Visitor&& vis, Variants&&... vars );
-
-// The following visit is restricted  with respect to the standard.
-// It uses the common idiom is to return anrhs variant:
-
 namespace detail
 {
 
@@ -1507,54 +1501,166 @@ template<typename R, typename VT>
 struct VisitorApplicatorImpl
 {
     template<typename Visitor, typename T>
-    static R apply(Visitor&& v, T&& arg)
+    static R apply(const Visitor& v, const T& arg)
     {
         return v(arg);
     }
 };
 
 template<typename R, typename VT>
-struct VisitorApplicatorImpl<R, TX<VT>>
+struct VisitorApplicatorImpl<R, TX<VT> >
 {
     template<typename Visitor, typename T>
-    static R apply(Visitor&&, T&&)
+    static R apply(const Visitor&, T)
     {
         return R();
     }
 };
 
-template<size_t NumVars, typename R, typename Visitor, typename ... V>
+template<typename R>
 struct VisitorApplicator;
 
 template<typename R, typename Visitor, typename V1>
-struct VisitorApplicator<1, R, Visitor, V1>
+struct VisitorUnwrapper;
+
+#if variant_CPP11_OR_GREATER
+template<size_t NumVars, typename R, typename Visitor, typename ... T>
+#else
+template<size_t NumVars, typename R, typename Visitor, typename T1, typename T2 = S0, typename T3 = S0>
+#endif
+struct TypedVisitorUnwrapper;
+
+template<typename R, typename Visitor, typename T2>
+struct TypedVisitorUnwrapper<2, R, Visitor, T2>
 {
-    template<typename Visitor_, typename V1_>
-    static R apply(Visitor_&& v, V1_&& arg)
+    const Visitor& visitor;
+    const T2& val2;
+    TypedVisitorUnwrapper(const Visitor& visitor_, const T2& val2_)
+        : visitor(visitor_)
+        , val2(val2_)
+    {
+    }
+    
+    template<typename T>
+    R operator()(const T& val1) const
+    {
+        return visitor(val1, val2);
+    }
+};
+
+template<typename R, typename Visitor, typename T2, typename T3>
+struct TypedVisitorUnwrapper<3, R, Visitor, T2, T3>
+{
+    const Visitor& visitor;
+    const T2& val2;
+    const T3& val3;
+    TypedVisitorUnwrapper(const Visitor& visitor_, const T2& val2_, const T3& val3_)
+        : visitor(visitor_)
+        , val2(val2_)
+        , val3(val3_)
+    {
+    }
+    
+    template<typename T>
+    R operator()(const T& val1) const
+    {
+        return visitor(val1, val2, val3);
+    }
+};
+
+template<typename R, typename Visitor, typename V2>
+struct VisitorUnwrapper
+{
+    const Visitor& visitor;
+    const V2& r;
+    
+    VisitorUnwrapper(const Visitor& visitor_, const V2& r_)
+        : visitor(visitor_)
+        , r(r_)
+    {
+    }
+    
+    template<typename T1>
+    R operator()(const T1& val1) const
+    {
+        typedef TypedVisitorUnwrapper<2, R, Visitor, T1> visitor_type;
+        return VisitorApplicator<R>::apply(visitor_type(visitor, val1), r);
+    }
+    
+    template<typename T1, typename T2>
+    R operator()(const T1& val1, const T2& val2) const
+    {
+        typedef TypedVisitorUnwrapper<3, R, Visitor, T1, T2> visitor_type;
+        return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2), r);
+    }
+};
+
+
+template<typename R>
+struct VisitorApplicator
+{
+    template<typename Visitor, typename V1>
+    static R apply(const Visitor& v, const V1& arg)
     {
         switch( arg.index() )
         {
-            case 0: return apply_visitor<0>( std::forward<Visitor_>(v), std::forward<V1_>(arg) );
-            case 1: return apply_visitor<1>( std::forward<Visitor_>(v), std::forward<V1_>(arg) );
+            case 0: return apply_visitor<0>(v, arg);
+            case 1: return apply_visitor<1>(v, arg);
+            case 2: return apply_visitor<2>(v, arg);
+            case 3: return apply_visitor<3>(v, arg);
+            case 4: return apply_visitor<4>(v, arg);
 
             default: return R();
         }
     }
 
-    template<size_t Idx, typename Visitor_, typename V1_>
-    static R apply_visitor(Visitor_&& v, V1_&& arg)
+    template<size_t Idx, typename Visitor, typename V1>
+    static R apply_visitor(const Visitor& v, const V1& arg)
     {
-        typedef typename variant_alternative<Idx, typename std::decay<V1_>::type>::type value_type;
-        return VisitorApplicatorImpl<R, value_type>::apply(std::forward<Visitor_>(v), get<Idx>(arg));
+        
+#if variant_CPP11_OR_GREATER
+        typedef typename variant_alternative<Idx, typename std::decay<V1>::type>::type value_type;
+#else
+        typedef typename variant_alternative<Idx, V1>::type value_type;
+#endif
+        return VisitorApplicatorImpl<R, value_type>::apply(v, get<Idx>(arg));
     }
+
+#if variant_CPP11_OR_GREATER
+    template<typename Visitor, typename V1, typename V2, typename ... V>
+    static R apply(const Visitor& v, const V1& arg1, const V2& arg2, const V ... args)
+    {
+        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
+        Unwrapper unwrapper(v, arg1);
+        return apply(unwrapper, arg2, args ...);
+    }
+#else
+    template<typename Visitor, typename V1, typename V2>
+    static R apply(const Visitor& v, const V1& arg1, const V2& arg2)
+    {
+        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
+        Unwrapper unwrapper(v, arg1);
+        return apply(unwrapper, arg2);
+    }
+    
+    template<typename Visitor, typename V1, typename V2, typename V3>
+    static R apply(const Visitor& v, const V1& arg1, const V2& arg2, const V3& arg3)
+    {
+        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
+        Unwrapper unwrapper(v, arg1);
+        return apply(unwrapper, arg2, arg3);
+    }
+#endif
 };
 
+#if variant_CPP11_OR_GREATER
 template<size_t NumVars, typename Visitor, typename ... V>
 struct VisitorImpl
 {
     typedef decltype(std::declval<Visitor>()(get<0>(std::declval<V>())...)) result_type;
-    typedef VisitorApplicator<NumVars, result_type, Visitor, V...> applicator_type;
+    typedef VisitorApplicator<result_type> applicator_type;
 };
+#endif
 } // detail
 
 #if variant_CPP11_OR_GREATER
@@ -1566,6 +1672,21 @@ inline auto visit(Visitor&& v, V&& ... vars) -> typename detail::VisitorImpl<siz
     return impl_type::applicator_type::apply(std::forward<Visitor>(v), std::forward<V>(vars)...);
 }
 #else
+template<typename R, typename Visitor, typename V1>
+inline R visit(const Visitor& v, const V1& arg)
+{
+    return detail::VisitorApplicator<R>::apply(v, arg);
+}
+template<typename R, typename Visitor, typename V1, typename V2>
+inline R visit(const Visitor& v, const V1& arg1, const V2& arg2)
+{
+    return detail::VisitorApplicator<R>::apply(v, arg1, arg2);
+}
+template<typename R, typename Visitor, typename V1, typename V2, typename V3>
+inline R visit(const Visitor& v, const V1& arg1, const V2& arg2, const V3& arg3)
+{
+    return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3);
+}
 #endif
 
 #if 0

@@ -865,7 +865,6 @@ struct GenericVisitor1
 };
 #if variant_CPP11_OR_GREATER
 #else
-struct Cpp03Visitor
 #endif
 
 CASE( "variant: Allows to visit contents (args: 1)" )
@@ -879,10 +878,61 @@ CASE( "variant: Allows to visit contents (args: 1)" )
     EXPECT( ri == "7" );
     EXPECT( rs == "hello" );
 #else
-    std::string ri = visit<std::string>(GenericVisitor(), vi);
-    std::string rs = visit<std::string>(GenericVisitor(), vs);
+    std::string ri = visit<std::string>(GenericVisitor1(), vi);
+    std::string rs = visit<std::string>(GenericVisitor1(), vs);
     EXPECT( ri == "7" );
     EXPECT( rs == "hello" );
+#endif
+}
+
+struct GenericVisitor2
+{
+    template<typename T1, typename T2>
+    std::string operator()(const T1& v1, const T2& v2) const
+    {
+        std::ostringstream os;
+        os << v1 << v2;
+        return os.str();
+    }
+};
+
+CASE( "variant: Allows to visit contents (args: 2)" )
+{
+    typedef variant< int, std::string > var_t;
+    var_t vi = 7;
+    var_t vs = std::string("hello");
+#if variant_CPP11_OR_GREATER
+    std::string r = visit(GenericVisitor2(), vi, vs);
+    EXPECT( r == "7hello" );
+#else
+    std::string r = visit<std::string>(GenericVisitor2(), vi, vs);
+    EXPECT( r == "7hello" );
+#endif
+}
+
+struct GenericVisitor3
+{
+    template<typename T1, typename T2, typename T3>
+    std::string operator()(const T1& v1, const T2& v2, const T3& v3) const
+    {
+        std::ostringstream os;
+        os << v1 << v2 << v3;
+        return os.str();
+    }
+};
+
+CASE( "variant: Allows to visit contents (args: 3)" )
+{
+    typedef variant< int, std::string, double > var_t;
+    var_t vi = 7;
+    var_t vs = std::string("hello");
+    var_t vd = 0.5;
+#if variant_CPP11_OR_GREATER
+    std::string r = visit(GenericVisitor3(), vi, vs, vd);
+    EXPECT( r == "7hello0.5" );
+#else
+    std::string r = visit<std::string>(GenericVisitor3(), vi, vs, vd);
+    EXPECT( r == "7hello0.5" );
 #endif
 }
 
