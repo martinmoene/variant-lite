@@ -19,6 +19,8 @@ import generate_header
 
 # Configuration:
 
+def_variant_type_count = 16
+
 table = (
     # path, substitute find, substitute format
     ( 'CMakeLists.txt'
@@ -34,7 +36,7 @@ table = (
 #        , 'variant_lite_version = "{major}.{minor}.{patch}"\n' )
 
     # Note: edit template:
-    
+
     , ( 'template/variant.hpp'
         , r'\#define\s+variant_lite_MAJOR\s+[0-9]+\s*$'
         , '#define variant_lite_MAJOR  {major}' )
@@ -100,7 +102,7 @@ def editFilesToVersionFromCommandLine():
     parser = argparse.ArgumentParser(
         description='Update version number in files.',
         epilog="""""",
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         'version',
@@ -114,15 +116,22 @@ def editFilesToVersionFromCommandLine():
         action='store_true',
         help='report the name of the file being processed')
 
+    parser.add_argument(
+        '--count',
+        metavar='count',
+        type=int,
+        default=def_variant_type_count,
+        help='number of variant types')
+
     args = parser.parse_args()
 
     editFilesToVersion( args.version[0], table, args.verbose )
-    makeVariantHeader( 'template/variant.hpp', 'include/nonstd/variant.hpp', args.verbose )
+    makeVariantHeader( 'template/variant.hpp', 'include/nonstd/variant.hpp', args.count, args.verbose )
 
-def makeVariantHeader( tpl_path, hdr_path, verbose ):
+def makeVariantHeader( tpl_path, hdr_path, type_count, verbose ):
     if verbose:
-        print( "- {tpl} => '{hdr}':".format( tpl=tpl_path, hdr=hdr_path ) )
-    generate_header.ProcessTemplate( tpl_path, hdr_path )
+        print( "- {tpl} => '{hdr}' with {cnt} types:".format( tpl=tpl_path, hdr=hdr_path, cnt=type_count ) )
+    generate_header.ProcessTemplate( tpl_path, hdr_path, type_count )
 
 
 if __name__ == '__main__':

@@ -34,7 +34,7 @@
 		<Unit filename="../../example/02-iostream.cpp" />
 		<Unit filename="../../include/nonstd/optional.hpp" />
 		<Unit filename="../../include/nonstd/variant.hpp" />
-		<Unit filename="../../script/generate-header.py" />
+		<Unit filename="../../script/generate_header.py" />
 		<Unit filename="../../script/update-version.py" />
 		<Unit filename="../../spike/type-select.cpp" />
 		<Unit filename="../../spike/variant-unused.cpp" />
