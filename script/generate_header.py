@@ -15,7 +15,7 @@ def ProcessTemplate(src, dst):
     fout.close()
 
 def main():
-    ProcessTemplate('./variant.hpp', '../include/nonstd/variant.hpp')
+    ProcessTemplate('template/variant.hpp', 'include/nonstd/variant.hpp')
 
 if __name__== "__main__":
   main()

@@ -10,7 +10,14 @@
 #ifndef NONSTD_VARIANT_LITE_HPP
 #define NONSTD_VARIANT_LITE_HPP
 
-#define  variant_lite_VERSION "1.0.0"
+#define variant_lite_MAJOR  1
+#define variant_lite_MINOR  0
+#define variant_lite_PATCH  0
+
+#define variant_lite_VERSION  variant_STRINGIFY(variant_lite_MAJOR) "." variant_STRINGIFY(variant_lite_MINOR) "." variant_STRINGIFY(variant_lite_PATCH)
+
+#define variant_STRINGIFY(  x )  variant_STRINGIFY_( x )
+#define variant_STRINGIFY_( x )  #x
 
 // variant-lite configuration:
 
@@ -459,7 +466,7 @@ struct typelist
 template< class List >
 struct typelist_max;
 
-template <>
+template<>
 struct typelist_max< nulltype >
 {
     enum { value = 0 } ;
@@ -487,7 +494,7 @@ public:
 template< class List >
 struct typelist_max_alignof;
 
-template <>
+template<>
 struct typelist_max_alignof< nulltype >
 {
     enum { value = 0 } ;
@@ -660,7 +667,7 @@ struct alignment_of_hack
     alignment_of_hack();
 };
 
-template< size_t A, size_t S >
+template< unsigned A, unsigned S >
 struct alignment_logic
 {
     enum { value = A < S ? A : S };
@@ -792,7 +799,7 @@ struct helper
         case 13: as<T13>( data )->~T13(); break;
         case 14: as<T14>( data )->~T14(); break;
         case 15: as<T15>( data )->~T15(); break;
-
+        
         }
     }
 
@@ -835,7 +842,7 @@ struct helper
         case 13: new( to_value ) T13( std::forward<T13>( *as<T13>( from_value ) ) ); break;
         case 14: new( to_value ) T14( std::forward<T14>( *as<T14>( from_value ) ) ); break;
         case 15: new( to_value ) T15( std::forward<T15>( *as<T15>( from_value ) ) ); break;
-
+        
         }
         return to_index_t( from_index );
     }
@@ -861,7 +868,7 @@ struct helper
         case 13: new( to_value ) T13( *as<T13>( from_value ) ); break;
         case 14: new( to_value ) T14( *as<T14>( from_value ) ); break;
         case 15: new( to_value ) T15( *as<T15>( from_value ) ); break;
-
+        
         }
         return to_index_t( from_index );
     }
@@ -991,7 +998,7 @@ public:
     variant( T13 const & t13 ) : type_index( 13 ) { new( ptr() ) T13( t13 ); }
     variant( T14 const & t14 ) : type_index( 14 ) { new( ptr() ) T14( t14 ); }
     variant( T15 const & t15 ) : type_index( 15 ) { new( ptr() ) T15( t15 ); }
-
+    
 
 #if variant_CPP11_OR_GREATER
     variant( T0 && t0 ) : type_index( 0 ) { new( ptr() ) T0( std::move(t0) ); }
@@ -1010,7 +1017,7 @@ public:
     variant( T13 && t13 ) : type_index( 13 ) { new( ptr() ) T13( std::move(t13) ); }
     variant( T14 && t14 ) : type_index( 14 ) { new( ptr() ) T14( std::move(t14) ); }
     variant( T15 && t15 ) : type_index( 15 ) { new( ptr() ) T15( std::move(t15) ); }
-
+    
 #endif
 
     variant(variant const & rhs)
@@ -1054,7 +1061,7 @@ public:
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
     }
 
-    template <size_t I, class U, class... Args,
+    template< size_t I, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
     explicit variant( nonstd_lite_in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
     {
@@ -1097,7 +1104,7 @@ public:
     variant & operator=( T13 &&      t13 ) { return move_assign_value<T13,13>( std::forward<T13>( t13 ) ); }
     variant & operator=( T14 &&      t14 ) { return move_assign_value<T14,14>( std::forward<T14>( t14 ) ); }
     variant & operator=( T15 &&      t15 ) { return move_assign_value<T15,15>( std::forward<T15>( t15 ) ); }
-
+    
 #else
     variant & operator=( T0 const & t0 ) { return copy_assign_value<T0,0>( t0 ); }
     variant & operator=( T1 const & t1 ) { return copy_assign_value<T1,1>( t1 ); }
@@ -1115,7 +1122,7 @@ public:
     variant & operator=( T13 const & t13 ) { return copy_assign_value<T13,13>( t13 ); }
     variant & operator=( T14 const & t14 ) { return copy_assign_value<T14,14>( t14 ); }
     variant & operator=( T15 const & t15 ) { return copy_assign_value<T15,15>( t15 ); }
-
+    
 #endif
 
     std::size_t index() const
@@ -1380,7 +1387,7 @@ private:
             case 13: swap( this->get<13>(), rhs.get<13>() ); break;
             case 14: swap( this->get<14>(), rhs.get<14>() ); break;
             case 15: swap( this->get<15>(), rhs.get<15>() ); break;
-
+            
         }
     }
 
@@ -1416,7 +1423,7 @@ private:
     type_index_t type_index;
 };
 
-template <class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v ) variant_noexcept
 {
     return v.index() == v.template index_of<T>();
@@ -1494,7 +1501,7 @@ inline void swap(
     a.swap( b );
 }
 
-// template <class Visitor, class... Variants>
+// template< class Visitor, class... Variants >
 // visit( Visitor&& vis, Variants&&... vars );
 
 // The following visit is restricted  with respect to the standard.
@@ -1526,7 +1533,7 @@ inline Variant visit( Visitor const & vis, Variant const & v )
         case 13: return vis( get<13>( v ) );
         case 14: return vis( get<14>( v ) );
         case 15: return vis( get<15>( v ) );
-
+        
         default: return Variant();
     }
 }
@@ -1556,7 +1563,7 @@ struct Comparator
             case 13: return get<13>( v ) == get<13>( w );
             case 14: return get<14>( v ) == get<14>( w );
             case 15: return get<15>( v ) == get<15>( w );
-
+            
             default: return false;
         }
     }
@@ -1581,7 +1588,7 @@ struct Comparator
             case 13: return get<13>( v ) < get<13>( w );
             case 14: return get<14>( v ) < get<14>( w );
             case 15: return get<15>( v ) < get<15>( w );
-
+            
             default: return false;
         }
     }

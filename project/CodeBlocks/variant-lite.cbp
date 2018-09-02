@@ -34,10 +34,13 @@
 		<Unit filename="../../example/02-iostream.cpp" />
 		<Unit filename="../../include/nonstd/optional.hpp" />
 		<Unit filename="../../include/nonstd/variant.hpp" />
+		<Unit filename="../../script/generate-header.py" />
+		<Unit filename="../../script/update-version.py" />
 		<Unit filename="../../spike/type-select.cpp" />
 		<Unit filename="../../spike/variant-unused.cpp" />
 		<Unit filename="../../spike/variant.cpp" />
 		<Unit filename="../../spike/vlad.cpp" />
+		<Unit filename="../../template/variant.hpp" />
 		<Unit filename="../../test/CMakeLists.txt" />
 		<Unit filename="../../test/lest_cpp03.hpp" />
 		<Unit filename="../../test/optional.t.cpp" />

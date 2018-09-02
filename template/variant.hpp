@@ -10,7 +10,14 @@
 #ifndef NONSTD_VARIANT_LITE_HPP
 #define NONSTD_VARIANT_LITE_HPP
 
-#define  variant_lite_VERSION "1.0.0"
+#define variant_lite_MAJOR  1
+#define variant_lite_MINOR  0
+#define variant_lite_PATCH  0
+
+#define variant_lite_VERSION  variant_STRINGIFY(variant_lite_MAJOR) "." variant_STRINGIFY(variant_lite_MINOR) "." variant_STRINGIFY(variant_lite_PATCH)
+
+#define variant_STRINGIFY(  x )  variant_STRINGIFY_( x )
+#define variant_STRINGIFY_( x )  #x
 
 // variant-lite configuration:
 
@@ -432,7 +439,7 @@ struct typelist
 template< class List >
 struct typelist_max;
 
-template <>
+template<>
 struct typelist_max< nulltype >
 {
     enum { value = 0 } ;
@@ -460,7 +467,7 @@ public:
 template< class List >
 struct typelist_max_alignof;
 
-template <>
+template<>
 struct typelist_max_alignof< nulltype >
 {
     enum { value = 0 } ;
@@ -608,10 +615,10 @@ union max_align_t
 #define variant_ALIGN_AS( to_align ) \
     typename detail::type_of_size< detail::alignment_types, detail::alignment_of< to_align >::value >::type
 
-template <typename T>
+template< typename T >
 struct alignment_of;
 
-template <typename T>
+template< typename T >
 struct alignment_of_hack
 {
     char c;
@@ -619,7 +626,7 @@ struct alignment_of_hack
     alignment_of_hack();
 };
 
-template <unsigned A, unsigned S>
+template< unsigned A, unsigned S >
 struct alignment_logic
 {
     enum { value = A < S ? A : S };
@@ -931,7 +938,7 @@ public:
         type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
     }
 
-    template <size_t I, class U, class... Args,
+    template< size_t I, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
     explicit variant( nonstd_lite_in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
     {
@@ -1251,7 +1258,7 @@ private:
     type_index_t type_index;
 };
 
-template <class T, {{TplParamsList}} >
+template< class T, {{TplParamsList}} >
 inline bool holds_alternative( variant<{{TplArgsList}}> const & v ) variant_noexcept
 {
     return v.index() == v.template index_of<T>();
@@ -1329,7 +1336,7 @@ inline void swap(
     a.swap( b );
 }
 
-// template <class Visitor, class... Variants>
+// template< class Visitor, class... Variants >
 // visit( Visitor&& vis, Variants&&... vars );
 
 // The following visit is restricted  with respect to the standard.
