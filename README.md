@@ -293,6 +293,11 @@ Other implementations of variant
 Notes and References
 --------------------
 
+### Acknowledgments
+
+Thanks to @flexferrum for making the number of variant types configurable.
+
+
 ### References
 
 [1] CppReference. [Variant](http://en.cppreference.com/w/cpp/utility/variant).  
