@@ -2,7 +2,7 @@
 //
 // https://github.com/martinmoene/variant-lite
 //
-// Distributed under the Boost Software License, Version 1.0. 
+// Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "variant-main.t.hpp"
@@ -848,17 +848,85 @@ struct Doubler
 };
 }
 
-CASE( "variant: Allows to visit contents (non-standard: always returning variant)" )
+struct GenericVisitor1
+{
+    std::string operator()(int val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    std::string operator()(const std::string& val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+};
+
+CASE( "variant: Allows to visit contents (args: 1)" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
     var_t vs = std::string("hello");
+#if variant_CPP11_OR_GREATER
+    std::string ri = visit(GenericVisitor1(), vi);
+    std::string rs = visit(GenericVisitor1(), vs);
+#else
+    std::string ri = visit<std::string>(GenericVisitor1(), vi);
+    std::string rs = visit<std::string>(GenericVisitor1(), vs);
+#endif
+    EXPECT( ri == "7" );
+    EXPECT( rs == "hello" );
+}
 
-//    var_t ri = visit( Doubler(), vi );
-//    var_t rs = visit( Doubler(), vs );
+struct GenericVisitor2
+{
+    template<typename T1, typename T2>
+    std::string operator()(const T1& v1, const T2& v2) const
+    {
+        std::ostringstream os;
+        os << v1 << v2;
+        return os.str();
+    }
+};
 
-//    EXPECT( ri == var_t( 14 ) );
-//    EXPECT( rs == var_t( std::string("hellohello") ) );
+CASE( "variant: Allows to visit contents (args: 2)" )
+{
+    typedef variant< int, std::string > var_t;
+    var_t vi = 7;
+    var_t vs = std::string("hello");
+#if variant_CPP11_OR_GREATER
+    std::string r = visit(GenericVisitor2(), vi, vs);
+    #else
+    std::string r = visit<std::string>(GenericVisitor2(), vi, vs);
+#endif
+    EXPECT( r == "7hello" );
+}
+
+struct GenericVisitor3
+{
+    template<typename T1, typename T2, typename T3>
+    std::string operator()(const T1& v1, const T2& v2, const T3& v3) const
+    {
+        std::ostringstream os;
+        os << v1 << v2 << v3;
+        return os.str();
+    }
+};
+
+CASE( "variant: Allows to visit contents (args: 3)" )
+{
+    typedef variant< int, std::string, double > var_t;
+    var_t vi = 7;
+    var_t vs = std::string("hello");
+    var_t vd = 0.5;
+#if variant_CPP11_OR_GREATER
+    std::string r = visit(GenericVisitor3(), vi, vs, vd);
+#else
+    std::string r = visit<std::string>(GenericVisitor3(), vi, vs, vd);
+#endif
+    EXPECT( r == "7hello0.5" );
 }
 
 CASE( "variant: Allows to check for content by type" )
