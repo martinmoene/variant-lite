@@ -863,9 +863,6 @@ struct GenericVisitor1
         return os.str();
     }
 };
-#if variant_CPP11_OR_GREATER
-#else
-#endif
 
 CASE( "variant: Allows to visit contents (args: 1)" )
 {
@@ -875,14 +872,12 @@ CASE( "variant: Allows to visit contents (args: 1)" )
 #if variant_CPP11_OR_GREATER
     std::string ri = visit(GenericVisitor1(), vi);
     std::string rs = visit(GenericVisitor1(), vs);
-    EXPECT( ri == "7" );
-    EXPECT( rs == "hello" );
 #else
     std::string ri = visit<std::string>(GenericVisitor1(), vi);
     std::string rs = visit<std::string>(GenericVisitor1(), vs);
+#endif
     EXPECT( ri == "7" );
     EXPECT( rs == "hello" );
-#endif
 }
 
 struct GenericVisitor2
@@ -903,11 +898,10 @@ CASE( "variant: Allows to visit contents (args: 2)" )
     var_t vs = std::string("hello");
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor2(), vi, vs);
-    EXPECT( r == "7hello" );
-#else
+    #else
     std::string r = visit<std::string>(GenericVisitor2(), vi, vs);
-    EXPECT( r == "7hello" );
 #endif
+    EXPECT( r == "7hello" );
 }
 
 struct GenericVisitor3
@@ -929,11 +923,10 @@ CASE( "variant: Allows to visit contents (args: 3)" )
     var_t vd = 0.5;
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor3(), vi, vs, vd);
-    EXPECT( r == "7hello0.5" );
 #else
     std::string r = visit<std::string>(GenericVisitor3(), vi, vs, vd);
-    EXPECT( r == "7hello0.5" );
 #endif
+    EXPECT( r == "7hello0.5" );
 }
 
 CASE( "variant: Allows to check for content by type" )
