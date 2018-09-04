@@ -1336,28 +1336,168 @@ inline void swap(
     a.swap( b );
 }
 
-// template< class Visitor, class... Variants >
-// visit( Visitor&& vis, Variants&&... vars );
-
-// The following visit is restricted  with respect to the standard.
-// It uses the common idiom is to return anrhs variant:
-
-template< class Visitor, class Variant >
-inline Variant visit( Visitor const & vis, Variant const & v )
+// Variant 'visitor' implementation
+{% macro SequenceGen(len, delim=', ') -%}
+{%- for i in range(len) %}{{delim if not loop.first}}{{caller(i, i + 1)}}{% endfor -%}
+{%- endmacro %}
+namespace detail
 {
-    if ( v.valueless_by_exception() )
+
+template< typename R, typename VT >
+struct VisitorApplicatorImpl
+{
+    template< typename Visitor, typename T >
+    static R apply(Visitor const& v, T const& arg)
     {
-        throw bad_variant_access();
+        return v(arg);
+    }
+};
+
+template< typename R, typename VT >
+struct VisitorApplicatorImpl<R, TX<VT> >
+{
+    template< typename Visitor, typename T >
+    static R apply(Visitor const&, T)
+    {
+        return R();
+    }
+};
+
+template<typename R>
+struct VisitorApplicator;
+
+template< typename R, typename Visitor, typename V1 >
+struct VisitorUnwrapper;
+
+#if variant_CPP11_OR_GREATER
+template< size_t NumVars, typename R, typename Visitor, typename ... T >
+#else
+template< size_t NumVars, typename R, typename Visitor, typename T1, {% call (i0, i1) SequenceGen(VisitorArgs - 1)%}typename T{{i1 + 1}} = S0{% endcall %} >
+#endif
+struct TypedVisitorUnwrapper;
+
+{% for n in range(VisitorArgs - 1) -%}
+template< typename R, typename Visitor, {% call (i0, i1) SequenceGen(n + 1)%}typename T{{i1 + 1}}{% endcall %} >
+struct TypedVisitorUnwrapper<{{n + 2}}, R, Visitor, {% call (i0, i1) SequenceGen(n + 1)%}T{{i1 + 1}}{% endcall %}>
+{
+    const Visitor& visitor;
+    {% call (i0, i1) SequenceGen(n + 1, '')%}T{{i1 + 1}} const& val{{i1 + 1}};
+    {% endcall %}
+    TypedVisitorUnwrapper(const Visitor& visitor_, {% call (i0, i1) SequenceGen(n + 1)%}T{{i1 + 1}} const& val{{i1 + 1}}_{% endcall %})
+        : visitor(visitor_)
+        {% call (i0, i1) SequenceGen(n + 1, '')%}, val{{i1 + 1}}(val{{i1 + 1}}_)
+        {% endcall %}
+    {
     }
 
-    switch( v.index() )
+    template<typename T>
+    R operator()(const T& val1) const
     {
-        {% for n in range(NumParams) -%}
-        case {{n}}: return vis( get<{{n}}>( v ) );
-        {% endfor %}
-        default: return Variant();
+        return visitor(val1, {% call (i0, i1) SequenceGen(n + 1)%}val{{i1 + 1}}{% endcall %});
     }
+};
+
+{% endfor %}
+
+template<typename R, typename Visitor, typename V2>
+struct VisitorUnwrapper
+{
+    const Visitor& visitor;
+    const V2& r;
+
+    VisitorUnwrapper(const Visitor& visitor_, const V2& r_)
+        : visitor(visitor_)
+        , r(r_)
+    {
+    }
+
+    {% for n in range(VisitorArgs) %}
+    template< {% call (i0, i1) SequenceGen(n + 1)%}typename T{{i1}}{% endcall %} >
+    R operator()({% call (i0, i1) SequenceGen(n + 1)%}T{{i1}} const& val{{i1}}{% endcall %}) const
+    {
+        typedef TypedVisitorUnwrapper<{{n + 2}}, R, Visitor, {% call (i0, i1) SequenceGen(n + 1)%}T{{i1}}{% endcall %}> visitor_type;
+        return VisitorApplicator<R>::apply(visitor_type(visitor, {% call (i0, i1) SequenceGen(n + 1)%}val{{i1}}{% endcall %}), r);
+    }
+    {% endfor %}
+};
+
+
+template<typename R>
+struct VisitorApplicator
+{
+    template<typename Visitor, typename V1>
+    static R apply(const Visitor& v, const V1& arg)
+    {
+        switch( arg.index() )
+        {
+            {% for n in range(NumParams) -%}
+            case {{n}}: return apply_visitor<{{n}}>(v, arg);
+            {% endfor %}
+            default: return R();
+        }
+    }
+
+    template<size_t Idx, typename Visitor, typename V1>
+    static R apply_visitor(const Visitor& v, const V1& arg)
+    {
+
+#if variant_CPP11_OR_GREATER
+        typedef typename variant_alternative<Idx, typename std::decay<V1>::type>::type value_type;
+#else
+        typedef typename variant_alternative<Idx, V1>::type value_type;
+#endif
+        return VisitorApplicatorImpl<R, value_type>::apply(v, get<Idx>(arg));
+    }
+
+#if variant_CPP11_OR_GREATER
+    template<typename Visitor, typename V1, typename V2, typename ... V>
+    static R apply(const Visitor& v, const V1& arg1, const V2& arg2, const V ... args)
+    {
+        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
+        Unwrapper unwrapper(v, arg1);
+        return apply(unwrapper, arg2, args ...);
+    }
+#else
+    {% for n in range(VisitorArgs - 1) %}
+    template< typename Visitor, {% call (i0, i1) SequenceGen(n + 2)%}typename V{{i1}}{% endcall %} >
+    static R apply(const Visitor& v, {% call (i0, i1) SequenceGen(n + 2)%}V{{i1}} const& arg{{i1}}{% endcall %})
+    {
+        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
+        Unwrapper unwrapper(v, arg1);
+        return apply(unwrapper, {% call (i0, i1) SequenceGen(n + 1)%}arg{{i1 + 1}}{% endcall %});
+    }
+    {% endfor %}
+#endif
+};
+
+#if variant_CPP11_OR_GREATER
+template< size_t NumVars, typename Visitor, typename ... V >
+struct VisitorImpl
+{
+    typedef decltype(std::declval<Visitor>()(get<0>(std::declval<V>())...)) result_type;
+    typedef VisitorApplicator<result_type> applicator_type;
+};
+#endif
+} // detail
+
+#if variant_CPP11_OR_GREATER
+// No perfect forwarding here in order to simplify code
+template< typename Visitor, typename ... V >
+inline auto visit(Visitor const& v, V const& ... vars) -> typename detail::VisitorImpl<sizeof ... (V), Visitor, V... > ::result_type
+{
+    typedef detail::VisitorImpl<sizeof ... (V), Visitor, V... > impl_type;
+    return impl_type::applicator_type::apply(v, vars...);
 }
+#else
+{% for n in range(VisitorArgs) %}
+template< typename R, typename Visitor, {% call (i0, i1) SequenceGen(n + 1)%}typename V{{i1}}{% endcall %} >
+inline R visit(const Visitor& v, {% call (i0, i1) SequenceGen(n + 1)%}V{{i1}} const& arg{{i1}}{% endcall %})
+{
+    return detail::VisitorApplicator<R>::apply(v, {% call (i0, i1) SequenceGen(n + 1)%}arg{{i1}}{% endcall %});
+}
+{% endfor %}
+#endif
+
 
 namespace detail {
 
