@@ -1781,7 +1781,6 @@ struct VisitorApplicator
             case 14: return apply_visitor<14>(v, arg);
             case 15: return apply_visitor<15>(v, arg);
             
-
             default: return R();
         }
     }
