@@ -1337,6 +1337,9 @@ inline void swap(
 }
 
 // template< class Visitor, class... Variants >
+=======
+// template <class Visitor, class... Variants>
+>>>>>>> 9f62c6c564ea7c3e1de1f3d7c6072dd101952055
 // visit( Visitor&& vis, Variants&&... vars );
 
 // The following visit is restricted  with respect to the standard.
