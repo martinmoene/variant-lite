@@ -1535,7 +1535,7 @@ struct VisitorUnwrapper;
 #if variant_CPP11_OR_GREATER
 template< size_t NumVars, typename R, typename Visitor, typename ... T >
 #else
-template< size_t NumVars, typename R, typename Visitor, typename T1, typename T2 = S0, typename T3 = S0, typename T4 = S0, typename T5 = S0, typename T6 = S0, typename T7 = S0 >
+template< size_t NumVars, typename R, typename Visitor, typename T1, typename T2 = S0, typename T3 = S0, typename T4 = S0, typename T5 = S0 >
 #endif
 struct TypedVisitorUnwrapper;
 
@@ -1631,64 +1631,6 @@ struct TypedVisitorUnwrapper<5, R, Visitor, T2, T3, T4, T5>
     }
 };
 
-template< typename R, typename Visitor, typename T2, typename T3, typename T4, typename T5, typename T6 >
-struct TypedVisitorUnwrapper<6, R, Visitor, T2, T3, T4, T5, T6>
-{
-    const Visitor& visitor;
-    T2 const& val2;
-    T3 const& val3;
-    T4 const& val4;
-    T5 const& val5;
-    T6 const& val6;
-    
-    TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_, T4 const& val4_, T5 const& val5_, T6 const& val6_)
-        : visitor(visitor_)
-        , val2(val2_)
-        , val3(val3_)
-        , val4(val4_)
-        , val5(val5_)
-        , val6(val6_)
-        
-    {
-    }
-
-    template<typename T>
-    R operator()(const T& val1) const
-    {
-        return visitor(val1, val2, val3, val4, val5, val6);
-    }
-};
-
-template< typename R, typename Visitor, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
-struct TypedVisitorUnwrapper<7, R, Visitor, T2, T3, T4, T5, T6, T7>
-{
-    const Visitor& visitor;
-    T2 const& val2;
-    T3 const& val3;
-    T4 const& val4;
-    T5 const& val5;
-    T6 const& val6;
-    T7 const& val7;
-    
-    TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_, T4 const& val4_, T5 const& val5_, T6 const& val6_, T7 const& val7_)
-        : visitor(visitor_)
-        , val2(val2_)
-        , val3(val3_)
-        , val4(val4_)
-        , val5(val5_)
-        , val6(val6_)
-        , val7(val7_)
-        
-    {
-    }
-
-    template<typename T>
-    R operator()(const T& val1) const
-    {
-        return visitor(val1, val2, val3, val4, val5, val6, val7);
-    }
-};
-
 
 
 template<typename R, typename Visitor, typename V2>
@@ -1737,20 +1679,6 @@ struct VisitorUnwrapper
     {
         typedef TypedVisitorUnwrapper<6, R, Visitor, T1, T2, T3, T4, T5> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5), r);
-    }
-    
-    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6 >
-    R operator()(T1 const& val1, T2 const& val2, T3 const& val3, T4 const& val4, T5 const& val5, T6 const& val6) const
-    {
-        typedef TypedVisitorUnwrapper<7, R, Visitor, T1, T2, T3, T4, T5, T6> visitor_type;
-        return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5, val6), r);
-    }
-    
-    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
-    R operator()(T1 const& val1, T2 const& val2, T3 const& val3, T4 const& val4, T5 const& val5, T6 const& val6, T7 const& val7) const
-    {
-        typedef TypedVisitorUnwrapper<8, R, Visitor, T1, T2, T3, T4, T5, T6, T7> visitor_type;
-        return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5, val6, val7), r);
     }
     
 };
@@ -1839,22 +1767,6 @@ struct VisitorApplicator
         return apply(unwrapper, arg2, arg3, arg4, arg5);
     }
     
-    template< typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6 >
-    static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6)
-    {
-        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
-        Unwrapper unwrapper(v, arg1);
-        return apply(unwrapper, arg2, arg3, arg4, arg5, arg6);
-    }
-    
-    template< typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6, typename V7 >
-    static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6, V7 const& arg7)
-    {
-        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
-        Unwrapper unwrapper(v, arg1);
-        return apply(unwrapper, arg2, arg3, arg4, arg5, arg6, arg7);
-    }
-    
 #endif
 };
 
@@ -1906,18 +1818,6 @@ template< typename R, typename Visitor, typename V1, typename V2, typename V3, t
 inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5)
 {
     return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3, arg4, arg5);
-}
-
-template< typename R, typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6 >
-inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6)
-{
-    return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3, arg4, arg5, arg6);
-}
-
-template< typename R, typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6, typename V7 >
-inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6, V7 const& arg7)
-{
-    return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 #endif
