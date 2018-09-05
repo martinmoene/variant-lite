@@ -19,7 +19,8 @@ import generate_header
 
 # Configuration:
 
-def_variant_type_count = 16
+def_max_types = 16
+def_max_args = 5
 
 table = (
     # path, substitute find, substitute format
@@ -117,21 +118,26 @@ def editFilesToVersionFromCommandLine():
         help='report the name of the file being processed')
 
     parser.add_argument(
-        '--count',
-        metavar='count',
+        '--max-types',
+        metavar='types',
         type=int,
-        default=def_variant_type_count,
+        default=def_max_types,
         help='number of variant types')
+
+    parser.add_argument(
+        '--max-args',
+        metavar='args',
+        type=int,
+        default=def_max_args,
+        help='number of arguments for \'visit\' methods')
 
     args = parser.parse_args()
 
     editFilesToVersion( args.version[0], table, args.verbose )
-    makeVariantHeader( 'template/variant.hpp', 'include/nonstd/variant.hpp', args.count, args.verbose )
+    makeVariantHeader( 'template/variant.hpp', 'include/nonstd/variant.hpp', args.max_types, args.max_args, args.verbose )
 
-def makeVariantHeader( tpl_path, hdr_path, type_count, verbose ):
-    if verbose:
-        print( "- {tpl} => '{hdr}' with {cnt} types:".format( tpl=tpl_path, hdr=hdr_path, cnt=type_count ) )
-    generate_header.ProcessTemplate( tpl_path, hdr_path, type_count )
+def makeVariantHeader( tpl_path, hdr_path, types, args, verbose ):
+    generate_header.ProcessTemplate( tpl_path, hdr_path, types, args, verbose )
 
 
 if __name__ == '__main__':
