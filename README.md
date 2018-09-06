@@ -343,6 +343,7 @@ variant: Allows non-default constructible as second and later type (first: monos
 variant: Allows to default-construct variant
 variant: Allows to copy-construct from variant
 variant: Allows to move-construct from variant (C++11)
+variant: Allows to move-construct if-noexcept from variant (C++11)
 variant: Allows to obtain the index of the current type
 variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to copy-assign from variant

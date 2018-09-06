@@ -31,6 +31,23 @@ enum State
     /*10 */ value_constructed,
 };
 
+#if variant_CPP11_OR_GREATER
+
+struct Tracer
+{
+    State state;
+    
+    Tracer() noexcept { state = default_constructed; }
+
+    Tracer( Tracer && ) noexcept  { state = move_constructed; }
+    Tracer &  operator= ( Tracer && ) noexcept  { state = move_assigned; return *this; }
+    
+    Tracer( const Tracer & ) noexcept  { state = copy_constructed; }
+    Tracer & operator= ( const Tracer & ) noexcept  { state = copy_assigned; return *this; }
+};
+
+#endif
+
 struct V
 {
     State state;
@@ -166,6 +183,21 @@ CASE( "variant: Allows to move-construct from variant (C++11)" )
     EXPECT( get<S>(var).value.value == V::deflt()  );
     EXPECT( get<S>(var).value.state == move_constructed );
     EXPECT( get<S>(var).state       == move_constructed );
+#else
+    EXPECT( !!"variant: move-construction is not available (no C++11)" );
+#endif
+}
+
+CASE( "variant: Allows to move-construct if-noexcept from variant (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    std::vector< variant<Tracer> > vec(1);
+    
+    EXPECT( get<Tracer>( vec[0] ).state == default_constructed );
+    
+    vec.resize( 7 );
+
+    EXPECT( get<Tracer>( vec[0] ).state == move_constructed );
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
