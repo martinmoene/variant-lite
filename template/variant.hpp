@@ -963,7 +963,10 @@ public:
 
 #if variant_CPP11_OR_GREATER
 
-    variant & operator=( variant && rhs )
+    variant & operator=( variant && rhs ) noexcept(
+        {% for n in range(NumParams) -%}
+        std::is_nothrow_move_assignable<T{{n}}>::value{{')' if loop.last else ' &&'}}
+        {% endfor -%}
     {
         return move_assign( std::forward<variant>( rhs ) );
     }

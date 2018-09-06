@@ -1099,8 +1099,24 @@ public:
 
 #if variant_CPP11_OR_GREATER
 
-    variant & operator=( variant && rhs )
-    {
+    variant & operator=( variant && rhs ) noexcept(
+        std::is_nothrow_move_assignable<T0>::value &&
+        std::is_nothrow_move_assignable<T1>::value &&
+        std::is_nothrow_move_assignable<T2>::value &&
+        std::is_nothrow_move_assignable<T3>::value &&
+        std::is_nothrow_move_assignable<T4>::value &&
+        std::is_nothrow_move_assignable<T5>::value &&
+        std::is_nothrow_move_assignable<T6>::value &&
+        std::is_nothrow_move_assignable<T7>::value &&
+        std::is_nothrow_move_assignable<T8>::value &&
+        std::is_nothrow_move_assignable<T9>::value &&
+        std::is_nothrow_move_assignable<T10>::value &&
+        std::is_nothrow_move_assignable<T11>::value &&
+        std::is_nothrow_move_assignable<T12>::value &&
+        std::is_nothrow_move_assignable<T13>::value &&
+        std::is_nothrow_move_assignable<T14>::value &&
+        std::is_nothrow_move_assignable<T15>::value)
+        {
         return move_assign( std::forward<variant>( rhs ) );
     }
 
