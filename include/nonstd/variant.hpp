@@ -1028,8 +1028,24 @@ public:
 
 #if variant_CPP11_OR_GREATER
 
-    variant( variant && rhs )
-    : type_index( rhs.type_index )
+    variant( variant && rhs ) noexcept(
+        std::is_nothrow_move_constructible<T0>::value &&
+        std::is_nothrow_move_constructible<T1>::value &&
+        std::is_nothrow_move_constructible<T2>::value &&
+        std::is_nothrow_move_constructible<T3>::value &&
+        std::is_nothrow_move_constructible<T4>::value &&
+        std::is_nothrow_move_constructible<T5>::value &&
+        std::is_nothrow_move_constructible<T6>::value &&
+        std::is_nothrow_move_constructible<T7>::value &&
+        std::is_nothrow_move_constructible<T8>::value &&
+        std::is_nothrow_move_constructible<T9>::value &&
+        std::is_nothrow_move_constructible<T10>::value &&
+        std::is_nothrow_move_constructible<T11>::value &&
+        std::is_nothrow_move_constructible<T12>::value &&
+        std::is_nothrow_move_constructible<T13>::value &&
+        std::is_nothrow_move_constructible<T14>::value &&
+        std::is_nothrow_move_constructible<T15>::value)
+        : type_index( rhs.type_index )
     {
         (void) helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
     }

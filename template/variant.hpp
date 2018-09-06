@@ -905,7 +905,10 @@ public:
 
 #if variant_CPP11_OR_GREATER
 
-    variant( variant && rhs )
+    variant( variant && rhs ) noexcept(
+        {% for n in range(NumParams) -%}
+        std::is_nothrow_move_constructible<T{{n}}>::value{{')' if loop.last else ' &&'}}
+        {% endfor -%}
     : type_index( rhs.type_index )
     {
         (void) helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
