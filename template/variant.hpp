@@ -21,9 +21,9 @@
 
 // variant-lite configuration:
 
-#if      variant_CONFIG_SELECT_STD_VARIANT
+#if      defined(variant_CONFIG_SELECT_STD_VARIANT) && variant_CONFIG_SELECT_STD_VARIANT
 # define variant_USES_STD_VARIANT  1
-#elif    variant_CONFIG_SELECT_NONSTD_VARIANT
+#elif    defined(variant_CONFIG_SELECT_NONSTD_VARIANT) && variant_CONFIG_SELECT_NONSTD_VARIANT
 # define variant_USES_STD_VARIANT  0
 #endif
 
@@ -300,8 +300,8 @@ using std::in_place_index_t;
 #define nonstd_lite_in_place_type_t( T)  std::in_place_type_t<T>
 #define nonstd_lite_in_place_index_t(T)  std::in_place_index_t<I>
 
-#define nonstd_lite_in_place_type( T)    std::in_place_type_t<T>()
-#define nonstd_lite_in_place_index(T)    std::in_place_index_t<I>()
+#define nonstd_lite_in_place_type( T)    std::in_place_type_t<T>{}
+#define nonstd_lite_in_place_index(T)    std::in_place_index_t<I>{}
 
 } // namespace nonstd
 
