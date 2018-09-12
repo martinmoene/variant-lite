@@ -539,8 +539,8 @@ CASE( "variant: Allows to in-place copy-construct element based on type (C++11)"
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant<int, NoCopyMove> var( in_place_type<NoCopyMove>, s, 7 );
 #else
-    variant<int, NoCopyMove> ___( in_place_type<NoCopyMove>, s, 7 );
-    variant<int, NoCopyMove> var( in_place<     NoCopyMove>, s, 7 );
+    variant<int, NoCopyMove> var( in_place_type<NoCopyMove>, s, 7 );
+//  variant<int, NoCopyMove> var( in_place<     NoCopyMove>, s, 7 );
 #endif
     EXPECT( get<NoCopyMove>( var ).value == 7 );
     EXPECT( get<NoCopyMove>( var ).s.value .value == 7  );
@@ -556,8 +556,8 @@ CASE( "variant: Allows to in-place move-construct element based on type (C++11)"
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant<int, NoCopyMove> var( in_place_type<NoCopyMove>, S( 7 ), 7 );
 #else
-    variant<int, NoCopyMove> ___( in_place_type<NoCopyMove>, S( 7 ), 7 );
-    variant<int, NoCopyMove> var( in_place<     NoCopyMove>, S( 7 ), 7 );
+    variant<int, NoCopyMove> var( in_place_type<NoCopyMove>, S( 7 ), 7 );
+//  variant<int, NoCopyMove> var( in_place<     NoCopyMove>, S( 7 ), 7 );
 #endif
 
     EXPECT( get<NoCopyMove>( var ).value == 7 );
@@ -575,8 +575,8 @@ CASE( "variant: Allows to in-place copy-construct element based on index (C++11)
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant<int, NoCopyMove> var( in_place_index<1>, s, 7 );
 #else
-    variant<int, NoCopyMove> ___( in_place_index<1>, s, 7 );
-    variant<int, NoCopyMove> var( in_place<      1>, s, 7 );
+    variant<int, NoCopyMove> var( in_place_index<1>, s, 7 );
+//  variant<int, NoCopyMove> var( in_place<      1>, s, 7 );
 #endif
 
     EXPECT( get<1>( var ).value == 7 );
@@ -593,8 +593,8 @@ CASE( "variant: Allows to in-place move-construct element based on index (C++11)
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant<int, NoCopyMove> var( in_place_index<1>, S( 7 ), 7 );
 #else
-    variant<int, NoCopyMove> ___( in_place_index<1>, S( 7 ), 7 );
-    variant<int, NoCopyMove> var( in_place<      1>, S( 7 ), 7 );
+    variant<int, NoCopyMove> var( in_place_index<1>, S( 7 ), 7 );
+//  variant<int, NoCopyMove> var( in_place<      1>, S( 7 ), 7 );
 #endif
 
     EXPECT( get<1>( var ).value == 7 );
@@ -628,8 +628,8 @@ CASE( "variant: Allows to in-place copy-construct elements from intializer-list 
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant< int, InitList> var( in_place_type<InitList>, { 7, 8, 9, }, 'a', s );
 #else
-    variant< int, InitList> ___( in_place_type<InitList>, { 7, 8, 9, }, 'a', s );
-    variant< int, InitList> var( in_place<     InitList>, { 7, 8, 9, }, 'a', s );
+    variant< int, InitList> var( in_place_type<InitList>, { 7, 8, 9, }, 'a', s );
+//  variant< int, InitList> var( in_place<     InitList>, { 7, 8, 9, }, 'a', s );
 #endif
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -649,8 +649,8 @@ CASE( "variant: Allows to in-place move-construct elements from intializer-list 
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant< int, InitList> var( in_place_type<InitList>, { 7, 8, 9, }, 'a', S( 7 ) );
 #else
-    variant< int, InitList> ___( in_place_type<InitList>, { 7, 8, 9, }, 'a', S( 7 ) );
-    variant< int, InitList> var( in_place<     InitList>, { 7, 8, 9, }, 'a', S( 7 ) );
+    variant< int, InitList> var( in_place_type<InitList>, { 7, 8, 9, }, 'a', S( 7 ) );
+//  variant< int, InitList> var( in_place<     InitList>, { 7, 8, 9, }, 'a', S( 7 ) );
 #endif
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -672,8 +672,8 @@ CASE( "variant: Allows to in-place copy-construct elements from intializer-list 
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant< int, InitList> var( in_place_index<1>, { 7, 8, 9, }, 'a', s );
 #else
-    variant< int, InitList> ___( in_place_index<1>, { 7, 8, 9, }, 'a', s );
-    variant< int, InitList> var( in_place<      1>, { 7, 8, 9, }, 'a', s );
+    variant< int, InitList> var( in_place_index<1>, { 7, 8, 9, }, 'a', s );
+//  variant< int, InitList> var( in_place<      1>, { 7, 8, 9, }, 'a', s );
 #endif
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
@@ -693,8 +693,8 @@ CASE( "variant: Allows to in-place move-construct elements from intializer-list 
 #if variant_HAVE_STD_VARIANT // or variant-lite
     variant< int, InitList> var( in_place_index<1>, { 7, 8, 9, }, 'a', S( 7 ) );
 #else
-    variant< int, InitList> ___( in_place_index<1>, { 7, 8, 9, }, 'a', S( 7 ) );
-    variant< int, InitList> var( in_place<      1>, { 7, 8, 9, }, 'a', S( 7 ) );
+    variant< int, InitList> var( in_place_index<1>, { 7, 8, 9, }, 'a', S( 7 ) );
+//  variant< int, InitList> var( in_place<      1>, { 7, 8, 9, }, 'a', S( 7 ) );
 #endif
 
     EXPECT( get<1>( var ).vec[0]  ==  7  );
