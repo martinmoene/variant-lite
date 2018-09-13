@@ -16,6 +16,9 @@ set( variant_lite_version "1.0.0" )
 option( VARIANT_LITE_OPT_BUILD_TESTS    "Build and perform variant-lite tests" ON )
 option( VARIANT_LITE_OPT_BUILD_EXAMPLES "Build variant-lite examples" OFF )
 
+option( VARIANT_LITE_OPT_SELECT_STD     "Select std::variant"    OFF )
+option( VARIANT_LITE_OPT_SELECT_NONSTD  "Select nonstd::variant" OFF )
+
 project( variant_lite LANGUAGES CXX )
 
 set( package_name "variant-lite" )

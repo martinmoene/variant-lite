@@ -18,8 +18,8 @@ set( HDRPATH ${HDRDIR}/${HDRNAME} )
 
 # Configure variant-lite for testing:
 
+set( DEFCMN  "" )
 set( OPTIONS "" )
-set( VARIANT_CONFIG "" )
 
 set( HAS_STD_FLAGS  FALSE )
 set( HAS_CPP98_FLAG FALSE )
@@ -33,7 +33,7 @@ if( MSVC )
     set( HAS_STD_FLAGS TRUE )
 
     set( OPTIONS     -W3 -EHsc )
-    set( DEFINITIONS -D_SCL_SECURE_NO_WARNINGS ${VARIANT_CONFIG} )
+    set( DEFINITIONS -D_SCL_SECURE_NO_WARNINGS ${DEFCMN} )
 
     if( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.00 )
         set( HAS_CPP14_FLAG TRUE )
@@ -48,8 +48,8 @@ elseif( CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" )
     set( HAS_STD_FLAGS  TRUE )
     set( HAS_CPP98_FLAG TRUE )
 
-    set( OPTIONS     -Wall -Wno-missing-braces -fno-elide-constructors )
-    set( DEFINITIONS ${VARIANT_CONFIG} )
+    set( OPTIONS     -Wall -Wextra -Wconversion -Wsign-conversion -Wno-missing-braces -fno-elide-constructorss )
+    set( DEFINITIONS ${DEFCMN} )
 
     # GNU: available -std flags depends on version
     if( CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
@@ -136,13 +136,31 @@ else()
     endif()
 
     if( HAS_CPP17_FLAG )
-        make_target( ${MAIN_BASE}-cpp17.t 17 )
+        set( std17 17 )
+        if( CMAKE_CXX_COMPILER_ID MATCHES "AppleClang" )
+            set( std17 1z )
+        endif()
+        make_target( ${MAIN_BASE}-cpp17.t ${std17} )
         enable_msvs_guideline_checker( ${MAIN_BASE}-cpp17.t )
     endif()
 
     if( HAS_CPPLATEST_FLAG )
         make_target( ${MAIN_BASE}-cpplatest.t latest )
     endif()
+endif()
+
+# with C++17, honour explicit request for std::variant or nonstd::variant:
+
+if( HAS_CPP17_FLAG )
+    set( WHICH variant_VARIANT_DEFAULT )
+
+    if( VARIANT_LITE_OPT_SELECT_STD )
+        set( WHICH variant_VARIANT_STD )
+    elseif( VARIANT_LITE_OPT_SELECT_NONSTD )
+        set( WHICH variant_VARIANT_NONSTD )
+    endif()
+
+    target_compile_definitions( ${MAIN_BASE}-cpp17.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
 endif()
 
 # configure unit tests via CTest:

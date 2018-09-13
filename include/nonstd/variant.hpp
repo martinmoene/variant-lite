@@ -21,14 +21,12 @@
 
 // variant-lite configuration:
 
-#if      defined(variant_CONFIG_SELECT_STD_VARIANT) && variant_CONFIG_SELECT_STD_VARIANT
-# define variant_USES_STD_VARIANT  1
-#elif    defined(variant_CONFIG_SELECT_NONSTD_VARIANT) && variant_CONFIG_SELECT_NONSTD_VARIANT
-# define variant_USES_STD_VARIANT  0
-#endif
+#define variant_VARIANT_DEFAULT  0
+#define variant_VARIANT_NONSTD   1
+#define variant_VARIANT_STD      2
 
-#if variant_CONFIG_SELECT_STD_VARIANT && variant_CONFIG_SELECT_NONSTD_VARIANT
-# error Please define none or one of variant_CONFIG_SELECT_STD_VARIANT, variant_CONFIG_SELECT_NONSTD_VARIANT to 1, but not both.
+#if !defined( variant_CONFIG_SELECT_VARIANT )
+# define variant_CONFIG_SELECT_VARIANT  ( variant_HAVE_STD_VARIANT ? variant_VARIANT_STD : variant_VARIANT_NONSTD )
 #endif
 
 #ifndef  variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
@@ -51,7 +49,7 @@
 #define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L || variant_MSVC_LANG >= 201703L )
 #define variant_CPP17_OR_GREATER  ( __cplusplus >= 201703L || variant_MSVC_LANG >= 201703L )
 
-// use C++17 std::variant if available:
+// Use C++17 std::variant if available and requested:
 
 #if defined( __has_include )
 # define variant_HAS_INCLUDE( arg )  __has_include( arg )
@@ -61,9 +59,7 @@
 
 #define variant_HAVE_STD_VARIANT  ( variant_CPP17_OR_GREATER && variant_HAS_INCLUDE(<string_view>) )
 
-#ifndef  variant_USES_STD_VARIANT
-# define variant_USES_STD_VARIANT  variant_HAVE_STD_VARIANT
-#endif
+#define variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
 
 //
 // Use C++17 std::string_view:
@@ -72,7 +68,6 @@
 #if variant_USES_STD_VARIANT
 
 #include <variant>
-
 
 #if ! variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
 # define variant_size_V(T)  nonstd::variant_size<T>::value
@@ -116,7 +111,7 @@ namespace nonstd {
 
 }
 
-#else // C++17 std::variant
+#else // variant_USES_STD_VARIANT
 
 #include <cstddef>
 #include <limits>
@@ -278,7 +273,7 @@ namespace nonstd {
 #endif
 
 //
-// in_place: code duplicated in any-lite, optional-lite, variant-lite:
+// in_place: code duplicated in any-lite, expected-lite, optional-lite, variant-lite:
 //
 
 #if   ! nonstd_lite_HAVE_IN_PLACE_TYPES
@@ -2050,6 +2045,6 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 # pragma warning( pop )
 #endif
 
-#endif // have C++17 std::variant
+#endif // variant_USES_STD_VARIANT
 
 #endif // NONSTD_VARIANT_LITE_HPP
