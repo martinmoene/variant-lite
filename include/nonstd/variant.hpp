@@ -37,17 +37,22 @@
 # define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
 #endif
 
-// Compiler detection:
+// C++ language version detection (C++20 is speculative):
+// Note: VC14.0/1900 (VS2015) lacks too much from C++14.
 
-#ifdef _MSVC_LANG
-# define variant_MSVC_LANG  _MSVC_LANG
-#else
-# define variant_MSVC_LANG  0
+#ifndef   variant_CPLUSPLUS
+# ifdef  _MSVC_LANG
+#  define variant_CPLUSPLUS  (_MSC_VER == 1900 ? 201103L : _MSVC_LANG )
+# else
+#  define variant_CPLUSPLUS  __cplusplus
+# endif
 #endif
 
-#define variant_CPP11_OR_GREATER  ( __cplusplus >= 201103L || variant_MSVC_LANG >= 201103L )
-#define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L || variant_MSVC_LANG >= 201703L )
-#define variant_CPP17_OR_GREATER  ( __cplusplus >= 201703L || variant_MSVC_LANG >= 201703L )
+#define variant_CPP98_OR_GREATER  ( variant_CPLUSPLUS >= 199711L )
+#define variant_CPP11_OR_GREATER  ( variant_CPLUSPLUS >= 201103L )
+#define variant_CPP14_OR_GREATER  ( variant_CPLUSPLUS >= 201402L )
+#define variant_CPP17_OR_GREATER  ( variant_CPLUSPLUS >= 201703L )
+#define variant_CPP20_OR_GREATER  ( variant_CPLUSPLUS >= 202000L )
 
 // Use C++17 std::variant if available and requested:
 
