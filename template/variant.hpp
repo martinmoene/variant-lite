@@ -56,18 +56,16 @@
 
 // Use C++17 std::variant if available and requested:
 
-#if defined( __has_include )
-# define variant_HAS_INCLUDE( arg )  __has_include( arg )
+#if any_CPP17_OR_GREATER && defined(__has_include ) && __has_include( <variant> )
+# define variant_HAVE_STD_VARIANT  1
 #else
-# define variant_HAS_INCLUDE( arg )  0
+# define variant_HAVE_STD_VARIANT  0
 #endif
 
-#define variant_HAVE_STD_VARIANT  ( variant_CPP17_OR_GREATER && variant_HAS_INCLUDE(<string_view>) )
-
-#define variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
+#define  variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
 
 //
-// Use C++17 std::string_view:
+// Use C++17 std::variant:
 //
 
 #if variant_USES_STD_VARIANT
@@ -297,9 +295,11 @@ using std::in_place_t;
 using std::in_place_type_t;
 using std::in_place_index_t;
 
+#define nonstd_lite_in_place_t(      T)  std::in_place_t
 #define nonstd_lite_in_place_type_t( T)  std::in_place_type_t<T>
 #define nonstd_lite_in_place_index_t(T)  std::in_place_index_t<I>
 
+#define nonstd_lite_in_place(      T)    std::in_place_t{}
 #define nonstd_lite_in_place_type( T)    std::in_place_type_t<T>{}
 #define nonstd_lite_in_place_index(T)    std::in_place_index_t<I>{}
 
@@ -346,12 +346,13 @@ inline in_place_t in_place_index( detail::in_place_index_tag<I> = detail::in_pla
 
 // mimic templated typedef:
 
+#define nonstd_lite_in_place_t(      T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
 #define nonstd_lite_in_place_type_t( T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
 #define nonstd_lite_in_place_index_t(T)  nonstd::in_place_t(&)( nonstd::detail::in_place_index_tag<I> )
 
+#define nonstd_lite_in_place(      T)    nonstd::in_place_type<T>
 #define nonstd_lite_in_place_type( T)    nonstd::in_place_type<T>
 #define nonstd_lite_in_place_index(T)    nonstd::in_place_index<I>
-
 
 } // namespace nonstd
 
@@ -964,7 +965,7 @@ public:
 
     template< class T, class... Args,
         typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
-    explicit variant( nonstd_lite_in_place_type_t(T), Args&&... args)
+    explicit variant( nonstd_lite_in_place_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
@@ -972,7 +973,7 @@ public:
 
     template< class T, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
-    explicit variant( nonstd_lite_in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
+    explicit variant( nonstd_lite_in_place_t(T), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
