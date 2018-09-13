@@ -283,7 +283,7 @@ namespace nonstd {
 // in_place: code duplicated in any-lite, expected-lite, optional-lite, variant-lite:
 //
 
-#if   ! nonstd_lite_HAVE_IN_PLACE_TYPES
+#ifndef nonstd_lite_HAVE_IN_PLACE_TYPES
 #define nonstd_lite_HAVE_IN_PLACE_TYPES  1
 
 // C++17 std::in_place in <utility>:
@@ -1070,15 +1070,15 @@ public:
     
 #endif
 
-    variant(variant const & rhs)
-    : type_index( rhs.type_index )
+    variant(variant const & other)
+    : type_index( other.type_index )
     {
-        (void) helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+        (void) helper_type::copy( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
 
-    variant( variant && rhs ) noexcept(
+    variant( variant && other ) noexcept(
         std::is_nothrow_move_constructible<T0>::value &&
         std::is_nothrow_move_constructible<T1>::value &&
         std::is_nothrow_move_constructible<T2>::value &&
@@ -1095,9 +1095,9 @@ public:
         std::is_nothrow_move_constructible<T13>::value &&
         std::is_nothrow_move_constructible<T14>::value &&
         std::is_nothrow_move_constructible<T15>::value)
-        : type_index( rhs.type_index )
+        : type_index( other.type_index )
     {
-        (void) helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+        (void) helper_type::move( other.type_index, other.ptr(), ptr() );
     }
 
     template< std::size_t I >
@@ -1105,7 +1105,7 @@ public:
 
     template< class T, class... Args,
         typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
-    explicit variant( nonstd_lite_in_place_t(T), Args&&... args)
+    explicit variant( nonstd_lite_in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
@@ -1113,7 +1113,7 @@ public:
 
     template< class T, class U, class... Args,
         typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
-    explicit variant( nonstd_lite_in_place_t(T), std::initializer_list<U> il, Args&&... args )
+    explicit variant( nonstd_lite_in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
@@ -1142,14 +1142,14 @@ public:
         helper_type::destroy( index(), ptr() );
     }
 
-    variant & operator=( variant const & rhs )
+    variant & operator=( variant const & other )
     {
-        return copy_assign( rhs );
+        return copy_assign( other );
     }
 
 #if variant_CPP11_OR_GREATER
 
-    variant & operator=( variant && rhs ) noexcept(
+    variant & operator=( variant && other ) noexcept(
         std::is_nothrow_move_assignable<T0>::value &&
         std::is_nothrow_move_assignable<T1>::value &&
         std::is_nothrow_move_assignable<T2>::value &&
@@ -1167,7 +1167,7 @@ public:
         std::is_nothrow_move_assignable<T14>::value &&
         std::is_nothrow_move_assignable<T15>::value)
         {
-        return move_assign( std::forward<variant>( rhs ) );
+        return move_assign( std::forward<variant>( other ) );
     }
 
     variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::forward<T0>( t0 ) ); }
@@ -1252,21 +1252,21 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap( variant & rhs ) variant_noexcept
+    void swap( variant & other ) variant_noexcept
     {
-        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( index() == rhs.index() )
+        else if ( index() == other.index() )
         {
-            this->swap_value( index(), rhs );
+            this->swap_value( index(), other );
         }
         else
         {
             variant tmp( *this );
-            *this = rhs;
-            rhs = tmp;
+            *this = other;
+            other = tmp;
         }
     }
 
@@ -1355,32 +1355,32 @@ private:
         return static_cast<type_index_t>( -1 );
     }
 
-    variant & copy_assign( variant const & rhs )
+    variant & copy_assign( variant const & other )
     {
-        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( ! valueless_by_exception() && rhs.valueless_by_exception() )
+        else if ( ! valueless_by_exception() && other.valueless_by_exception() )
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
         }
-        else if ( index() == rhs.index() )
+        else if ( index() == other.index() )
         {
-            type_index = helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+            type_index = helper_type::copy( other.type_index, other.ptr(), ptr() );
         }
         else
         {
             // alas exception safety with pre-C++11 needs an extra copy:
 
-            variant tmp( rhs );
+            variant tmp( other );
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
 #if variant_CPP11_OR_GREATER
-            type_index = helper_type::move( rhs.type_index, tmp.ptr(), ptr() );
+            type_index = helper_type::move( other.type_index, tmp.ptr(), ptr() );
 #else
-            type_index = helper_type::copy( rhs.type_index, tmp.ptr(), ptr() );
+            type_index = helper_type::copy( other.type_index, tmp.ptr(), ptr() );
 #endif
         }
         return *this;
@@ -1388,26 +1388,26 @@ private:
 
 #if variant_CPP11_OR_GREATER
 
-    variant & move_assign( variant && rhs )
+    variant & move_assign( variant && other )
     {
-        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( ! valueless_by_exception() && rhs.valueless_by_exception() )
+        else if ( ! valueless_by_exception() && other.valueless_by_exception() )
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
         }
-        else if ( index() == rhs.index() )
+        else if ( index() == other.index() )
         {
-            type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
         }
         else
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-            type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
         }
         return *this;
     }
@@ -1448,27 +1448,27 @@ private:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap_value( std::size_t index, variant & rhs )
+    void swap_value( std::size_t index, variant & other )
     {
         using std::swap;
         switch( index )
         {
-            case 0: swap( this->get<0>(), rhs.get<0>() ); break;
-            case 1: swap( this->get<1>(), rhs.get<1>() ); break;
-            case 2: swap( this->get<2>(), rhs.get<2>() ); break;
-            case 3: swap( this->get<3>(), rhs.get<3>() ); break;
-            case 4: swap( this->get<4>(), rhs.get<4>() ); break;
-            case 5: swap( this->get<5>(), rhs.get<5>() ); break;
-            case 6: swap( this->get<6>(), rhs.get<6>() ); break;
-            case 7: swap( this->get<7>(), rhs.get<7>() ); break;
-            case 8: swap( this->get<8>(), rhs.get<8>() ); break;
-            case 9: swap( this->get<9>(), rhs.get<9>() ); break;
-            case 10: swap( this->get<10>(), rhs.get<10>() ); break;
-            case 11: swap( this->get<11>(), rhs.get<11>() ); break;
-            case 12: swap( this->get<12>(), rhs.get<12>() ); break;
-            case 13: swap( this->get<13>(), rhs.get<13>() ); break;
-            case 14: swap( this->get<14>(), rhs.get<14>() ); break;
-            case 15: swap( this->get<15>(), rhs.get<15>() ); break;
+            case 0: swap( this->get<0>(), other.get<0>() ); break;
+            case 1: swap( this->get<1>(), other.get<1>() ); break;
+            case 2: swap( this->get<2>(), other.get<2>() ); break;
+            case 3: swap( this->get<3>(), other.get<3>() ); break;
+            case 4: swap( this->get<4>(), other.get<4>() ); break;
+            case 5: swap( this->get<5>(), other.get<5>() ); break;
+            case 6: swap( this->get<6>(), other.get<6>() ); break;
+            case 7: swap( this->get<7>(), other.get<7>() ); break;
+            case 8: swap( this->get<8>(), other.get<8>() ); break;
+            case 9: swap( this->get<9>(), other.get<9>() ); break;
+            case 10: swap( this->get<10>(), other.get<10>() ); break;
+            case 11: swap( this->get<11>(), other.get<11>() ); break;
+            case 12: swap( this->get<12>(), other.get<12>() ); break;
+            case 13: swap( this->get<13>(), other.get<13>() ); break;
+            case 14: swap( this->get<14>(), other.get<14>() ); break;
+            case 15: swap( this->get<15>(), other.get<15>() ); break;
             
         }
     }
