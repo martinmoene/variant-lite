@@ -56,10 +56,14 @@
 
 // Use C++17 std::variant if available and requested:
 
-#if any_CPP17_OR_GREATER && defined(__has_include ) && __has_include( <variant> )
-# define variant_HAVE_STD_VARIANT  1
+#if variant_CPP17_OR_GREATER && defined(__has_include )
+# if __has_include( <variant> )
+#  define variant_HAVE_STD_VARIANT  1
+# else
+#  define variant_HAVE_STD_VARIANT  0
+# endif
 #else
-# define variant_HAVE_STD_VARIANT  0
+# define  variant_HAVE_STD_VARIANT  0
 #endif
 
 #define  variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
