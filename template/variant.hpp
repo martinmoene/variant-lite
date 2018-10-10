@@ -149,7 +149,7 @@ namespace nonstd {
 # define variant_COMPILER_MSVC_VERSION   0
 #endif
 
-#if defined __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 # define variant_COMPILER_GNUC_VERSION  __GNUC__
 #else
 # define variant_COMPILER_GNUC_VERSION    0
