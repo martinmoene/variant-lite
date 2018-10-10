@@ -231,7 +231,7 @@ CASE( "variant: Allows to copy-assign from variant" )
     var1 = var2;
 
     EXPECT( get<S>(var1).value.value == V::deflt() );
-#if variant_HAVE_STD_VARIANT
+#if variant_USES_STD_VARIANT
     EXPECT( get<S>(var1).value.state == copy_assigned );
     EXPECT( get<S>(var1).state       == copy_assigned );
 #else
@@ -293,7 +293,7 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
     var = variant<S>{};
 
     EXPECT( get<S>(var).value.value == V::deflt() );
-#if variant_HAVE_STD_VARIANT
+#if variant_USES_STD_VARIANT
     EXPECT( get<S>(var).value.state == move_assigned );
     EXPECT( get<S>(var).state       == move_assigned );
 #else
@@ -429,7 +429,7 @@ CASE( "variant: Allows to move-assign from element value" )
     EXPECT( get<S>(var).value.value == 7 );
     EXPECT( get<S>(var).value.state == move_constructed );
     EXPECT( get<S>(var).value.state == move_constructed );
-#if variant_HAVE_STD_VARIANT
+#if variant_USES_STD_VARIANT
     EXPECT( get<S>(var).state       == value_move_constructed );
 #else
     EXPECT( get<S>(var).state       == move_constructed );
@@ -974,7 +974,7 @@ CASE( "variant: Allows to check for content by type" )
     EXPECT(     holds_alternative< double       >( vd ) );
     EXPECT(     holds_alternative< std::string  >( vs ) );
 
-#if ! variant_HAVE_STD_VARIANT // fires static_assert with g++ (GCC) 7.2.0:
+#if ! variant_USES_STD_VARIANT // fires static_assert with g++ (GCC) 7.2.0:
     EXPECT_NOT( holds_alternative< char         >( vi ) );
     EXPECT_NOT( holds_alternative< short        >( vi ) );
     EXPECT_NOT( holds_alternative< float        >( vd ) );
