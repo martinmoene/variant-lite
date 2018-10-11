@@ -74,6 +74,7 @@
 
 #if variant_USES_STD_VARIANT
 
+#include <functional>   // std::hash<>
 #include <variant>
 
 #if ! variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
@@ -268,6 +269,10 @@ namespace nonstd {
 #endif
 
 // additional includes:
+
+#if variant_CPP11_OR_GREATER
+# include <functional>      // std::hash
+#endif
 
 #if variant_HAVE_INITIALIZER_LIST
 # include <initializer_list>
