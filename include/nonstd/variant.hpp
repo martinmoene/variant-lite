@@ -1245,37 +1245,41 @@ public:
     template< class T, class... Args
         variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
     >
-    void emplace( Args&&... args )
+    T& emplace( Args&&... args )
     {
         helper_type::destroy( type_index, ptr() );
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
+
+        return *as<T>();
     }
 
     template< class T, class U, class... Args
         variant_REQUIRES_T( std::is_constructible< T, std::initializer_list<U>&, Args...>::value )
     >
-    void emplace( std::initializer_list<U> il, Args&&... args )
+    T& emplace( std::initializer_list<U> il, Args&&... args )
     {
         helper_type::destroy( type_index, ptr() );
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
+
+        return *as<T>();
     }
 
     template< size_t K, class... Args
         variant_REQUIRES_T( std::is_constructible< type_at_t<K>, Args...>::value )
     >
-    void emplace( Args&&... args )
+    variant_alternative_t<K, variant> & emplace( Args&&... args )
     {
-        this->template emplace< type_at_t<K> >( std::forward<Args>(args)... );
+        return this->template emplace< type_at_t<K> >( std::forward<Args>(args)... );
     }
 
     template< size_t K, class U, class... Args
         variant_REQUIRES_T( std::is_constructible< type_at_t<K>, std::initializer_list<U>&, Args...>::value )
     >
-    void emplace( std::initializer_list<U> il, Args&&... args )
+    variant_alternative_t<K, variant> & emplace( std::initializer_list<U> il, Args&&... args )
     {
-        this->template emplace< type_at_t<K> >( il, std::forward<Args>(args)... );
+        return this->template emplace< type_at_t<K> >( il, std::forward<Args>(args)... );
     }
 
 #endif // variant_CPP11_OR_GREATER

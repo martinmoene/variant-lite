@@ -137,10 +137,10 @@ Synopsis
 | &nbsp;       |< C++11 | template&lt; class Tx ><br>variant & **operator=**( Tx const & t ) | copy-assign from value;<br>non-standard |
 | State        |&nbsp;| std::size_t **index**() const                    | index of current content's type |
 | &nbsp;       |&nbsp;| bool **valueless_by_exception**() const          | true if no content is present |
-| Emplace      |C++11 | template&lt; class T, class... Args ><br>void **emplace**( Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template&lt; class T, class U, class... Args ><br>void **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template&lt; size_t I, class... Args ><br>void **emplace**( Args&&... args ); | emplace type at index I |
-| &nbsp;       |C++11 | template&lt; size_t I, class U, class... Args ><br>void **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
+| Emplace      |C++11 | template&lt; class T, class... Args ><br>T & **emplace**( Args&&... args ) | emplace type T |
+| &nbsp;       |C++11 | template&lt; class T, class U, class... Args ><br>T & **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
+| &nbsp;       |C++11 | template&lt; size_t I, class... Args ><br>variant_alternative_t&lt;I,variant> &<br>**emplace**( Args&&... args ); | emplace type at index I |
+| &nbsp;       |C++11 | template&lt; size_t I, class U, class... Args ><br>variant_alternative_t&lt;I,variant> &<br>**emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
 | Swap         |&nbsp;| void **swap**( variant & other );                | swap with other |
  
 
