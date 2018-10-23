@@ -9,7 +9,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 # variant-lite version, updated by script/update-version.py:
 
-set( variant_lite_version "1.0.0" )
+set( variant_lite_version "1.1.0" )
 
 # At default, enable building and performing of tests and building of examples:
 

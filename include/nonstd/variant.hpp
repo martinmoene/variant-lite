@@ -11,7 +11,7 @@
 #define NONSTD_VARIANT_LITE_HPP
 
 #define variant_lite_MAJOR  1
-#define variant_lite_MINOR  0
+#define variant_lite_MINOR  1
 #define variant_lite_PATCH  0
 
 #define variant_lite_VERSION  variant_STRINGIFY(variant_lite_MAJOR) "." variant_STRINGIFY(variant_lite_MINOR) "." variant_STRINGIFY(variant_lite_PATCH)
