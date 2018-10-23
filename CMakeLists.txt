@@ -24,6 +24,7 @@ project( variant_lite LANGUAGES CXX )
 include( GNUInstallDirs )
 
 set( package_name "variant-lite" )
+set( include_source_dir "${PROJECT_SOURCE_DIR}/include" )
 
 # Interface library:
 
