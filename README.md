@@ -1,6 +1,6 @@
 # variant lite: A single-file header-only version of a C++17-like variant, a type-safe union for C++98, C++11 and later
 
-[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [ ![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/agauniyal/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
+[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/martinmoene/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
 
 **Contents**  
 - [Example usage](#example-usage)
@@ -75,12 +75,12 @@ Or, if you use the [conan package manager](https://www.conan.io/), follow these 
 
 1. Add *nonstd-lite* to the conan remotes:
 
-        conan remote add nonstd-lite https://api.bintray.com/conan/agauniyal/nonstd-lite
+        conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
 
 2. Add a reference to *variant-lite* to the *requires* section of your project's `conanfile.txt` file:
 
         [requires]
-        variant-lite/0.1.0@nonstd-lite/stable
+        variant-lite/[~=0]@nonstd-lite/testing
 
 3. Run conan's install command:
 
