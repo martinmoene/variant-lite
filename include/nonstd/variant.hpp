@@ -1579,6 +1579,46 @@ get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T1
     return v.template get<K>();
 }
 
+#if variant_CPP11_OR_GREATER
+
+template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline R && get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+{
+    return std::move(v.template get<R>());
+}
+
+template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline R const && get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+{
+    return std::move(v.template get<R>());
+}
+
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type &&
+get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+{
+    if ( K != v.index() )
+    {
+        throw bad_variant_access();
+    }
+
+    return std::move(v.template get<K>());
+}
+
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type const &&
+get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+{
+    if ( K != v.index() )
+    {
+        throw bad_variant_access();
+    }
+
+    return std::move(v.template get<K>());
+}
+
+#endif // variant_CPP11_OR_GREATER
+
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline typename detail::add_pointer<T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )

@@ -146,30 +146,34 @@ Synopsis
 
 ### Algorithms for *variant lite*
 
-| Kind                      | Std  | Function |
-|---------------------------|------|----------|
-| **Relational operators**  |&nbsp;| &nbsp;   | 
-| ==                        |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
-| !=                        |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
-| <                         |&nbsp;| template<...><br>bool **operator<**( variant<...> const & v, variant<...> const & w ) |
-| >                         |&nbsp;| template<...><br>bool **operator>**( variant<...> const & v, variant<...> const & w ) |
-| <=                        |&nbsp;| template<...><br>bool **operator<=**( variant<...> const & v, variant<...> const & w ) |
-| >=                        |&nbsp;| template<...><br>bool **operator>=**( variant<...> const & v, variant<...> const & w ) |
-| **Content**               |&nbsp;| &nbsp;   |
-| contains value of type T  |&nbsp;| template< class T, ...><br>bool **holds_alternative**( variant<...> const & v ) [noexcept] |
-| get by type               |&nbsp;| template< class R, ...><br>R &<br>**get**( variant<...> & v, in_place_type_t(R) = in_place<R> ) |
-| get by type (const)       |&nbsp;| template< class R, ...><br>R const &<br>**get**( variant<...> const & v, in_place_type_t(R) = in_place<R> ) |
-| get by index              |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &<br>**get**( variant<...> & v, in_place_index_t(I) = in_place<I> ) |
-| get by index (const)      |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &<br>**get**( variant<...> const & v, in_place_index_t(I) = in_place<I> ) |
-| get_if by type            |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;T>::type<br>**get_if**( variant<...> * pv, in_place_type_t(T) = in_place<T> ) |
-| get_if by type (const)    |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;const T>::type<br>**get_if**( variant<...> const * pv, in_place_type_t(T) = in_place<T>) |
-| get_if by index           |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> * pv, in_place_index_t(I) = in_place<I> ) |
-| get_if by index (const)   |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> const * pv, in_place_index_t(I) = in_place<I> ) |
-| swap                      |&nbsp;| template<...><br>void **swap**( variant<...> & x, variant<...> & y ) |
-| visit                     |Note&nbsp;1| template< class Visitor, class Variant ><br>Variant **visit**( Visitor const & vis, Variant const & v ) |
-| **Hash support**          |&nbsp;| &nbsp;   | 
-| variant                   |C++11 | template<...> struct **hash**< variant<...> >; |
-| monostate                 |C++11 | template<> struct **hash**< monostate >;       |
+| Kind                        | Std  | Function |
+|-----------------------------|------|----------|
+| **Relational operators**    |&nbsp;| &nbsp;   |
+| ==                          |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
+| !=                          |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
+| <                           |&nbsp;| template<...><br>bool **operator<**( variant<...> const & v, variant<...> const & w ) |
+| >                           |&nbsp;| template<...><br>bool **operator>**( variant<...> const & v, variant<...> const & w ) |
+| <=                          |&nbsp;| template<...><br>bool **operator<=**( variant<...> const & v, variant<...> const & w ) |
+| >=                          |&nbsp;| template<...><br>bool **operator>=**( variant<...> const & v, variant<...> const & w ) |
+| **Content**                 |&nbsp;| &nbsp;   |
+| contains value of type T    |&nbsp;| template< class T, ...><br>bool **holds_alternative**( variant<...> const & v ) [noexcept] |
+| get by type                 |&nbsp;| template< class R, ...><br>R &<br>**get**( variant<...> & v, in_place_type_t(R) = in_place<R> ) |
+| get by type (rvalue)        |C++11 | template< class R, ...><br>R &&<br>**get**( variant<...> && v, in_place_type_t(R) = in_place<R> ) |
+| get by type (const)         |&nbsp;| template< class R, ...><br>R const &<br>**get**( variant<...> const & v, in_place_type_t(R) = in_place<R> ) |
+| get by type (const rvalue)  |C++11 | template< class R, ...><br>R const &&<br>**get**( variant<...> const && v, in_place_type_t(R) = in_place<R> ) |
+| get by index                |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &<br>**get**( variant<...> & v, in_place_index_t(I) = in_place<I> ) |
+| get by index (rvalue)       |C++11 | template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &&<br>**get**( variant<...> && v, in_place_index_t(I) = in_place<I> ) |
+| get by index (const)        |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &<br>**get**( variant<...> const & v, in_place_index_t(I) = in_place<I> ) |
+| get by index (const rvalue) |C++11 | template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &&<br>**get**( variant<...> const && v, in_place_index_t(I) = in_place<I> ) |
+| get_if by type              |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;T>::type<br>**get_if**( variant<...> * pv, in_place_type_t(T) = in_place<T> ) |
+| get_if by type (const)      |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;const T>::type<br>**get_if**( variant<...> const * pv, in_place_type_t(T) = in_place<T>) |
+| get_if by index             |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> * pv, in_place_index_t(I) = in_place<I> ) |
+| get_if by index (const)     |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> const * pv, in_place_index_t(I) = in_place<I> ) |
+| swap                        |&nbsp;| template<...><br>void **swap**( variant<...> & x, variant<...> & y ) |
+| visit                         |Note&nbsp;1| template< class Visitor, class Variant ><br>Variant **visit**( Visitor const & vis, Variant const & v ) |
+| **Hash support**            |&nbsp;| &nbsp;   |
+| variant                     |C++11 | template<...> struct **hash**< variant<...> >; |
+| monostate                   |C++11 | template<> struct **hash**< monostate >;       |
 
 Note 1: visitor is limited to always return a Variant.
 
