@@ -1388,6 +1388,46 @@ get( variant<{{TplArgsList}}> const & v, nonstd_lite_in_place_index_t(K) = nonst
     return v.template get<K>();
 }
 
+#if variant_CPP11_OR_GREATER
+
+template< class R, {{TplParamsList}} >
+inline R && get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+{
+    return std::move(v.template get<R>());
+}
+
+template< class R, {{TplParamsList}} >
+inline R const && get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+{
+    return std::move(v.template get<R>());
+}
+
+template< std::size_t K, {{TplParamsList}} >
+inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type &&
+get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+{
+    if ( K != v.index() )
+    {
+        throw bad_variant_access();
+    }
+
+    return std::move(v.template get<K>());
+}
+
+template< std::size_t K, {{TplParamsList}} >
+inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &&
+get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+{
+    if ( K != v.index() )
+    {
+        throw bad_variant_access();
+    }
+
+    return std::move(v.template get<K>());
+}
+
+#endif // variant_CPP11_OR_GREATER
+
 template< class T, {{TplParamsList}} >
 inline typename detail::add_pointer<T>::type
 get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
