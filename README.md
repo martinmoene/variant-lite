@@ -1,6 +1,6 @@
 # variant lite: A single-file header-only version of a C++17-like variant, a type-safe union for C++98, C++11 and later
 
-[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [ ![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/agauniyal/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
+[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/martinmoene/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
 
 **Contents**  
 - [Example usage](#example-usage)
@@ -52,9 +52,9 @@ In a nutshell
 -------------
 **variant lite** is a single-file header-only library to represent a type-safe union. The library aims to provide a [C++17-like variant](http://en.cppreference.com/w/cpp/utility/variant) for use with C++98 and later. If available, std::variant is used. 
 
-**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite) and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
+**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite), [expected-lite](https://github.com/martinmoene/expected-lite)  and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
 
-**Limitations of variant lite** are the maximum of seven alternative types that all must have a different type. Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. The visitor only takes a single variant and can only return a variant. *variant lite* does not provide allocator-extended constructors.
+**Limitations of variant lite** are the requirement for the alternative types to be of different types and the limit on the number of alternative types and the number of visitor arguments. The maximum number of types and visitor arguments are configurable via [script generate_header.py](script/generate_header.py) (default: 16 types, 5 visitor arguments). Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. *variant lite* does not provide allocator-extended constructors.
 
 
 License
@@ -75,12 +75,12 @@ Or, if you use the [conan package manager](https://www.conan.io/), follow these 
 
 1. Add *nonstd-lite* to the conan remotes:
 
-        conan remote add nonstd-lite https://api.bintray.com/conan/agauniyal/nonstd-lite
+        conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
 
 2. Add a reference to *variant-lite* to the *requires* section of your project's `conanfile.txt` file:
 
         [requires]
-        variant-lite/0.1.0@nonstd-lite/stable
+        variant-lite/[~=0]@nonstd-lite/testing
 
 3. Run conan's install command:
 
@@ -137,10 +137,10 @@ Synopsis
 | &nbsp;       |< C++11 | template&lt; class Tx ><br>variant & **operator=**( Tx const & t ) | copy-assign from value;<br>non-standard |
 | State        |&nbsp;| std::size_t **index**() const                    | index of current content's type |
 | &nbsp;       |&nbsp;| bool **valueless_by_exception**() const          | true if no content is present |
-| Emplace      |C++11 | template&lt; class T, class... Args ><br>void **emplace**( Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template&lt; class T, class U, class... Args ><br>void **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template&lt; size_t I, class... Args ><br>void **emplace**( Args&&... args ); | emplace type at index I |
-| &nbsp;       |C++11 | template&lt; size_t I, class U, class... Args ><br>void **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
+| Emplace      |C++11 | template&lt; class T, class... Args ><br>T & **emplace**( Args&&... args ) | emplace type T |
+| &nbsp;       |C++11 | template&lt; class T, class U, class... Args ><br>T & **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
+| &nbsp;       |C++11 | template&lt; size_t I, class... Args ><br>variant_alternative_t&lt;I,variant> &<br>**emplace**( Args&&... args ); | emplace type at index I |
+| &nbsp;       |C++11 | template&lt; size_t I, class U, class... Args ><br>variant_alternative_t&lt;I,variant> &<br>**emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
 | Swap         |&nbsp;| void **swap**( variant & other );                | swap with other |
  
 
@@ -295,7 +295,7 @@ Notes and References
 
 ### Acknowledgments
 
-Thanks to @flexferrum for making the number of variant types configurable.
+Thanks to @flexferrum for making the number of variant types and visitor arguments [configurable](#in-a-nutshell).
 
 
 ### References
@@ -343,6 +343,7 @@ variant: Allows non-default constructible as second and later type (first: monos
 variant: Allows to default-construct variant
 variant: Allows to copy-construct from variant
 variant: Allows to move-construct from variant (C++11)
+variant: Allows to move-construct if-noexcept from variant (C++11)
 variant: Allows to obtain the index of the current type
 variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to copy-assign from variant
