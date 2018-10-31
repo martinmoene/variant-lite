@@ -179,13 +179,20 @@ Note 1: visitor is limited to always return a Variant.
 
 ### Configuration macros
 
+#### Select `std::variant` or `nonstd::variant`
+At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
+
+-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
+Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
+
+#### Presence of simulation macros
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_SIZE\_V\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
 
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
-### Macros to control alignment
+#### Macros to control alignment
 
 If *variant lite* is compiled as C++11 or later, C++11 alignment facilities are used for storage of the underlying object. When compiled as pre-C++11, *variant lite* tries to determine proper alignment itself. If this doesn't work out, you can control alignment via the following macros. See also section [Implementation notes](#implementation-notes).
 
