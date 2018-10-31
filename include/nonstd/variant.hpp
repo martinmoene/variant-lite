@@ -69,6 +69,94 @@
 #define  variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
 
 //
+// in_place: code duplicated in any-lite, expected-lite, optional-lite, value-ptr-lite, variant-lite:
+//
+
+#ifndef nonstd_lite_HAVE_IN_PLACE_TYPES
+#define nonstd_lite_HAVE_IN_PLACE_TYPES  1
+
+// C++17 std::in_place in <utility>:
+
+#if variant_CPP17_OR_GREATER
+
+#include <utility>
+
+namespace nonstd {
+
+using std::in_place;
+using std::in_place_type;
+using std::in_place_index;
+using std::in_place_t;
+using std::in_place_type_t;
+using std::in_place_index_t;
+
+#define nonstd_lite_in_place_t(      T)  std::in_place_t
+#define nonstd_lite_in_place_type_t( T)  std::in_place_type_t<T>
+#define nonstd_lite_in_place_index_t(K)  std::in_place_index_t<K>
+
+#define nonstd_lite_in_place(      T)    std::in_place_t{}
+#define nonstd_lite_in_place_type( T)    std::in_place_type_t<T>{}
+#define nonstd_lite_in_place_index(K)    std::in_place_index_t<K>{}
+
+} // namespace nonstd
+
+#else // variant_CPP17_OR_GREATER
+
+#include <cstddef>
+
+namespace nonstd {
+namespace detail {
+
+template< class T >
+struct in_place_type_tag {};
+
+template< std::size_t K >
+struct in_place_index_tag {};
+
+} // namespace detail
+
+struct in_place_t {};
+
+template< class T >
+inline in_place_t in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+{
+    return in_place_t();
+}
+
+template< std::size_t K >
+inline in_place_t in_place( detail::in_place_index_tag<K> = detail::in_place_index_tag<K>() )
+{
+    return in_place_t();
+}
+
+template< class T >
+inline in_place_t in_place_type( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+{
+    return in_place_t();
+}
+
+template< std::size_t K >
+inline in_place_t in_place_index( detail::in_place_index_tag<K> = detail::in_place_index_tag<K>() )
+{
+    return in_place_t();
+}
+
+// mimic templated typedef:
+
+#define nonstd_lite_in_place_t(      T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
+#define nonstd_lite_in_place_type_t( T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
+#define nonstd_lite_in_place_index_t(K)  nonstd::in_place_t(&)( nonstd::detail::in_place_index_tag<K> )
+
+#define nonstd_lite_in_place(      T)    nonstd::in_place_type<T>
+#define nonstd_lite_in_place_type( T)    nonstd::in_place_type<T>
+#define nonstd_lite_in_place_index(K)    nonstd::in_place_index<K>
+
+} // namespace nonstd
+
+#endif // variant_CPP17_OR_GREATER
+#endif // nonstd_lite_HAVE_IN_PLACE_TYPES
+
+//
 // Use C++17 std::variant:
 //
 
@@ -96,13 +184,6 @@ namespace nonstd {
     using std::variant_alternative_t;
     using std::hash;
 
-    using std::in_place;
-    using std::in_place_type;
-    using std::in_place_index;
-    using std::in_place_t;
-    using std::in_place_type_t;
-    using std::in_place_index_t;
-
     using std::visit;
     using std::holds_alternative;
     using std::get;
@@ -116,7 +197,6 @@ namespace nonstd {
     using std::swap;
 
     constexpr auto variant_npos = std::variant_npos;
-
 }
 
 #else // variant_USES_STD_VARIANT
@@ -298,90 +378,6 @@ namespace nonstd {
     , typename std::enable_if<__VA_ARGS__, void*>::type = variant_nullptr
 
 #endif
-
-//
-// in_place: code duplicated in any-lite, expected-lite, optional-lite, variant-lite:
-//
-
-#ifndef nonstd_lite_HAVE_IN_PLACE_TYPES
-#define nonstd_lite_HAVE_IN_PLACE_TYPES  1
-
-// C++17 std::in_place in <utility>:
-
-#if variant_CPP17_OR_GREATER
-
-namespace nonstd {
-
-using std::in_place;
-using std::in_place_type;
-using std::in_place_index;
-using std::in_place_t;
-using std::in_place_type_t;
-using std::in_place_index_t;
-
-#define nonstd_lite_in_place_t(      T)  std::in_place_t
-#define nonstd_lite_in_place_type_t( T)  std::in_place_type_t<T>
-#define nonstd_lite_in_place_index_t(K)  std::in_place_index_t<K>
-
-#define nonstd_lite_in_place(      T)    std::in_place_t{}
-#define nonstd_lite_in_place_type( T)    std::in_place_type_t<T>{}
-#define nonstd_lite_in_place_index(K)    std::in_place_index_t<K>{}
-
-} // namespace nonstd
-
-#else // variant_CPP17_OR_GREATER
-
-namespace nonstd {
-namespace detail {
-
-template< class T >
-struct in_place_type_tag {};
-
-template< std::size_t K >
-struct in_place_index_tag {};
-
-} // namespace detail
-
-struct in_place_t {};
-
-template< class T >
-inline in_place_t in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
-{
-    return in_place_t();
-}
-
-template< std::size_t K >
-inline in_place_t in_place( detail::in_place_index_tag<K> = detail::in_place_index_tag<K>() )
-{
-    return in_place_t();
-}
-
-template< class T >
-inline in_place_t in_place_type( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
-{
-    return in_place_t();
-}
-
-template< std::size_t K >
-inline in_place_t in_place_index( detail::in_place_index_tag<K> = detail::in_place_index_tag<K>() )
-{
-    return in_place_t();
-}
-
-// mimic templated typedef:
-
-#define nonstd_lite_in_place_t(      T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
-#define nonstd_lite_in_place_type_t( T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
-#define nonstd_lite_in_place_index_t(K)  nonstd::in_place_t(&)( nonstd::detail::in_place_index_tag<K> )
-
-#define nonstd_lite_in_place(      T)    nonstd::in_place_type<T>
-#define nonstd_lite_in_place_type( T)    nonstd::in_place_type<T>
-#define nonstd_lite_in_place_index(K)    nonstd::in_place_index<K>
-
-} // namespace nonstd
-
-#endif // variant_CPP17_OR_GREATER
-#endif // nonstd_lite_HAVE_IN_PLACE_TYPES
 
 //
 // variant:
