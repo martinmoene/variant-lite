@@ -287,7 +287,8 @@ Other implementations of variant
 --------------------------------
 - Isabella Muerte. [MNMLSTC Core](https://github.com/mnmlstc/core) (C++11).
 - Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
-- Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union.](https://github.com/eggs-cpp/variant).
+- Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union](https://github.com/eggs-cpp/variant).
+- Chris Beck. [strict_variant, a simpler type-safe union for C++11/C++14](https://github.com/cbeck88/strict-variant).
 - Mapbox. [C++11/C++14 Variant](https://github.com/mapbox/variant).
 - Michael Park. [Variant: A type-safe union (C++14)](https://github.com/mpark/variant).
 - Gregor Burger. [Typesafe tagged union with "don't call us, we'll call you" feature (C++14)](https://github.com/gregorburger/variant).
