@@ -11,7 +11,7 @@
 #define NONSTD_VARIANT_LITE_HPP
 
 #define variant_lite_MAJOR  1
-#define variant_lite_MINOR  0
+#define variant_lite_MINOR  1
 #define variant_lite_PATCH  0
 
 #define variant_lite_VERSION  variant_STRINGIFY(variant_lite_MAJOR) "." variant_STRINGIFY(variant_lite_MINOR) "." variant_STRINGIFY(variant_lite_PATCH)
@@ -21,6 +21,14 @@
 
 // variant-lite configuration:
 
+#define variant_VARIANT_DEFAULT  0
+#define variant_VARIANT_NONSTD   1
+#define variant_VARIANT_STD      2
+
+#if !defined( variant_CONFIG_SELECT_VARIANT )
+# define variant_CONFIG_SELECT_VARIANT  ( variant_HAVE_STD_VARIANT ? variant_VARIANT_STD : variant_VARIANT_NONSTD )
+#endif
+
 #ifndef  variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
 # define variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO  0
 #endif
@@ -29,30 +37,132 @@
 # define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
 #endif
 
-// Compiler detection:
+// C++ language version detection (C++20 is speculative):
+// Note: VC14.0/1900 (VS2015) lacks too much from C++14.
 
-#ifdef _MSVC_LANG
-# define variant_MSVC_LANG  _MSVC_LANG
-#else
-# define variant_MSVC_LANG  0
+#ifndef   variant_CPLUSPLUS
+# ifdef  _MSVC_LANG
+#  define variant_CPLUSPLUS  (_MSC_VER == 1900 ? 201103L : _MSVC_LANG )
+# else
+#  define variant_CPLUSPLUS  __cplusplus
+# endif
 #endif
 
-#define variant_CPP11_OR_GREATER  ( __cplusplus >= 201103L || variant_MSVC_LANG >= 201103L )
-#define variant_CPP14_OR_GREATER  ( __cplusplus >= 201402L || variant_MSVC_LANG >= 201703L )
-#define variant_CPP17_OR_GREATER  ( __cplusplus >= 201703L || variant_MSVC_LANG >= 201703L )
+#define variant_CPP98_OR_GREATER  ( variant_CPLUSPLUS >= 199711L )
+#define variant_CPP11_OR_GREATER  ( variant_CPLUSPLUS >= 201103L )
+#define variant_CPP14_OR_GREATER  ( variant_CPLUSPLUS >= 201402L )
+#define variant_CPP17_OR_GREATER  ( variant_CPLUSPLUS >= 201703L )
+#define variant_CPP20_OR_GREATER  ( variant_CPLUSPLUS >= 202000L )
 
-// use C++17 std::variant if available:
+// Use C++17 std::variant if available and requested:
 
-#if defined( __has_include )
-# define variant_HAS_INCLUDE( arg )  __has_include( arg )
+#if variant_CPP17_OR_GREATER && defined(__has_include )
+# if __has_include( <variant> )
+#  define variant_HAVE_STD_VARIANT  1
+# else
+#  define variant_HAVE_STD_VARIANT  0
+# endif
 #else
-# define variant_HAS_INCLUDE( arg )  0
+# define  variant_HAVE_STD_VARIANT  0
 #endif
 
-#if variant_HAS_INCLUDE( <variant> ) && variant_CPP17_OR_GREATER
+#define  variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
 
-#define variant_HAVE_STD_VARIANT  1
+//
+// in_place: code duplicated in any-lite, expected-lite, optional-lite, value-ptr-lite, variant-lite:
+//
 
+#ifndef nonstd_lite_HAVE_IN_PLACE_TYPES
+#define nonstd_lite_HAVE_IN_PLACE_TYPES  1
+
+// C++17 std::in_place in <utility>:
+
+#if variant_CPP17_OR_GREATER
+
+#include <utility>
+
+namespace nonstd {
+
+using std::in_place;
+using std::in_place_type;
+using std::in_place_index;
+using std::in_place_t;
+using std::in_place_type_t;
+using std::in_place_index_t;
+
+#define nonstd_lite_in_place_t(      T)  std::in_place_t
+#define nonstd_lite_in_place_type_t( T)  std::in_place_type_t<T>
+#define nonstd_lite_in_place_index_t(K)  std::in_place_index_t<K>
+
+#define nonstd_lite_in_place(      T)    std::in_place_t{}
+#define nonstd_lite_in_place_type( T)    std::in_place_type_t<T>{}
+#define nonstd_lite_in_place_index(K)    std::in_place_index_t<K>{}
+
+} // namespace nonstd
+
+#else // variant_CPP17_OR_GREATER
+
+#include <cstddef>
+
+namespace nonstd {
+namespace detail {
+
+template< class T >
+struct in_place_type_tag {};
+
+template< std::size_t K >
+struct in_place_index_tag {};
+
+} // namespace detail
+
+struct in_place_t {};
+
+template< class T >
+inline in_place_t in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+{
+    return in_place_t();
+}
+
+template< std::size_t K >
+inline in_place_t in_place( detail::in_place_index_tag<K> = detail::in_place_index_tag<K>() )
+{
+    return in_place_t();
+}
+
+template< class T >
+inline in_place_t in_place_type( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
+{
+    return in_place_t();
+}
+
+template< std::size_t K >
+inline in_place_t in_place_index( detail::in_place_index_tag<K> = detail::in_place_index_tag<K>() )
+{
+    return in_place_t();
+}
+
+// mimic templated typedef:
+
+#define nonstd_lite_in_place_t(      T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
+#define nonstd_lite_in_place_type_t( T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
+#define nonstd_lite_in_place_index_t(K)  nonstd::in_place_t(&)( nonstd::detail::in_place_index_tag<K> )
+
+#define nonstd_lite_in_place(      T)    nonstd::in_place_type<T>
+#define nonstd_lite_in_place_type( T)    nonstd::in_place_type<T>
+#define nonstd_lite_in_place_index(K)    nonstd::in_place_index<K>
+
+} // namespace nonstd
+
+#endif // variant_CPP17_OR_GREATER
+#endif // nonstd_lite_HAVE_IN_PLACE_TYPES
+
+//
+// Use C++17 std::variant:
+//
+
+#if variant_USES_STD_VARIANT
+
+#include <functional>   // std::hash<>
 #include <variant>
 
 #if ! variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
@@ -60,7 +170,7 @@
 #endif
 
 #if ! variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO
-# define variant_alternative_T(I,T)  typename nonstd::variant_alternative<I,T >::type
+# define variant_alternative_T(K,T)  typename nonstd::variant_alternative<K,T >::type
 #endif
 
 namespace nonstd {
@@ -73,13 +183,6 @@ namespace nonstd {
     using std::variant_alternative;
     using std::variant_alternative_t;
     using std::hash;
-
-    using std::in_place;
-    using std::in_place_type;
-    using std::in_place_index;
-    using std::in_place_t;
-    using std::in_place_type_t;
-    using std::in_place_index_t;
 
     using std::visit;
     using std::holds_alternative;
@@ -94,10 +197,9 @@ namespace nonstd {
     using std::swap;
 
     constexpr auto variant_npos = std::variant_npos;
-
 }
 
-#else // C++17 std::variant
+#else // variant_USES_STD_VARIANT
 
 #include <cstddef>
 #include <limits>
@@ -128,7 +230,7 @@ namespace nonstd {
 # define variant_COMPILER_MSVC_VERSION   0
 #endif
 
-#if defined __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 # define variant_COMPILER_GNUC_VERSION  __GNUC__
 #else
 # define variant_COMPILER_GNUC_VERSION    0
@@ -248,6 +350,10 @@ namespace nonstd {
 
 // additional includes:
 
+#if variant_CPP11_OR_GREATER
+# include <functional>      // std::hash
+#endif
+
 #if variant_HAVE_INITIALIZER_LIST
 # include <initializer_list>
 #endif
@@ -258,60 +364,20 @@ namespace nonstd {
 # include <tr1/type_traits>
 #endif
 
-//
-// in_place: code duplicated in any-lite, optional-lite, variant-lite:
-//
+// Method enabling
 
-#if ! nonstd_lite_HAVE_IN_PLACE_TYPES
+#if variant_CPP11_OR_GREATER
 
-namespace nonstd {
+# define variant_REQUIRES_T(...) \
+    , typename = typename std::enable_if<__VA_ARGS__>::type
 
-namespace detail {
+# define variant_REQUIRES_R(R, ...) \
+    typename std::enable_if<__VA_ARGS__, R>::type
 
-template< class T >
-struct in_place_type_tag {};
+# define variant_REQUIRES_A(...) \
+    , typename std::enable_if<__VA_ARGS__, void*>::type = variant_nullptr
 
-template< std::size_t I >
-struct in_place_index_tag {};
-
-} // namespace detail
-
-struct in_place_t {};
-
-template< class T >
-inline in_place_t in_place( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
-{
-    return in_place_t();
-}
-
-template< std::size_t I >
-inline in_place_t in_place( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
-{
-    return in_place_t();
-}
-
-template< class T >
-inline in_place_t in_place_type( detail::in_place_type_tag<T> = detail::in_place_type_tag<T>() )
-{
-    return in_place_t();
-}
-
-template< std::size_t I >
-inline in_place_t in_place_index( detail::in_place_index_tag<I> = detail::in_place_index_tag<I>() )
-{
-    return in_place_t();
-}
-
-// mimic templated typedef:
-
-#define nonstd_lite_in_place_type_t( T)  nonstd::in_place_t(&)( nonstd::detail::in_place_type_tag<T>  )
-#define nonstd_lite_in_place_index_t(T)  nonstd::in_place_t(&)( nonstd::detail::in_place_index_tag<I> )
-
-#define nonstd_lite_HAVE_IN_PLACE_TYPES  1
-
-} // namespace nonstd
-
-#endif // nonstd_lite_HAVE_IN_PLACE_TYPES
+#endif
 
 //
 // variant:
@@ -812,14 +878,14 @@ struct helper
         return to_index_t( detail::typelist_index_of< variant_types, T>::value );
     }
 
-    template< std::size_t I, class... Args >
+    template< std::size_t K, class... Args >
     static type_index_t construct_i( void * data, Args&&... args )
     {
-        using type = typename detail::typelist_type_at< variant_types, I >::type;
+        using type = typename detail::typelist_type_at< variant_types, K >::type;
 
         construct_t< type >( data, std::forward<Args>(args)... );
 
-        return to_index_t( I );
+        return to_index_t( K );
     }
 
     static type_index_t move( std::size_t const from_index, void * from_value, void * to_value )
@@ -914,22 +980,22 @@ constexpr std::size_t variant_size_v = variant_size<T>::value;
 
 // obtain the type of the alternative specified by its index, at compile time:
 
-template< std::size_t I, class T >
+template< std::size_t K, class T >
 struct variant_alternative; /* undefined */
 
-template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-struct variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+struct variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >
 {
-    typedef typename detail::typelist_type_at<variant_TL16(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15), I>::type type;
+    typedef typename detail::typelist_type_at<variant_TL16(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15), K>::type type;
 };
 
 #if variant_CPP11_OR_GREATER
-template< std::size_t I, class T >
-using variant_alternative_t = typename variant_alternative<I, T>::type;
+template< std::size_t K, class T >
+using variant_alternative_t = typename variant_alternative<K, T>::type;
 #endif
 
 #if ! variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO
-# define variant_alternative_T(I,T)  typename nonstd::variant_alternative<I,T >::type
+# define variant_alternative_T(K,T)  typename nonstd::variant_alternative<K,T >::type
 #endif
 
 // NTS:implement specializes the std::uses_allocator type trait
@@ -1020,53 +1086,73 @@ public:
     
 #endif
 
-    variant(variant const & rhs)
-    : type_index( rhs.type_index )
+    variant(variant const & other)
+    : type_index( other.type_index )
     {
-        (void) helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+        (void) helper_type::copy( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
 
-    variant( variant && rhs )
-    : type_index( rhs.type_index )
+    variant( variant && other ) noexcept(
+        std::is_nothrow_move_constructible<T0>::value &&
+        std::is_nothrow_move_constructible<T1>::value &&
+        std::is_nothrow_move_constructible<T2>::value &&
+        std::is_nothrow_move_constructible<T3>::value &&
+        std::is_nothrow_move_constructible<T4>::value &&
+        std::is_nothrow_move_constructible<T5>::value &&
+        std::is_nothrow_move_constructible<T6>::value &&
+        std::is_nothrow_move_constructible<T7>::value &&
+        std::is_nothrow_move_constructible<T8>::value &&
+        std::is_nothrow_move_constructible<T9>::value &&
+        std::is_nothrow_move_constructible<T10>::value &&
+        std::is_nothrow_move_constructible<T11>::value &&
+        std::is_nothrow_move_constructible<T12>::value &&
+        std::is_nothrow_move_constructible<T13>::value &&
+        std::is_nothrow_move_constructible<T14>::value &&
+        std::is_nothrow_move_constructible<T15>::value)
+        : type_index( other.type_index )
     {
-        (void) helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+        (void) helper_type::move( other.type_index, other.ptr(), ptr() );
     }
 
-    template< std::size_t I >
-    using type_at_t = typename detail::typelist_type_at< variant_types, I >::type;
+    template< std::size_t K >
+    using type_at_t = typename detail::typelist_type_at< variant_types, K >::type;
 
-    template< class T, class... Args,
-        typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
+    template< class T, class... Args
+        variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
+    >
     explicit variant( nonstd_lite_in_place_type_t(T), Args&&... args)
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
     }
 
-    template< class T, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
+    template< class T, class U, class... Args
+        variant_REQUIRES_T( std::is_constructible< T, std::initializer_list<U>&, Args...>::value )
+    >
     explicit variant( nonstd_lite_in_place_type_t(T), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
     }
 
-    template< std::size_t I, class... Args,
-        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, Args...>::value>::type >
-    explicit variant( nonstd_lite_in_place_index_t(I), Args&&... args )
+    template< std::size_t K, class... Args
+        variant_REQUIRES_T( std::is_constructible< type_at_t<K>, Args...>::value )
+    >
+    explicit variant( nonstd_lite_in_place_index_t(K), Args&&... args )
     {
         type_index = variant_npos_internal();
-        type_index = helper_type::template construct_i<I>( ptr(), std::forward<Args>(args)... );
+        type_index = helper_type::template construct_i<K>( ptr(), std::forward<Args>(args)... );
     }
 
-    template< size_t I, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
-    explicit variant( nonstd_lite_in_place_index_t(I), std::initializer_list<U> il, Args&&... args )
+    template< size_t K, class U, class... Args
+        variant_REQUIRES_T( std::is_constructible< type_at_t<K>, std::initializer_list<U>&, Args...>::value )
+    >
+    explicit variant( nonstd_lite_in_place_index_t(K), std::initializer_list<U> il, Args&&... args )
     {
         type_index = variant_npos_internal();
-        type_index = helper_type::template construct_i<I>( ptr(), il, std::forward<Args>(args)... );
+        type_index = helper_type::template construct_i<K>( ptr(), il, std::forward<Args>(args)... );
     }
 
 #endif // variant_CPP11_OR_GREATER
@@ -1076,16 +1162,32 @@ public:
         helper_type::destroy( index(), ptr() );
     }
 
-    variant & operator=( variant const & rhs )
+    variant & operator=( variant const & other )
     {
-        return copy_assign( rhs );
+        return copy_assign( other );
     }
 
 #if variant_CPP11_OR_GREATER
 
-    variant & operator=( variant && rhs )
-    {
-        return move_assign( std::forward<variant>( rhs ) );
+    variant & operator=( variant && other ) noexcept(
+        std::is_nothrow_move_assignable<T0>::value &&
+        std::is_nothrow_move_assignable<T1>::value &&
+        std::is_nothrow_move_assignable<T2>::value &&
+        std::is_nothrow_move_assignable<T3>::value &&
+        std::is_nothrow_move_assignable<T4>::value &&
+        std::is_nothrow_move_assignable<T5>::value &&
+        std::is_nothrow_move_assignable<T6>::value &&
+        std::is_nothrow_move_assignable<T7>::value &&
+        std::is_nothrow_move_assignable<T8>::value &&
+        std::is_nothrow_move_assignable<T9>::value &&
+        std::is_nothrow_move_assignable<T10>::value &&
+        std::is_nothrow_move_assignable<T11>::value &&
+        std::is_nothrow_move_assignable<T12>::value &&
+        std::is_nothrow_move_assignable<T13>::value &&
+        std::is_nothrow_move_assignable<T14>::value &&
+        std::is_nothrow_move_assignable<T15>::value)
+        {
+        return move_assign( std::forward<variant>( other ) );
     }
 
     variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::forward<T0>( t0 ) ); }
@@ -1136,55 +1238,63 @@ public:
     }
 
 #if variant_CPP11_OR_GREATER
-    template< class T, class... Args,
-        typename = typename std::enable_if< std::is_constructible< T, Args...>::value>::type >
-    void emplace( Args&&... args )
+    template< class T, class... Args
+        variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
+    >
+    T& emplace( Args&&... args )
     {
         helper_type::destroy( type_index, ptr() );
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), std::forward<Args>(args)... );
+
+        return *as<T>();
     }
 
-    template< class T, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< T, std::initializer_list<U>&, Args...>::value>::type >
-    void emplace( std::initializer_list<U> il, Args&&... args )
+    template< class T, class U, class... Args
+        variant_REQUIRES_T( std::is_constructible< T, std::initializer_list<U>&, Args...>::value )
+    >
+    T& emplace( std::initializer_list<U> il, Args&&... args )
     {
         helper_type::destroy( type_index, ptr() );
         type_index = variant_npos_internal();
         type_index = helper_type::template construct_t<T>( ptr(), il, std::forward<Args>(args)... );
+
+        return *as<T>();
     }
 
-    template< size_t I, class... Args,
-        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, Args...>::value>::type >
-    void emplace( Args&&... args )
+    template< size_t K, class... Args
+        variant_REQUIRES_T( std::is_constructible< type_at_t<K>, Args...>::value )
+    >
+    variant_alternative_t<K, variant> & emplace( Args&&... args )
     {
-        this->template emplace< type_at_t<I> >( std::forward<Args>(args)... );
+        return this->template emplace< type_at_t<K> >( std::forward<Args>(args)... );
     }
 
-    template< size_t I, class U, class... Args,
-        typename = typename std::enable_if< std::is_constructible< type_at_t<I>, std::initializer_list<U>&, Args...>::value >::type >
-    void emplace( std::initializer_list<U> il, Args&&... args )
+    template< size_t K, class U, class... Args
+        variant_REQUIRES_T( std::is_constructible< type_at_t<K>, std::initializer_list<U>&, Args...>::value )
+    >
+    variant_alternative_t<K, variant> & emplace( std::initializer_list<U> il, Args&&... args )
     {
-        this->template emplace< type_at_t<I> >( il, std::forward<Args>(args)... );
+        return this->template emplace< type_at_t<K> >( il, std::forward<Args>(args)... );
     }
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap( variant & rhs ) variant_noexcept
+    void swap( variant & other ) variant_noexcept
     {
-        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( index() == rhs.index() )
+        else if ( index() == other.index() )
         {
-            this->swap_value( index(), rhs );
+            this->swap_value( index(), other );
         }
         else
         {
             variant tmp( *this );
-            *this = rhs;
-            rhs = tmp;
+            *this = other;
+            other = tmp;
         }
     }
 
@@ -1224,18 +1334,18 @@ public:
         return *as<const T>();
     }
 
-    template< std::size_t I >
-    typename variant_alternative< I, variant >::type &
+    template< std::size_t K >
+    typename variant_alternative< K, variant >::type &
     get()
     {
-        return this->template get< typename detail::typelist_type_at< variant_types, I >::type >();
+        return this->template get< typename detail::typelist_type_at< variant_types, K >::type >();
     }
 
-    template< std::size_t I >
-    typename variant_alternative< I, variant >::type const &
+    template< std::size_t K >
+    typename variant_alternative< K, variant >::type const &
     get() const
     {
-        return this->template get< typename detail::typelist_type_at< variant_types, I >::type >();
+        return this->template get< typename detail::typelist_type_at< variant_types, K >::type >();
     }
 
 private:
@@ -1273,32 +1383,32 @@ private:
         return static_cast<type_index_t>( -1 );
     }
 
-    variant & copy_assign( variant const & rhs )
+    variant & copy_assign( variant const & other )
     {
-        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( ! valueless_by_exception() && rhs.valueless_by_exception() )
+        else if ( ! valueless_by_exception() && other.valueless_by_exception() )
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
         }
-        else if ( index() == rhs.index() )
+        else if ( index() == other.index() )
         {
-            type_index = helper_type::copy( rhs.type_index, rhs.ptr(), ptr() );
+            type_index = helper_type::copy( other.type_index, other.ptr(), ptr() );
         }
         else
         {
             // alas exception safety with pre-C++11 needs an extra copy:
 
-            variant tmp( rhs );
+            variant tmp( other );
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
 #if variant_CPP11_OR_GREATER
-            type_index = helper_type::move( rhs.type_index, tmp.ptr(), ptr() );
+            type_index = helper_type::move( other.type_index, tmp.ptr(), ptr() );
 #else
-            type_index = helper_type::copy( rhs.type_index, tmp.ptr(), ptr() );
+            type_index = helper_type::copy( other.type_index, tmp.ptr(), ptr() );
 #endif
         }
         return *this;
@@ -1306,34 +1416,34 @@ private:
 
 #if variant_CPP11_OR_GREATER
 
-    variant & move_assign( variant && rhs )
+    variant & move_assign( variant && other )
     {
-        if ( valueless_by_exception() && rhs.valueless_by_exception() )
+        if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( ! valueless_by_exception() && rhs.valueless_by_exception() )
+        else if ( ! valueless_by_exception() && other.valueless_by_exception() )
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
         }
-        else if ( index() == rhs.index() )
+        else if ( index() == other.index() )
         {
-            type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
         }
         else
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-            type_index = helper_type::move( rhs.type_index, rhs.ptr(), ptr() );
+            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
         }
         return *this;
     }
 
-    template< class T, std::size_t I >
+    template< class T, std::size_t K >
     variant & move_assign_value( T && value )
     {
-        if( index() == I )
+        if( index() == K )
         {
             *as<T>() = std::forward<T>( value );
         }
@@ -1342,15 +1452,15 @@ private:
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
             new( ptr() ) T( std::forward<T>( value ) );
-            type_index = I;
+            type_index = K;
         }
         return *this;
     }
 #else
-    template< class T, std::size_t I >
+    template< class T, std::size_t K >
     variant & copy_assign_value( T const & value )
     {
-        if( index() == I )
+        if( index() == K )
         {
             *as<T>() = value;
         }
@@ -1359,34 +1469,34 @@ private:
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
             new( ptr() ) T( value );
-            type_index = I;
+            type_index = K;
         }
         return *this;
     }
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap_value( std::size_t index, variant & rhs )
+    void swap_value( std::size_t index, variant & other )
     {
         using std::swap;
         switch( index )
         {
-            case 0: swap( this->get<0>(), rhs.get<0>() ); break;
-            case 1: swap( this->get<1>(), rhs.get<1>() ); break;
-            case 2: swap( this->get<2>(), rhs.get<2>() ); break;
-            case 3: swap( this->get<3>(), rhs.get<3>() ); break;
-            case 4: swap( this->get<4>(), rhs.get<4>() ); break;
-            case 5: swap( this->get<5>(), rhs.get<5>() ); break;
-            case 6: swap( this->get<6>(), rhs.get<6>() ); break;
-            case 7: swap( this->get<7>(), rhs.get<7>() ); break;
-            case 8: swap( this->get<8>(), rhs.get<8>() ); break;
-            case 9: swap( this->get<9>(), rhs.get<9>() ); break;
-            case 10: swap( this->get<10>(), rhs.get<10>() ); break;
-            case 11: swap( this->get<11>(), rhs.get<11>() ); break;
-            case 12: swap( this->get<12>(), rhs.get<12>() ); break;
-            case 13: swap( this->get<13>(), rhs.get<13>() ); break;
-            case 14: swap( this->get<14>(), rhs.get<14>() ); break;
-            case 15: swap( this->get<15>(), rhs.get<15>() ); break;
+            case 0: swap( this->get<0>(), other.get<0>() ); break;
+            case 1: swap( this->get<1>(), other.get<1>() ); break;
+            case 2: swap( this->get<2>(), other.get<2>() ); break;
+            case 3: swap( this->get<3>(), other.get<3>() ); break;
+            case 4: swap( this->get<4>(), other.get<4>() ); break;
+            case 5: swap( this->get<5>(), other.get<5>() ); break;
+            case 6: swap( this->get<6>(), other.get<6>() ); break;
+            case 7: swap( this->get<7>(), other.get<7>() ); break;
+            case 8: swap( this->get<8>(), other.get<8>() ); break;
+            case 9: swap( this->get<9>(), other.get<9>() ); break;
+            case 10: swap( this->get<10>(), other.get<10>() ); break;
+            case 11: swap( this->get<11>(), other.get<11>() ); break;
+            case 12: swap( this->get<12>(), other.get<12>() ); break;
+            case 13: swap( this->get<13>(), other.get<13>() ); break;
+            case 14: swap( this->get<14>(), other.get<14>() ); break;
+            case 15: swap( this->get<15>(), other.get<15>() ); break;
             
         }
     }
@@ -1430,67 +1540,107 @@ inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline R & get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & v, nonstd_lite_in_place_type_t(R) = in_place<R> )
+inline R & get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
 {
     return v.template get<R>();
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v, nonstd_lite_in_place_type_t(R) = in_place<R> )
+inline R const & get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
 {
     return v.template get<R>();
 }
 
-template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type &
-get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & v, nonstd_lite_in_place_index_t(I) = in_place<I> )
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type &
+get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
-    if ( I != v.index() )
+    if ( K != v.index() )
     {
         throw bad_variant_access();
     }
 
-    return v.template get<I>();
+    return v.template get<K>();
 }
 
-template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename variant_alternative< I, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type const &
-get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v, nonstd_lite_in_place_index_t(I) = in_place<I> )
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type const &
+get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
-    if ( I != v.index() )
+    if ( K != v.index() )
     {
         throw bad_variant_access();
     }
 
-    return v.template get<I>();
+    return v.template get<K>();
 }
+
+#if variant_CPP11_OR_GREATER
+
+template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline R && get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+{
+    return std::move(v.template get<R>());
+}
+
+template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline R const && get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+{
+    return std::move(v.template get<R>());
+}
+
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type &&
+get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+{
+    if ( K != v.index() )
+    {
+        throw bad_variant_access();
+    }
+
+    return std::move(v.template get<K>());
+}
+
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type const &&
+get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+{
+    if ( K != v.index() )
+    {
+        throw bad_variant_access();
+    }
+
+    return std::move(v.template get<K>());
+}
+
+#endif // variant_CPP11_OR_GREATER
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline typename detail::add_pointer<T>::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_type_t(T) = in_place<T> )
+get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline typename detail::add_pointer<const T>::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_type_t(T) = in_place<T>)
+get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T))
 {
     return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
-template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_index_t(I) = in_place<I> )
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename detail::add_pointer< typename variant_alternative<K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
+get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
-    return ( pv->index() == I ) ? &get<I>( *pv ) : variant_nullptr;
+    return ( pv->index() == K ) ? &get<K>( *pv ) : variant_nullptr;
 }
 
-template< std::size_t I, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
-get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_index_t(I) = in_place<I> )
+template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+inline typename detail::add_pointer< const typename variant_alternative<K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
+get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
-    return ( pv->index() == I ) ? &get<I>( *pv )  : variant_nullptr;
+    return ( pv->index() == K ) ? &get<K>( *pv )  : variant_nullptr;
 }
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
@@ -1535,7 +1685,7 @@ struct VisitorUnwrapper;
 #if variant_CPP11_OR_GREATER
 template< size_t NumVars, typename R, typename Visitor, typename ... T >
 #else
-template< size_t NumVars, typename R, typename Visitor, typename T1, typename T2 = S0, typename T3 = S0, typename T4 = S0, typename T5 = S0, typename T6 = S0, typename T7 = S0 >
+template< size_t NumVars, typename R, typename Visitor, typename T1, typename T2 = S0, typename T3 = S0, typename T4 = S0, typename T5 = S0 >
 #endif
 struct TypedVisitorUnwrapper;
 
@@ -1631,64 +1781,6 @@ struct TypedVisitorUnwrapper<5, R, Visitor, T2, T3, T4, T5>
     }
 };
 
-template< typename R, typename Visitor, typename T2, typename T3, typename T4, typename T5, typename T6 >
-struct TypedVisitorUnwrapper<6, R, Visitor, T2, T3, T4, T5, T6>
-{
-    const Visitor& visitor;
-    T2 const& val2;
-    T3 const& val3;
-    T4 const& val4;
-    T5 const& val5;
-    T6 const& val6;
-    
-    TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_, T4 const& val4_, T5 const& val5_, T6 const& val6_)
-        : visitor(visitor_)
-        , val2(val2_)
-        , val3(val3_)
-        , val4(val4_)
-        , val5(val5_)
-        , val6(val6_)
-        
-    {
-    }
-
-    template<typename T>
-    R operator()(const T& val1) const
-    {
-        return visitor(val1, val2, val3, val4, val5, val6);
-    }
-};
-
-template< typename R, typename Visitor, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
-struct TypedVisitorUnwrapper<7, R, Visitor, T2, T3, T4, T5, T6, T7>
-{
-    const Visitor& visitor;
-    T2 const& val2;
-    T3 const& val3;
-    T4 const& val4;
-    T5 const& val5;
-    T6 const& val6;
-    T7 const& val7;
-    
-    TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_, T4 const& val4_, T5 const& val5_, T6 const& val6_, T7 const& val7_)
-        : visitor(visitor_)
-        , val2(val2_)
-        , val3(val3_)
-        , val4(val4_)
-        , val5(val5_)
-        , val6(val6_)
-        , val7(val7_)
-        
-    {
-    }
-
-    template<typename T>
-    R operator()(const T& val1) const
-    {
-        return visitor(val1, val2, val3, val4, val5, val6, val7);
-    }
-};
-
 
 
 template<typename R, typename Visitor, typename V2>
@@ -1737,20 +1829,6 @@ struct VisitorUnwrapper
     {
         typedef TypedVisitorUnwrapper<6, R, Visitor, T1, T2, T3, T4, T5> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5), r);
-    }
-    
-    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6 >
-    R operator()(T1 const& val1, T2 const& val2, T3 const& val3, T4 const& val4, T5 const& val5, T6 const& val6) const
-    {
-        typedef TypedVisitorUnwrapper<7, R, Visitor, T1, T2, T3, T4, T5, T6> visitor_type;
-        return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5, val6), r);
-    }
-    
-    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
-    R operator()(T1 const& val1, T2 const& val2, T3 const& val3, T4 const& val4, T5 const& val5, T6 const& val6, T7 const& val7) const
-    {
-        typedef TypedVisitorUnwrapper<8, R, Visitor, T1, T2, T3, T4, T5, T6, T7> visitor_type;
-        return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5, val6, val7), r);
     }
     
 };
@@ -1839,22 +1917,6 @@ struct VisitorApplicator
         return apply(unwrapper, arg2, arg3, arg4, arg5);
     }
     
-    template< typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6 >
-    static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6)
-    {
-        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
-        Unwrapper unwrapper(v, arg1);
-        return apply(unwrapper, arg2, arg3, arg4, arg5, arg6);
-    }
-    
-    template< typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6, typename V7 >
-    static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6, V7 const& arg7)
-    {
-        typedef VisitorUnwrapper<R, Visitor, V1> Unwrapper;
-        Unwrapper unwrapper(v, arg1);
-        return apply(unwrapper, arg2, arg3, arg4, arg5, arg6, arg7);
-    }
-    
 #endif
 };
 
@@ -1906,18 +1968,6 @@ template< typename R, typename Visitor, typename V1, typename V2, typename V3, t
 inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5)
 {
     return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3, arg4, arg5);
-}
-
-template< typename R, typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6 >
-inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6)
-{
-    return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3, arg4, arg5, arg6);
-}
-
-template< typename R, typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5, typename V6, typename V7 >
-inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5, V6 const& arg6, V7 const& arg7)
-{
-    return detail::VisitorApplicator<R>::apply(v, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 #endif
@@ -2073,6 +2123,6 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 # pragma warning( pop )
 #endif
 
-#endif // have C++17 std::variant
+#endif // variant_USES_STD_VARIANT
 
 #endif // NONSTD_VARIANT_LITE_HPP

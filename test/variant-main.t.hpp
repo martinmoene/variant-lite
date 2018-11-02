@@ -10,7 +10,6 @@
 #ifndef TEST_VARIANT_LITE_H_INCLUDED
 #define TEST_VARIANT_LITE_H_INCLUDED
 
-#include "optional.hpp"
 #include "variant.hpp"
 #include "lest_cpp03.hpp"
 

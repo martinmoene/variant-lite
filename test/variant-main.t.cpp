@@ -19,12 +19,23 @@ lest::tests & specification()
     return tests; 
 }
 
-CASE( "variant-lite version" "[.version]" )
+CASE( "variant-lite version" "[.variant][.version]" )
 {
     variant_PRESENT( variant_lite_MAJOR );
     variant_PRESENT( variant_lite_MINOR );
     variant_PRESENT( variant_lite_PATCH );
     variant_PRESENT( variant_lite_VERSION );
+}
+
+CASE( "any configuration" "[.variant][.config]" )
+{
+    variant_PRESENT( variant_HAVE_STD_VARIANT );
+    variant_PRESENT( variant_USES_STD_VARIANT );
+    variant_PRESENT( variant_CONFIG_SELECT_VARIANT );
+    variant_PRESENT( variant_VARIANT_DEFAULT );
+    variant_PRESENT( variant_VARIANT_NONSTD );
+    variant_PRESENT( variant_VARIANT_STD );
+    variant_PRESENT( variant_CPLUSPLUS );
 }
 
 CASE( "__cplusplus" "[.stdc++]" )

@@ -1,6 +1,6 @@
 # variant lite: A single-file header-only version of a C++17-like variant, a type-safe union for C++98, C++11 and later
 
-[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [ ![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/agauniyal/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
+[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/martinmoene/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
 
 **Contents**  
 - [Example usage](#example-usage)
@@ -52,9 +52,9 @@ In a nutshell
 -------------
 **variant lite** is a single-file header-only library to represent a type-safe union. The library aims to provide a [C++17-like variant](http://en.cppreference.com/w/cpp/utility/variant) for use with C++98 and later. If available, std::variant is used. 
 
-**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite) and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
+**Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite), [expected-lite](https://github.com/martinmoene/expected-lite)  and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
 
-**Limitations of variant lite** are the maximum of seven alternative types that all must have a different type. Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. The visitor only takes a single variant and can only return a variant. *variant lite* does not provide allocator-extended constructors.
+**Limitations of variant lite** are the requirement for the alternative types to be of different types and the limit on the number of alternative types and the number of visitor arguments. The maximum number of types and visitor arguments are configurable via [script generate_header.py](script/generate_header.py) (default: 16 types, 5 visitor arguments). Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. *variant lite* does not provide allocator-extended constructors.
 
 
 License
@@ -75,12 +75,12 @@ Or, if you use the [conan package manager](https://www.conan.io/), follow these 
 
 1. Add *nonstd-lite* to the conan remotes:
 
-        conan remote add nonstd-lite https://api.bintray.com/conan/agauniyal/nonstd-lite
+        conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
 
 2. Add a reference to *variant-lite* to the *requires* section of your project's `conanfile.txt` file:
 
         [requires]
-        variant-lite/0.1.0@nonstd-lite/stable
+        variant-lite/[~=0]@nonstd-lite/testing
 
 3. Run conan's install command:
 
@@ -137,51 +137,62 @@ Synopsis
 | &nbsp;       |< C++11 | template&lt; class Tx ><br>variant & **operator=**( Tx const & t ) | copy-assign from value;<br>non-standard |
 | State        |&nbsp;| std::size_t **index**() const                    | index of current content's type |
 | &nbsp;       |&nbsp;| bool **valueless_by_exception**() const          | true if no content is present |
-| Emplace      |C++11 | template&lt; class T, class... Args ><br>void **emplace**( Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template&lt; class T, class U, class... Args ><br>void **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
-| &nbsp;       |C++11 | template&lt; size_t I, class... Args ><br>void **emplace**( Args&&... args ); | emplace type at index I |
-| &nbsp;       |C++11 | template&lt; size_t I, class U, class... Args ><br>void **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
+| Emplace      |C++11 | template&lt; class T, class... Args ><br>T & **emplace**( Args&&... args ) | emplace type T |
+| &nbsp;       |C++11 | template&lt; class T, class U, class... Args ><br>T & **emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type T |
+| &nbsp;       |C++11 | template&lt; size_t I, class... Args ><br>variant_alternative_t&lt;I,variant> &<br>**emplace**( Args&&... args ); | emplace type at index I |
+| &nbsp;       |C++11 | template&lt; size_t I, class U, class... Args ><br>variant_alternative_t&lt;I,variant> &<br>**emplace**( std::initializer_list&lt;U> il, Args&&... args ) | emplace type at index I |
 | Swap         |&nbsp;| void **swap**( variant & other );                | swap with other |
  
 
 ### Algorithms for *variant lite*
 
-| Kind                      | Std  | Function |
-|---------------------------|------|----------|
-| **Relational operators**  |&nbsp;| &nbsp;   | 
-| ==                        |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
-| !=                        |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
-| <                         |&nbsp;| template<...><br>bool **operator<**( variant<...> const & v, variant<...> const & w ) |
-| >                         |&nbsp;| template<...><br>bool **operator>**( variant<...> const & v, variant<...> const & w ) |
-| <=                        |&nbsp;| template<...><br>bool **operator<=**( variant<...> const & v, variant<...> const & w ) |
-| >=                        |&nbsp;| template<...><br>bool **operator>=**( variant<...> const & v, variant<...> const & w ) |
-| **Content**               |&nbsp;| &nbsp;   |
-| contains value of type T  |&nbsp;| template< class T, ...><br>bool **holds_alternative**( variant<...> const & v ) [noexcept] |
-| get by type               |&nbsp;| template< class R, ...><br>R &<br>**get**( variant<...> & v, in_place_type_t(R) = in_place<R> ) |
-| get by type (const)       |&nbsp;| template< class R, ...><br>R const &<br>**get**( variant<...> const & v, in_place_type_t(R) = in_place<R> ) |
-| get by index              |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &<br>**get**( variant<...> & v, in_place_index_t(I) = in_place<I> ) |
-| get by index (const)      |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &<br>**get**( variant<...> const & v, in_place_index_t(I) = in_place<I> ) |
-| get_if by type            |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;T>::type<br>**get_if**( variant<...> * pv, in_place_type_t(T) = in_place<T> ) |
-| get_if by type (const)    |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;const T>::type<br>**get_if**( variant<...> const * pv, in_place_type_t(T) = in_place<T>) |
-| get_if by index           |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> * pv, in_place_index_t(I) = in_place<I> ) |
-| get_if by index (const)   |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> const * pv, in_place_index_t(I) = in_place<I> ) |
-| swap                      |&nbsp;| template<...><br>void **swap**( variant<...> & x, variant<...> & y ) |
-| visit                     |Note&nbsp;1| template< class Visitor, class Variant ><br>Variant **visit**( Visitor const & vis, Variant const & v ) |
-| **Hash support**          |&nbsp;| &nbsp;   | 
-| variant                   |C++11 | template<...> struct **hash**< variant<...> >; |
-| monostate                 |C++11 | template<> struct **hash**< monostate >;       |
+| Kind                        | Std  | Function |
+|-----------------------------|------|----------|
+| **Relational operators**    |&nbsp;| &nbsp;   |
+| ==                          |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
+| !=                          |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
+| <                           |&nbsp;| template<...><br>bool **operator<**( variant<...> const & v, variant<...> const & w ) |
+| >                           |&nbsp;| template<...><br>bool **operator>**( variant<...> const & v, variant<...> const & w ) |
+| <=                          |&nbsp;| template<...><br>bool **operator<=**( variant<...> const & v, variant<...> const & w ) |
+| >=                          |&nbsp;| template<...><br>bool **operator>=**( variant<...> const & v, variant<...> const & w ) |
+| **Content**                 |&nbsp;| &nbsp;   |
+| contains value of type T    |&nbsp;| template< class T, ...><br>bool **holds_alternative**( variant<...> const & v ) [noexcept] |
+| get by type                 |&nbsp;| template< class R, ...><br>R &<br>**get**( variant<...> & v, in_place_type_t(R) = in_place<R> ) |
+| get by type (rvalue)        |C++11 | template< class R, ...><br>R &&<br>**get**( variant<...> && v, in_place_type_t(R) = in_place<R> ) |
+| get by type (const)         |&nbsp;| template< class R, ...><br>R const &<br>**get**( variant<...> const & v, in_place_type_t(R) = in_place<R> ) |
+| get by type (const rvalue)  |C++11 | template< class R, ...><br>R const &&<br>**get**( variant<...> const && v, in_place_type_t(R) = in_place<R> ) |
+| get by index                |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &<br>**get**( variant<...> & v, in_place_index_t(I) = in_place<I> ) |
+| get by index (rvalue)       |C++11 | template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type &&<br>**get**( variant<...> && v, in_place_index_t(I) = in_place<I> ) |
+| get by index (const)        |&nbsp;| template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &<br>**get**( variant<...> const & v, in_place_index_t(I) = in_place<I> ) |
+| get by index (const rvalue) |C++11 | template< std::size_t I, ...><br>typename variant_alternative< I, variant<...> >::type const &&<br>**get**( variant<...> const && v, in_place_index_t(I) = in_place<I> ) |
+| get_if by type              |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;T>::type<br>**get_if**( variant<...> * pv, in_place_type_t(T) = in_place<T> ) |
+| get_if by type (const)      |&nbsp;| template< class T, ...><br>typename detail::add_pointer&lt;const T>::type<br>**get_if**( variant<...> const * pv, in_place_type_t(T) = in_place<T>) |
+| get_if by index             |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> * pv, in_place_index_t(I) = in_place<I> ) |
+| get_if by index (const)     |&nbsp;| template< std::size_t I, ...><br>typename detail::add_pointer< const typename variant_alternative<I, variant<T0, T1, T2, T3, T4, T5, T6> >::type >::type<br>**get_if**( variant<...> const * pv, in_place_index_t(I) = in_place<I> ) |
+| swap                        |&nbsp;| template<...><br>void **swap**( variant<...> & x, variant<...> & y ) |
+| visit                         |Note&nbsp;1| template< class Visitor, class Variant ><br>Variant **visit**( Visitor const & vis, Variant const & v ) |
+| **Hash support**            |&nbsp;| &nbsp;   |
+| variant                     |C++11 | template<...> struct **hash**< variant<...> >; |
+| monostate                   |C++11 | template<> struct **hash**< monostate >;       |
 
 Note 1: visitor is limited to always return a Variant.
 
 ### Configuration macros
 
+#### Select `std::variant` or `nonstd::variant`
+At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
+
+-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
+Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
+
+#### Presence of simulation macros
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_SIZE\_V\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
 
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
-### Macros to control alignment
+#### Macros to control alignment
 
 If *variant lite* is compiled as C++11 or later, C++11 alignment facilities are used for storage of the underlying object. When compiled as pre-C++11, *variant lite* tries to determine proper alignment itself. If this doesn't work out, you can control alignment via the following macros. See also section [Implementation notes](#implementation-notes).
 
@@ -283,7 +294,8 @@ Other implementations of variant
 --------------------------------
 - Isabella Muerte. [MNMLSTC Core](https://github.com/mnmlstc/core) (C++11).
 - Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
-- Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union.](https://github.com/eggs-cpp/variant).
+- Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union](https://github.com/eggs-cpp/variant).
+- Chris Beck. [strict_variant, a simpler type-safe union for C++11/C++14](https://github.com/cbeck88/strict-variant).
 - Mapbox. [C++11/C++14 Variant](https://github.com/mapbox/variant).
 - Michael Park. [Variant: A type-safe union (C++14)](https://github.com/mpark/variant).
 - Gregor Burger. [Typesafe tagged union with "don't call us, we'll call you" feature (C++14)](https://github.com/gregorburger/variant).
@@ -295,7 +307,7 @@ Notes and References
 
 ### Acknowledgments
 
-Thanks to @flexferrum for making the number of variant types configurable.
+Thanks to @flexferrum for making the number of variant types and visitor arguments [configurable](#in-a-nutshell).
 
 
 ### References
@@ -343,6 +355,7 @@ variant: Allows non-default constructible as second and later type (first: monos
 variant: Allows to default-construct variant
 variant: Allows to copy-construct from variant
 variant: Allows to move-construct from variant (C++11)
+variant: Allows to move-construct if-noexcept from variant (C++11)
 variant: Allows to obtain the index of the current type
 variant: Allows to inspect if variant is "valueless by exception"
 variant: Allows to copy-assign from variant
