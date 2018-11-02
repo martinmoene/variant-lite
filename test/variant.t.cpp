@@ -1007,6 +1007,49 @@ CASE( "variant: Allows to check for content by type" )
 #endif
 }
 
+#if variant_CPP11_OR_GREATER
+struct RVRefTestVisitor
+{
+    std::string operator()(int val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    std::string operator()(const std::string& val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+	
+	template<typename ... Args>
+	std::string operator()(const variant<Args...>& var) const
+	{
+		return visit(RVRefTestVisitor(), var);
+	}
+	
+	template<typename U>
+	std::string operator()(U&&) const
+	{
+		return ">>> Broken branch! <<<";
+	}
+};
+
+CASE( "variant: Allows to visit contents (args: 1)" )
+{
+	typedef variant< int, std::string> inner_var_t;
+    typedef variant< int, std::string, inner_var_t > var_t;
+    inner_var_t inner = std::string("hello");
+
+    var_t vv = std::string("hello");
+
+    std::string rs = visit(RVRefTestVisitor(), vv);
+
+    EXPECT( rs == "hello" );
+}
+#endif
+
 CASE( "variant: Allows to get element by type" )
 {
     variant<int, S> var( S( 7 ) );
