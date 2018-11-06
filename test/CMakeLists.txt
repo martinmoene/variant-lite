@@ -176,8 +176,6 @@ endif()
 # with C++17, honour explicit request for std::variant or nonstd::variant:
 
 if( HAS_CPP17_FLAG )
-    message (STATUS ">>>>>>>> Trying to select between 'std' and 'nonstd' variant")
-
     set( WHICH variant_VARIANT_DEFAULT )
 
     if( VARIANT_LITE_OPT_SELECT_STD )
@@ -187,8 +185,9 @@ if( HAS_CPP17_FLAG )
     endif()
 
     target_compile_definitions( ${MAIN_BASE}-cpp17.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
-else ()
-    message (STATUS ">>>>>>>>!!!!!!!!!!!! HAS_CPP17_FLAG is equal to '${HAS_CPP17_FLAG}', nothing to select")
+    if( HAS_CPPLATEST_FLAG )
+        target_compile_definitions( ${MAIN_BASE}-cpplatest.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
+    endif()
 endif()
 
 # configure unit tests via CTest:
