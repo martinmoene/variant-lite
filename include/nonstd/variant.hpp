@@ -1924,7 +1924,7 @@ struct VisitorApplicator
 template< size_t NumVars, typename Visitor, typename ... V >
 struct VisitorImpl
 {
-    typedef decltype(std::declval<Visitor>()(get<0>(std::declval<V>())...)) result_type;
+    typedef decltype(std::declval<Visitor>()(get<0>(static_cast<const V&>(std::declval<V>()))...)) result_type;
     typedef VisitorApplicator<result_type> applicator_type;
 };
 #endif

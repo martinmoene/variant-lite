@@ -7,6 +7,8 @@
 
 #include "variant-main.t.hpp"
 
+#include <memory>
+
 namespace {
 
 // ensure comparison of pointers for lest:
@@ -1006,6 +1008,83 @@ CASE( "variant: Allows to check for content by type" )
     EXPECT_NOT( holds_alternative< unsigned int >( vi ) );
 #endif
 }
+
+#if variant_CPP14_OR_GREATER
+struct RVRefTestVisitor
+{
+    std::string operator()(int val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    std::string operator()(const std::string& val) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+	
+	template<typename ... Args>
+	std::string operator()(const variant<Args...>& var) const
+	{
+		return visit(RVRefTestVisitor(), var);
+	}
+	
+	template<typename U>
+	std::string operator()(U&&) const
+	{
+	    static_assert(std::is_const<U>::value, "Wrong branch!");
+		return ">>> Broken branch! <<<";
+	}
+};
+
+struct Unwrapper
+{
+    RVRefTestVisitor* m_v;
+    
+    Unwrapper(RVRefTestVisitor* v)
+        : m_v(v)
+    {}
+    
+    template<typename T>
+    auto& Unwrap(T&& val) const
+    {
+        return std::forward<T>(val);
+    }
+    
+    template<typename T>
+    const auto& Unwrap(std::shared_ptr<T> val) const
+    {
+        const auto& result = *val.get();
+        return result;
+    }
+    
+    template<typename ... Args>
+    auto operator()(Args&& ... args) const
+    {
+        return (*m_v)(Unwrap(std::forward<Args>(args))...);
+    }
+    
+};
+
+CASE( "variant: Allows to visit contents (args: 1)" )
+{
+	typedef std::shared_ptr<std::string> string_ptr_t;
+    typedef variant< int, std::string, string_ptr_t > var_t;
+    string_ptr_t inner = std::make_shared<std::string>("hello1");
+
+    var_t vstr1 = inner;
+    var_t vstr2 = std::string("hello2");
+    RVRefTestVisitor visitor;
+    
+    std::string rs1 = visit(Unwrapper(&visitor), vstr1);
+    std::string rs2 = visit(Unwrapper(&visitor), vstr2);
+
+    EXPECT( rs1 == "hello1" );
+    EXPECT( rs2 == "hello2" );
+}
+#endif
 
 CASE( "variant: Allows to get element by type" )
 {
