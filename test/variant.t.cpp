@@ -1032,8 +1032,9 @@ struct RVRefTestVisitor
 	}
 	
 	template<typename U>
-	std::string operator()(U&&, std::enable_if_t<std::is_const<U>::value>* ptr = nullptr) const
+	std::string operator()(U&&) const
 	{
+	    static_assert(!std::is_const<U>::value, "Wrong branch!");
 		return ">>> Broken branch! <<<";
 	}
 };
