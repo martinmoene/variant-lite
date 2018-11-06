@@ -396,7 +396,10 @@ variant: Allows to copy-emplace elements from intializer-list based on index (C+
 variant: Allows to move-emplace elements from intializer-list based on index (C++11)
 variant: Allows to swap variants, same index (member)
 variant: Allows to swap variants, different index (member)
-variant: Allows to visit contents (non-standard: always returning variant)
+variant: Allows to visit contents (args: 1)
+variant: Allows to visit contents (args: 2)
+variant: Allows to visit contents (args: 3)
+variant: Allows to visit contents, rvalue reference (args: 1)
 variant: Allows to check for content by type
 variant: Allows to get element by type
 variant: Allows to get element by index
