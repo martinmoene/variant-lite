@@ -16,12 +16,16 @@
 
 #ifdef __clang__
 # pragma clang diagnostic ignored "-Wstring-conversion"
-# pragma clang diagnostic ignored "-Wunused-function"
 # pragma clang diagnostic ignored "-Wunused-parameter"
+# pragma clang diagnostic ignored "-Wunused-template"
+# pragma clang diagnostic ignored "-Wunused-function"
+# pragma clang diagnostic ignored "-Wunused-member-function"
 #elif defined __GNUC__
-# pragma clang diagnostic ignored "-Wstring-conversion"
-# pragma clang diagnostic ignored "-Wunused-function"
-# pragma clang diagnostic ignored "-Wunused-parameter"
+# pragma GCC   diagnostic ignored "-Wstring-conversion"
+# pragma GCC   diagnostic ignored "-Wunused-parameter"
+# pragma GCC   diagnostic ignored "-Wunused-template"
+# pragma GCC   diagnostic ignored "-Wunused-function"
+# pragma GCC   diagnostic ignored "-Wunused-member-function"
 #endif
 
 #include <iostream>
