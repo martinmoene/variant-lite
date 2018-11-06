@@ -1034,7 +1034,7 @@ struct RVRefTestVisitor
 	template<typename U>
 	std::string operator()(U&&) const
 	{
-	    static_assert(!std::is_const<U>::value, "Wrong branch!");
+	    static_assert(std::is_lvalue_reference<U>::value, "Wrong branch!");
 		return ">>> Broken branch! <<<";
 	}
 };
