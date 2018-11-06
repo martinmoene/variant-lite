@@ -185,6 +185,10 @@ if( HAS_CPP17_FLAG )
     endif()
 
     target_compile_definitions( ${MAIN_BASE}-cpp17.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
+
+    if( HAS_CPPLATEST_FLAG )
+        target_compile_definitions( ${MAIN_BASE}-cpplatest.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
+    endif()
 endif()
 
 # configure unit tests via CTest:
