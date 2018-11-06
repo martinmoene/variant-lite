@@ -81,8 +81,6 @@ using ::nonstd::variants::operator<<;
 
 #include "lest_cpp03.hpp"
 
-using namespace nonstd;
-
 extern lest::tests & specification();
 
 #define CASE( name ) lest_CASE( specification(), name )

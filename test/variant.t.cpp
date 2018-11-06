@@ -9,6 +9,8 @@
 
 #include <memory>
 
+using namespace nonstd;
+
 namespace {
 
 // ensure comparison of pointers for lest:
