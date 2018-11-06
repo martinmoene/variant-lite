@@ -845,7 +845,7 @@ struct helper
         return static_cast<type_index_t>( index );
     }
 
-    static void destroy( std::size_t index, void * data )
+    static void destroy( type_index_t index, void * data )
     {
         switch ( index )
         {
@@ -888,7 +888,7 @@ struct helper
         return to_index_t( K );
     }
 
-    static type_index_t move( std::size_t const from_index, void * from_value, void * to_value )
+    static type_index_t move( type_index_t const from_index, void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -910,11 +910,11 @@ struct helper
         case 15: new( to_value ) T15( std::forward<T15>( *as<T15>( from_value ) ) ); break;
         
         }
-        return to_index_t( from_index );
+        return from_index;
     }
 #endif
 
-    static type_index_t copy( std::size_t const from_index, const void * from_value, void * to_value )
+    static type_index_t copy( type_index_t const from_index, const void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -936,7 +936,7 @@ struct helper
         case 15: new( to_value ) T15( *as<T15>( from_value ) ); break;
         
         }
-        return to_index_t( from_index );
+        return from_index;
     }
 };
 
@@ -1159,7 +1159,7 @@ public:
 
     ~variant()
     {
-        helper_type::destroy( index(), ptr() );
+        helper_type::destroy( type_index, ptr() );
     }
 
     variant & operator=( variant const & other )
@@ -1229,7 +1229,7 @@ public:
 
     std::size_t index() const
     {
-        return variant_npos_internal() == type_index ? variant_npos : type_index;
+        return variant_npos_internal() == type_index ? variant_npos : static_cast<std::size_t>( type_index );
     }
 
     bool valueless_by_exception() const
@@ -1286,9 +1286,9 @@ public:
         {
             // no effect
         }
-        else if ( index() == other.index() )
+        else if ( type_index == other.type_index )
         {
-            this->swap_value( index(), other );
+            this->swap_value( type_index, other );
         }
         else
         {
@@ -1305,7 +1305,7 @@ public:
     template< class T >
     variant_constexpr std::size_t index_of() const variant_noexcept
     {
-        return detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value;
+        return to_size_t( detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value );
     }
 
     template< class T >
@@ -1371,6 +1371,12 @@ private:
     U const * as() const
     {
         return reinterpret_cast<U const *>( ptr() );
+    }
+
+    template< class U >
+    static std::size_t to_size_t( U index )
+    {
+        return static_cast<std::size_t >( index );
     }
 
     variant_constexpr std::size_t max_index() const variant_noexcept
@@ -1476,7 +1482,7 @@ private:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap_value( std::size_t index, variant & other )
+    void swap_value( type_index_t index, variant & other )
     {
         using std::swap;
         switch( index )
