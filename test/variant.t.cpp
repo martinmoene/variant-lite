@@ -384,14 +384,14 @@ CASE( "variant: Allows to convert-copy-construct from element" )
 {
     int i = 7;
 
-    variant<double, std::string> var1(  i    );
-    variant<double, std::string> var2(  7    );
+    variant<double, std::string> var1(  i );
+    variant<double, std::string> var2(  7 );
 
-    EXPECT( var1.index() == 0u );
-    EXPECT( get<0>(var1) == 7  );
+    EXPECT( var1.index() == 0u              );
+    EXPECT( get<0>(var1) == lest::approx(7) );
 
-    EXPECT( var2.index() == 0u );
-    EXPECT( get<0>(var2) == 7  );
+    EXPECT( var2.index() == 0u              );
+    EXPECT( get<0>(var2) == lest::approx(7) );
 }
 
 CASE( "variant: Allows to convert-move-construct from element (C++11)" )
@@ -401,8 +401,8 @@ CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 
     variant<double, std::string> var( Int{} );
 
-    EXPECT( var.index() == 0u );
-    EXPECT( get<0>(var) == 7  );
+    EXPECT( var.index() == 0u              );
+    EXPECT( get<0>(var) == lest::approx(7) );
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
@@ -496,7 +496,7 @@ CASE( "variant: Allows to copy-construct from elements in intializer-list based 
 
     EXPECT( get<0>( vec[0] ) == 10    );
     EXPECT( get<1>( vec[1] ) == 15L   );
-    EXPECT( get<2>( vec[2] ) == 1.5   );
+    EXPECT( get<2>( vec[2] ) == lest::approx(1.5) );
     EXPECT( get<3>( vec[3] ) == hello );
     EXPECT( get<4>( vec[4] ).value.value == 7 );
     EXPECT( get<4>( vec[4] ).state       == copy_constructed );
