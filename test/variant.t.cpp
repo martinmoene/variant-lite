@@ -908,13 +908,14 @@ struct Doubler
 
 struct GenericVisitor1
 {
-    std::string operator()(int val) const
+    std::string operator()( int val ) const
     {
         std::ostringstream os;
         os << val;
         return os.str();
     }
-    std::string operator()(const std::string& val) const
+
+    std::string operator()( std::string const & val ) const
     {
         std::ostringstream os;
         os << val;
@@ -940,8 +941,8 @@ CASE( "variant: Allows to visit contents (args: 1)" )
 
 struct GenericVisitor2
 {
-    template<typename T1, typename T2>
-    std::string operator()(const T1& v1, const T2& v2) const
+    template< typename T1, typename T2 >
+    std::string operator()( T1 const & v1, T2 const & v2 ) const
     {
         std::ostringstream os;
         os << v1 << v2;
@@ -954,11 +955,13 @@ CASE( "variant: Allows to visit contents (args: 2)" )
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
     var_t vs = std::string("hello");
+    
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor2(), vi, vs);
-    #else
+#else
     std::string r = visit<std::string>(GenericVisitor2(), vi, vs);
 #endif
+
     EXPECT( r == "7hello" );
 }
 
@@ -979,12 +982,96 @@ CASE( "variant: Allows to visit contents (args: 3)" )
     var_t vi = 7;
     var_t vs = std::string("hello");
     var_t vd = 0.5;
+
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor3(), vi, vs, vd);
 #else
     std::string r = visit<std::string>(GenericVisitor3(), vi, vs, vd);
 #endif
+
     EXPECT( r == "7hello0.5" );
+}
+
+#if variant_CPP14_OR_GREATER
+
+struct RVRefTestVisitor
+{
+    std::string operator()( int val ) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    std::string operator()( std::string const & val ) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    
+    template< typename ... Args >
+    std::string operator()( variant<Args...> const & var ) const
+    {
+        return visit( RVRefTestVisitor(), var );
+    }
+    
+    template< typename U >
+    std::string operator()( U && ) const
+    {
+        static_assert( std::is_const<U>::value, "Wrong branch!" );
+        return ">>> Broken branch! <<<";
+    }
+};
+
+struct Unwrapper
+{
+    RVRefTestVisitor * m_v;
+    
+    Unwrapper( RVRefTestVisitor * v )
+        : m_v( v )
+    {}
+    
+    template< typename T >
+    auto & Unwrap( T && val ) const
+    {
+        return std::forward<T>( val );
+    }
+    
+    template< typename T >
+    const auto & Unwrap( std::shared_ptr<T> val ) const
+    {
+        const auto & result = *val.get();
+        return result;
+    }
+    
+    template< typename ... Args >
+    auto operator()( Args &&... args ) const
+    {
+        return (*m_v)( Unwrap( std::forward<Args>(args))...);
+    }
+};
+
+#endif
+
+CASE( "variant: Allows to visit contents, rvalue reference (args: 1)" )
+{
+#if variant_CPP14_OR_GREATER
+    typedef std::shared_ptr< std::string > string_ptr_t;
+    typedef variant< int, std::string, string_ptr_t > var_t;
+    string_ptr_t inner = std::make_shared< std::string >("hello1");
+
+    var_t vstr1 = inner;
+    var_t vstr2 = std::string("hello2");
+    RVRefTestVisitor visitor;
+    
+    std::string rs1 = visit( Unwrapper( &visitor ), vstr1 );
+    std::string rs2 = visit( Unwrapper( &visitor ), vstr2 );
+
+    EXPECT( rs1 == "hello1" );
+    EXPECT( rs2 == "hello2" );
+#else
+    EXPECT( !!"variant: return type deduction is not available (no C++14)" );
+#endif
 }
 
 CASE( "variant: Allows to check for content by type" )
@@ -1008,83 +1095,6 @@ CASE( "variant: Allows to check for content by type" )
     EXPECT_NOT( holds_alternative< unsigned int >( vi ) );
 #endif
 }
-
-#if variant_CPP14_OR_GREATER
-struct RVRefTestVisitor
-{
-    std::string operator()(int val) const
-    {
-        std::ostringstream os;
-        os << val;
-        return os.str();
-    }
-    std::string operator()(const std::string& val) const
-    {
-        std::ostringstream os;
-        os << val;
-        return os.str();
-    }
-	
-	template<typename ... Args>
-	std::string operator()(const variant<Args...>& var) const
-	{
-		return visit(RVRefTestVisitor(), var);
-	}
-	
-	template<typename U>
-	std::string operator()(U&&) const
-	{
-	    static_assert(std::is_const<U>::value, "Wrong branch!");
-		return ">>> Broken branch! <<<";
-	}
-};
-
-struct Unwrapper
-{
-    RVRefTestVisitor* m_v;
-    
-    Unwrapper(RVRefTestVisitor* v)
-        : m_v(v)
-    {}
-    
-    template<typename T>
-    auto& Unwrap(T&& val) const
-    {
-        return std::forward<T>(val);
-    }
-    
-    template<typename T>
-    const auto& Unwrap(std::shared_ptr<T> val) const
-    {
-        const auto& result = *val.get();
-        return result;
-    }
-    
-    template<typename ... Args>
-    auto operator()(Args&& ... args) const
-    {
-        return (*m_v)(Unwrap(std::forward<Args>(args))...);
-    }
-    
-};
-
-CASE( "variant: Allows to visit contents (args: 1)" )
-{
-	typedef std::shared_ptr<std::string> string_ptr_t;
-    typedef variant< int, std::string, string_ptr_t > var_t;
-    string_ptr_t inner = std::make_shared<std::string>("hello1");
-
-    var_t vstr1 = inner;
-    var_t vstr2 = std::string("hello2");
-    RVRefTestVisitor visitor;
-    
-    std::string rs1 = visit(Unwrapper(&visitor), vstr1);
-    std::string rs2 = visit(Unwrapper(&visitor), vstr2);
-
-    EXPECT( rs1 == "hello1" );
-    EXPECT( rs2 == "hello2" );
-}
-#endif
 
 CASE( "variant: Allows to get element by type" )
 {
