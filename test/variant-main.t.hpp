@@ -13,6 +13,18 @@
 #include "variant.hpp"
 #include "lest_cpp03.hpp"
 
+// Compiler warning suppression for usage of lest:
+
+#ifdef __clang__
+# pragma clang diagnostic ignored "-Wstring-conversion"
+# pragma clang diagnostic ignored "-Wunused-function"
+# pragma clang diagnostic ignored "-Wunused-parameter"
+#elif defined __GNUC__
+# pragma clang diagnostic ignored "-Wstring-conversion"
+# pragma clang diagnostic ignored "-Wunused-function"
+# pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+
 using namespace nonstd;
 
 #define CASE( name ) lest_CASE( specification(), name )

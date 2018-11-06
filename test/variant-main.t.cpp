@@ -183,7 +183,7 @@ CASE( "Presence of C++ library features" "[.stdlibrary]" )
     variant_ABSENT(  variant_HAVE_TYPE_TRAITS );
 #endif
 
-#if _HAS_CPP0X
+#if defined(_MSC_VER) && !defined(__clang__) && _HAS_CPP0X
     variant_PRESENT( _HAS_CPP0X );
 #else    
     variant_ABSENT(  _HAS_CPP0X );

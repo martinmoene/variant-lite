@@ -523,8 +523,8 @@ struct NoCopyMove
 {
     S s; int  value;
 
-    NoCopyMove( S const& s, int v  ) : s( s ), value( v ) {}
-    NoCopyMove( S && s    , int v  ) : s( std::move(s) ), value( v ) {}
+    NoCopyMove( S const& t, int v  ) : s( t ), value( v ) {}
+    NoCopyMove( S && t    , int v  ) : s( std::move(t) ), value( v ) {}
     NoCopyMove(                    ) = delete;
     NoCopyMove( NoCopyMove const & ) = delete;
     NoCopyMove( NoCopyMove &&      ) = delete;
@@ -612,11 +612,11 @@ struct InitList
     char c;
     S s;
 
-    InitList( std::initializer_list<int> il, char c, S const & s)
-    : vec( il ), c( c ), s( s ) {}
+    InitList( std::initializer_list<int> il, char k, S const & t)
+    : vec( il ), c( k ), s( t ) {}
 
-    InitList( std::initializer_list<int> il, char c, S && s)
-    : vec( il ), c( c ), s( std::forward<S>(s) ) {}
+    InitList( std::initializer_list<int> il, char k, S && t)
+    : vec( il ), c( k ), s( std::forward<S>(t) ) {}
 };
 #endif
 
