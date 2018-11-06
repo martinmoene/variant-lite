@@ -1032,10 +1032,8 @@ struct RVRefTestVisitor
 	}
 	
 	template<typename U>
-	std::string operator()(U&&) const
+	std::string operator()(U&&, std::enable_if_t<std::is_const<U>::value>* ptr = nullptr) const
 	{
-	    int* ptr = nullptr;
-	    *ptr = 0;
 		return ">>> Broken branch! <<<";
 	}
 };
