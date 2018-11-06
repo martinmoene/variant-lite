@@ -11,13 +11,20 @@
 #define TEST_VARIANT_LITE_H_INCLUDED
 
 #include "variant.hpp"
-#include "lest_cpp03.hpp"
 
-using namespace nonstd;
+// Compiler warning suppression for usage of lest:
 
-#define CASE( name ) lest_CASE( specification(), name )
+#ifdef __clang__
+# pragma clang diagnostic ignored "-Wstring-conversion"
+# pragma clang diagnostic ignored "-Wunused-function"
+# pragma clang diagnostic ignored "-Wunused-parameter"
+#elif defined __GNUC__
+# pragma clang diagnostic ignored "-Wstring-conversion"
+# pragma clang diagnostic ignored "-Wunused-function"
+# pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
 
-extern lest::tests & specification();
+#include <iostream>
 
 #if variant_HAVE_STD_VARIANT
 
@@ -71,6 +78,14 @@ using ::nonstd::variants::operator<<;
 } // namespace lest
 
 #endif // variant_HAVE_STD_VARIANT
+
+#include "lest_cpp03.hpp"
+
+using namespace nonstd;
+
+extern lest::tests & specification();
+
+#define CASE( name ) lest_CASE( specification(), name )
 
 #endif // TEST_VARIANT_LITE_H_INCLUDED
 
