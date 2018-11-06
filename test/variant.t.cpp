@@ -7,6 +7,8 @@
 
 #include "variant-main.t.hpp"
 
+#include <memory>
+
 namespace {
 
 // ensure comparison of pointers for lest:
@@ -1007,7 +1009,7 @@ CASE( "variant: Allows to check for content by type" )
 #endif
 }
 
-#if variant_CPP11_OR_GREATER
+#if variant_CPP14_OR_GREATER
 struct RVRefTestVisitor
 {
     std::string operator()(int val) const
@@ -1032,21 +1034,56 @@ struct RVRefTestVisitor
 	template<typename U>
 	std::string operator()(U&&) const
 	{
+	    int* ptr = nullptr;
+	    *ptr = 0;
 		return ">>> Broken branch! <<<";
 	}
 };
 
+struct Unwrapper
+{
+    RVRefTestVisitor* m_v;
+    
+    Unwrapper(RVRefTestVisitor* v)
+        : m_v(v)
+    {}
+    
+    template<typename T>
+    auto& Unwrap(T&& val) const
+    {
+        return std::forward<T>(val);
+    }
+    
+    template<typename T>
+    const auto& Unwrap(std::shared_ptr<T> val) const
+    {
+        const auto& result = *val.get();
+        return result;
+    }
+    
+    template<typename ... Args>
+    auto operator()(Args&& ... args) const
+    {
+        return (*m_v)(Unwrap(std::forward<Args>(args))...);
+    }
+    
+};
+
 CASE( "variant: Allows to visit contents (args: 1)" )
 {
-	typedef variant< int, std::string> inner_var_t;
-    typedef variant< int, std::string, inner_var_t > var_t;
-    inner_var_t inner = std::string("hello");
+	typedef std::shared_ptr<std::string> string_ptr_t;
+    typedef variant< int, std::string, string_ptr_t > var_t;
+    string_ptr_t inner = std::make_shared<std::string>("hello1");
 
-    var_t vv = std::string("hello");
+    var_t vstr1 = inner;
+    var_t vstr2 = std::string("hello2");
+    RVRefTestVisitor visitor;
+    
+    std::string rs1 = visit(Unwrapper(&visitor), vstr1);
+    std::string rs2 = visit(Unwrapper(&visitor), vstr2);
 
-    std::string rs = visit(RVRefTestVisitor(), vv);
-
-    EXPECT( rs == "hello" );
+    EXPECT( rs1 == "hello1" );
+    EXPECT( rs2 == "hello2" );
 }
 #endif
 
