@@ -180,7 +180,7 @@ Note 1: visitor is limited to always return a Variant.
 ### Configuration macros
 
 #### Standard selection macro
-\-D<b>variant\_CPLUSPLUS</b>=199711L
+\-D<b>variant\_CPLUSPLUS</b>=199711L  
 Define this macro to override the auto-detection of the supported C++ standard, or if your compiler does not set the `__cplusplus` macro correctly.
 
 #### Select `std::variant` or `nonstd::variant`
