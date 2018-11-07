@@ -15,7 +15,11 @@ namespace {
 
 // ensure comparison of pointers for lest:
 
-const void * test_nullptr = 0;
+#if variant_USES_STD_VARIANT
+const void * test_nullptr = nullptr;
+#else
+const void * test_nullptr = variant_nullptr;
+#endif
 
 // The following tracer code originates as Oracle from Optional by
 // Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
