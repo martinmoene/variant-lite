@@ -325,9 +325,8 @@ namespace nonstd {
 
 #define variant_HAVE_SIZED_TYPES        variant_CPP11_140
 
-#if variant_CPP11_140 || (variant_CPP11_90 && variant_HAS_CPP0X)
-# define variant_HAVE_CONTAINER_DATA_METHOD  1
-#endif
+#define variant_HAVE_CONTAINER_DATA_METHOD \
+    (variant_CPP11_140 || (variant_CPP11_90 && variant_HAS_CPP0X))
 
 // For the rest, consider VC14 as C++11 for variant-lite:
 
