@@ -50,6 +50,7 @@
 
 #define variant_CPP98_OR_GREATER  ( variant_CPLUSPLUS >= 199711L )
 #define variant_CPP11_OR_GREATER  ( variant_CPLUSPLUS >= 201103L )
+#define variant_CPP11_OR_GREATER_ ( variant_CPLUSPLUS >= 201103L )
 #define variant_CPP14_OR_GREATER  ( variant_CPLUSPLUS >= 201402L )
 #define variant_CPP17_OR_GREATER  ( variant_CPLUSPLUS >= 201703L )
 #define variant_CPP20_OR_GREATER  ( variant_CPLUSPLUS >= 202000L )
@@ -272,11 +273,18 @@ namespace nonstd {
 # define variant_HAS_CPP0X  0
 #endif
 
-#define variant_CPP11_90   (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 90)
-#define variant_CPP11_100  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 100)
-#define variant_CPP11_110  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 110)
-#define variant_CPP11_120  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 120)
-#define variant_CPP11_140  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 140)
+// Unless defined otherwise below, consider VC14 as C++11 for variant-lite:
+
+#if variant_COMPILER_MSVC_VERSION >= 140
+# undef  variant_CPP11_OR_GREATER
+# define variant_CPP11_OR_GREATER  1
+#endif
+
+#define variant_CPP11_90   (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >=  90)
+#define variant_CPP11_100  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 100)
+#define variant_CPP11_110  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 110)
+#define variant_CPP11_120  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 120)
+#define variant_CPP11_140  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 140)
 
 #define variant_CPP14_000  (variant_CPP14_OR_GREATER)
 #define variant_CPP17_000  (variant_CPP17_OR_GREATER)
@@ -327,13 +335,6 @@ namespace nonstd {
 
 #define variant_HAVE_CONTAINER_DATA_METHOD \
     (variant_CPP11_140 || (variant_CPP11_90 && variant_HAS_CPP0X))
-
-// For the rest, consider VC14 as C++11 for variant-lite:
-
-#if variant_COMPILER_MSVC_VERSION >= 14
-# undef  variant_CPP11_OR_GREATER
-# define variant_CPP11_OR_GREATER  1
-#endif
 
 // C++ feature usage:
 
