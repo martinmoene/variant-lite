@@ -179,6 +179,10 @@ Note 1: visitor is limited to always return a Variant.
 
 ### Configuration macros
 
+#### Standard selection macro
+\-D<b>variant\_CPLUSPLUS</b>=199711L
+Define this macro to override the auto-detection of the supported C++ standard, or if your compiler does not set the `__cplusplus` macro correctly.
+
 #### Select `std::variant` or `nonstd::variant`
 At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
 

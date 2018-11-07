@@ -27,7 +27,7 @@ CASE( "variant-lite version" "[.variant][.version]" )
     variant_PRESENT( variant_lite_VERSION );
 }
 
-CASE( "any configuration" "[.variant][.config]" )
+CASE( "vriant configuration" "[.variant][.config]" )
 {
     variant_PRESENT( variant_HAVE_STD_VARIANT );
     variant_PRESENT( variant_USES_STD_VARIANT );
@@ -43,149 +43,56 @@ CASE( "__cplusplus" "[.stdc++]" )
     variant_PRESENT( __cplusplus );
 }
 
-CASE( "compiler version" "[.compiler]" )
+CASE( "Compiler version" "[.compiler]" )
 {
-#if variant_COMPILER_GNUC_VERSION 
+#if variant_USES_STD_VARIANT
+    std::cout << "(Compiler version not available: using std::variant)\n";
+#else
+    variant_PRESENT( variant_COMPILER_CLANG_VERSION );
     variant_PRESENT( variant_COMPILER_GNUC_VERSION );
-#else
-    variant_ABSENT(  variant_COMPILER_GNUC_VERSION );
-#endif
-
-#if variant_COMPILER_MSVC_VERSION 
     variant_PRESENT( variant_COMPILER_MSVC_VERSION );
-#else
-    variant_ABSENT(  variant_COMPILER_MSVC_VERSION );
 #endif
 }
 
 CASE( "Presence of C++ language features" "[.stdlanguage]" )
 {
-#if variant_HAVE_AUTO 
+#if variant_USES_STD_VARIANT
+    std::cout << "(Presence of C++ language features not available: using std::variant)\n";
+#else
     variant_PRESENT( variant_HAVE_AUTO );
-#else    
-    variant_ABSENT(  variant_HAVE_AUTO );
-#endif
-
-#if variant_HAVE_NULLPTR 
     variant_PRESENT( variant_HAVE_NULLPTR );
-#else    
-    variant_ABSENT(  variant_HAVE_NULLPTR );
-#endif
-
-#if variant_HAVE_STATIC_ASSERT
     variant_PRESENT( variant_HAVE_STATIC_ASSERT );
-#else    
-    variant_ABSENT(  variant_HAVE_STATIC_ASSERT );
-#endif
-
-#if variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG 
     variant_PRESENT( variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG );
-#else    
-    variant_ABSENT(  variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG );
-#endif
-
-#if variant_HAVE_ALIAS_TEMPLATE 
     variant_PRESENT( variant_HAVE_ALIAS_TEMPLATE );
-#else    
-    variant_ABSENT(  variant_HAVE_ALIAS_TEMPLATE );
-#endif
-
-#if variant_HAVE_CONSTEXPR_11 
     variant_PRESENT( variant_HAVE_CONSTEXPR_11 );
-#else    
-    variant_ABSENT(  variant_HAVE_CONSTEXPR_11 );
-#endif
-
-#if variant_HAVE_CONSTEXPR_14
     variant_PRESENT( variant_HAVE_CONSTEXPR_14 );
-#else    
-    variant_ABSENT(  variant_HAVE_CONSTEXPR_14 );
-#endif
-
-#if variant_HAVE_ENUM_CLASS 
     variant_PRESENT( variant_HAVE_ENUM_CLASS );
-#else    
-    variant_ABSENT(  variant_HAVE_ENUM_CLASS );
-#endif
-
-#if variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE 
     variant_PRESENT( variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE );
-#else    
-    variant_ABSENT(  variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE );
-#endif
-
-#if variant_HAVE_EXPLICIT_CONVERSION 
     variant_PRESENT( variant_HAVE_EXPLICIT_CONVERSION );
-#else    
-    variant_ABSENT(  variant_HAVE_EXPLICIT_CONVERSION );
-#endif
-
-#if variant_HAVE_INITIALIZER_LIST 
     variant_PRESENT( variant_HAVE_INITIALIZER_LIST );
-#else    
-    variant_ABSENT(  variant_HAVE_INITIALIZER_LIST );
-#endif
-
-#if variant_HAVE_IS_DEFAULT 
     variant_PRESENT( variant_HAVE_IS_DEFAULT );
-#else    
-    variant_ABSENT(  variant_HAVE_IS_DEFAULT );
-#endif
-
-#if variant_HAVE_IS_DELETE 
     variant_PRESENT( variant_HAVE_IS_DELETE );
-#else    
-    variant_ABSENT(  variant_HAVE_IS_DELETE );
-#endif
-
-#if variant_HAVE_NOEXCEPT 
     variant_PRESENT( variant_HAVE_NOEXCEPT );
-#else    
-    variant_ABSENT(  variant_HAVE_NOEXCEPT );
 #endif
 }
 
 CASE( "Presence of C++ library features" "[.stdlibrary]" )
 {
-#if variant_HAVE_ARRAY
+#if variant_USES_STD_VARIANT
+    std::cout << "(Presence of C++ library features not available: using std::variant)\n";
+#else
     variant_PRESENT( variant_HAVE_ARRAY );
-#else    
-    variant_ABSENT(  variant_HAVE_ARRAY );
-#endif
-
-#if variant_HAVE_CONDITIONAL
     variant_PRESENT( variant_HAVE_CONDITIONAL );
-#else    
-    variant_ABSENT(  variant_HAVE_CONDITIONAL );
-#endif
-
-#if variant_HAVE_CONTAINER_DATA_METHOD
     variant_PRESENT( variant_HAVE_CONTAINER_DATA_METHOD );
-#else    
-    variant_ABSENT(  variant_HAVE_CONTAINER_DATA_METHOD );
-#endif
-
-#if variant_HAVE_REMOVE_CV
     variant_PRESENT( variant_HAVE_REMOVE_CV );
-#else    
-    variant_ABSENT(  variant_HAVE_REMOVE_CV );
-#endif
-
-#if variant_HAVE_SIZED_TYPES
     variant_PRESENT( variant_HAVE_SIZED_TYPES );
-#else    
-    variant_ABSENT(  variant_HAVE_SIZED_TYPES );
-#endif
-
-#if variant_HAVE_TYPE_TRAITS
     variant_PRESENT( variant_HAVE_TYPE_TRAITS );
-#else    
-    variant_ABSENT(  variant_HAVE_TYPE_TRAITS );
+    variant_PRESENT( variant_HAS_CPP0X );
 #endif
 
-#if defined(_MSC_VER) && !defined(__clang__) && _HAS_CPP0X
+#if defined _HAS_CPP0X
     variant_PRESENT( _HAS_CPP0X );
-#else    
+#else
     variant_ABSENT(  _HAS_CPP0X );
 #endif
 }

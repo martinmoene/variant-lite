@@ -41,7 +41,7 @@
 // Note: VC14.0/1900 (VS2015) lacks too much from C++14.
 
 #ifndef   variant_CPLUSPLUS
-# ifdef  _MSVC_LANG
+# if defined(_MSVC_LANG ) && !defined(__clang__)
 #  define variant_CPLUSPLUS  (_MSC_VER == 1900 ? 201103L : _MSVC_LANG )
 # else
 #  define variant_CPLUSPLUS  __cplusplus
@@ -224,89 +224,109 @@ namespace nonstd {
 // half-open range [lo..hi):
 #define variant_BETWEEN( v, lo, hi ) ( lo <= v && v < hi )
 
-#if defined(_MSC_VER) && !defined(__clang__)
-# define variant_COMPILER_MSVC_VERSION   (_MSC_VER / 100 - 5 - (_MSC_VER < 1900))
+// Compiler versions:
+//
+// MSVC++ 6.0  _MSC_VER == 1200 (Visual Studio 6.0)
+// MSVC++ 7.0  _MSC_VER == 1300 (Visual Studio .NET 2002)
+// MSVC++ 7.1  _MSC_VER == 1310 (Visual Studio .NET 2003)
+// MSVC++ 8.0  _MSC_VER == 1400 (Visual Studio 2005)
+// MSVC++ 9.0  _MSC_VER == 1500 (Visual Studio 2008)
+// MSVC++ 10.0 _MSC_VER == 1600 (Visual Studio 2010)
+// MSVC++ 11.0 _MSC_VER == 1700 (Visual Studio 2012)
+// MSVC++ 12.0 _MSC_VER == 1800 (Visual Studio 2013)
+// MSVC++ 14.0 _MSC_VER == 1900 (Visual Studio 2015)
+// MSVC++ 14.1 _MSC_VER >= 1910 (Visual Studio 2017)
+
+#if defined( _MSC_VER ) && !defined( __clang__ )
+# define variant_COMPILER_MSVC_VERSION  (_MSC_VER / 10 - 10 * ( 5 + (_MSC_VER < 1900 ) ) )
 #else
-# define variant_COMPILER_MSVC_VERSION   0
+# define variant_COMPILER_MSVC_VERSION  0
+#endif
+
+#define variant_COMPILER_VERSION( major, minor, patch )  ( 10 * ( 10 * (major) + (minor) ) + (patch) )
+
+#if defined(__clang__)
+# define variant_COMPILER_CLANG_VERSION  variant_COMPILER_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
+#else
+# define variant_COMPILER_CLANG_VERSION  0
 #endif
 
 #if defined(__GNUC__) && !defined(__clang__)
-# define variant_COMPILER_GNUC_VERSION  __GNUC__
+# define variant_COMPILER_GNUC_VERSION  variant_COMPILER_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 #else
-# define variant_COMPILER_GNUC_VERSION    0
+# define variant_COMPILER_GNUC_VERSION  0
 #endif
 
-#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 7, 14 )
+#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 70, 140 )
 # pragma warning( push )
 # pragma warning( disable: 4345 )   // initialization behavior changed
 #endif
 
+// Presence of language and library features:
+
+#define variant_HAVE( feature )  ( variant_HAVE_##feature )
+
+#ifdef _HAS_CPP0X
+# define variant_HAS_CPP0X  _HAS_CPP0X
+#else
+# define variant_HAS_CPP0X  0
+#endif
+
+#define variant_CPP11_90   (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 90)
+#define variant_CPP11_100  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 100)
+#define variant_CPP11_110  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 110)
+#define variant_CPP11_120  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 120)
+#define variant_CPP11_140  (variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 140)
+
+#define variant_CPP14_000  (variant_CPP14_OR_GREATER)
+#define variant_CPP17_000  (variant_CPP17_OR_GREATER)
+
 // Presence of C++11 language features:
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 10
-# define variant_HAVE_AUTO  1
-# define variant_HAVE_NULLPTR  1
-# define variant_HAVE_STATIC_ASSERT  1
-#endif
+#define variant_HAVE_AUTO               variant_CPP11_100
+#define variant_HAVE_NULLPTR            variant_CPP11_100
+#define variant_HAVE_STATIC_ASSERT      variant_CPP11_100
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG  1
-# define variant_HAVE_INITIALIZER_LIST  1
-#endif
+#define variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG \
+                                        variant_CPP11_120
+#define variant_HAVE_INITIALIZER_LIST   variant_CPP11_120
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
-# define variant_HAVE_ALIAS_TEMPLATE  1
-# define variant_HAVE_CONSTEXPR_11  1
-# define variant_HAVE_ENUM_CLASS  1
-# define variant_HAVE_EXPLICIT_CONVERSION  1
-# define variant_HAVE_IS_DEFAULT  1
-# define variant_HAVE_IS_DELETE  1
-# define variant_HAVE_NOEXCEPT  1
-# define variant_HAVE_OVERRIDE  1
-#endif
+#define variant_HAVE_ALIAS_TEMPLATE     variant_CPP11_140
+#define variant_HAVE_CONSTEXPR_11       variant_CPP11_140
+#define variant_HAVE_ENUM_CLASS         variant_CPP11_140
+#define variant_HAVE_EXPLICIT_CONVERSION  variant_CPP11_140
+#define variant_HAVE_IS_DEFAULT         variant_CPP11_140
+#define variant_HAVE_IS_DELETE          variant_CPP11_140
+#define variant_HAVE_NOEXCEPT           variant_CPP11_140
+#define variant_HAVE_OVERRIDE           variant_CPP11_140
 
 // Presence of C++14 language features:
 
-#if variant_CPP14_OR_GREATER
-# define variant_HAVE_CONSTEXPR_14  1
-#endif
+#define variant_HAVE_CONSTEXPR_14       variant_CPP14_000
 
 // Presence of C++17 language features:
 
-#if variant_CPP17_OR_GREATER
-# define variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE  1
-#endif
+#define variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE \
+                                        variant_CPP17_000
 
 // Presence of C++ library features:
 
-#if variant_COMPILER_GNUC_VERSION
-# define variant_HAVE_TR1_TYPE_TRAITS  1
-# define variant_HAVE_TR1_ADD_POINTER  1
-#endif
+#define variant_HAVE_TR1_TYPE_TRAITS    (!! variant_COMPILER_GNUC_VERSION )
+#define variant_HAVE_TR1_ADD_POINTER    (!! variant_COMPILER_GNUC_VERSION )
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 9
-# define variant_HAVE_TYPE_TRAITS  1
-# define variant_HAVE_STD_ADD_POINTER  1
-#endif
+#define variant_HAVE_TYPE_TRAITS        variant_CPP11_90
+#define variant_HAVE_STD_ADD_POINTER    variant_CPP11_90
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 11
-# define variant_HAVE_ARRAY  1
-#endif
+#define variant_HAVE_ARRAY              variant_CPP11_110
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_CONDITIONAL  1
-#endif
+#define variant_HAVE_CONDITIONAL        variant_CPP11_120
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14 || (variant_COMPILER_MSVC_VERSION >= 9 && _HAS_CPP0X)
+#define variant_HAVE_REMOVE_CV          variant_CPP11_120
+
+#define variant_HAVE_SIZED_TYPES        variant_CPP11_140
+
+#if variant_CPP11_140 || (variant_CPP11_90 && variant_HAS_CPP0X)
 # define variant_HAVE_CONTAINER_DATA_METHOD  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_REMOVE_CV  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
-# define variant_HAVE_SIZED_TYPES  1
 #endif
 
 // For the rest, consider VC14 as C++11 for variant-lite:
