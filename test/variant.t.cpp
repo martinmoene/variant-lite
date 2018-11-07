@@ -1279,7 +1279,7 @@ CASE( "variant_size_V(): Allows to obtain number of element types (non-standard:
 
 CASE( "variant_alternative<>: Allows to select type by index" )
 {
-#if variant_HAVE_STATIC_ASSERT
+#if variant_CPP11_OR_GREATER || defined(variant_HAVE_STATIC_ASSERT) && variant_HAVE_STATIC_ASSERT
     static_assert( std::is_same<char, typename variant_alternative< 0, variant<char> >::type >::value, "variant_alternative<0,...>" );
     static_assert( std::is_same<char, typename variant_alternative< 1, variant<int, char> >::type >::value, "variant_alternative<1,...>" );
     static_assert( std::is_same<char, typename variant_alternative< 2, variant<int, int, char> >::type >::value, "variant_alternative<2,...>" );
@@ -1294,7 +1294,7 @@ CASE( "variant_alternative<>: Allows to select type by index" )
 
 CASE( "variant_alternative_t<>: Allows to select type by index (C++11)" )
 {
-#if variant_CPP11_OR_GREATER
+#if variant_CPP11_OR_GREATER || defined(variant_HAVE_STATIC_ASSERT) && variant_HAVE_STATIC_ASSERT
     static_assert( std::is_same<char, variant_alternative_t< 0, variant<char> > >::value, "variant_alternative_t<0,...>" );
     static_assert( std::is_same<char, variant_alternative_t< 1, variant<int, char> > >::value, "variant_alternative_t<1,...>" );
     static_assert( std::is_same<char, variant_alternative_t< 2, variant<int, int, char> > >::value, "variant_alternative_t<2,...>" );
@@ -1309,7 +1309,7 @@ CASE( "variant_alternative_t<>: Allows to select type by index (C++11)" )
 
 CASE( "variant_alternative_T(): Allows to select type by index (non-standard: macro)" )
 {
-#if variant_HAVE_STATIC_ASSERT
+#if variant_CPP11_OR_GREATER || defined(variant_HAVE_STATIC_ASSERT) && variant_HAVE_STATIC_ASSERT
     // cannot use variant<int, char> in macro due to comma:
 
     typedef variant<char> var0;
