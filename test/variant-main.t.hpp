@@ -20,7 +20,6 @@
 # pragma clang diagnostic ignored "-Wunused-template"
 # pragma clang diagnostic ignored "-Wunused-function"
 # pragma clang diagnostic ignored "-Wunused-member-function"
-# pragma clang diagnostic ignored "-Wunnamed-type-template-args"
 #elif defined __GNUC__
 # pragma GCC   diagnostic ignored "-Wunused-parameter"
 # pragma GCC   diagnostic ignored "-Wunused-function"

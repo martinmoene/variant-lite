@@ -508,7 +508,7 @@ struct typelist_max;
 template<>
 struct typelist_max< nulltype >
 {
-    enum { value = 0 } ;
+    enum V { value = 0 } ;
     typedef void type;
 };
 
@@ -516,12 +516,12 @@ template< class Head, class Tail >
 struct typelist_max< typelist<Head, Tail> >
 {
 private:
-    enum { tail_value = size_t( typelist_max<Tail>::value ) };
+    enum TV { tail_value = size_t( typelist_max<Tail>::value ) };
 
     typedef typename typelist_max<Tail>::type tail_type;
 
 public:
-    enum { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
+    enum V { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
 
     typedef typename conditional< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
 };
@@ -536,17 +536,17 @@ struct typelist_max_alignof;
 template<>
 struct typelist_max_alignof< nulltype >
 {
-    enum { value = 0 } ;
+    enum V { value = 0 } ;
 };
 
 template< class Head, class Tail >
 struct typelist_max_alignof< typelist<Head, Tail> >
 {
 private:
-    enum { tail_value = size_t( typelist_max_alignof<Tail>::value ) };
+    enum TV { tail_value = size_t( typelist_max_alignof<Tail>::value ) };
 
 public:
-    enum { value = (alignof( Head ) > tail_value) ? alignof( Head ) : std::size_t( tail_value ) };
+    enum V { value = (alignof( Head ) > tail_value) ? alignof( Head ) : std::size_t( tail_value ) };
 };
 
 #endif
@@ -556,19 +556,19 @@ public:
 template< class List >
 struct typelist_size
 {
-   enum { value = 1 };
+   enum V { value = 1 };
 };
 
 {% for n in range(NumParams) -%}
-template<> struct typelist_size< T{{n}} > { enum { value = 0 }; };
+template<> struct typelist_size< T{{n}} > { enum V { value = 0 }; };
 {% endfor %}
 
-template<> struct typelist_size< nulltype > { enum { value = 0 } ; };
+template<> struct typelist_size< nulltype > { enum V { value = 0 } ; };
 
 template< class Head, class Tail >
 struct typelist_size< typelist<Head, Tail> >
 {
-    enum { value = typelist_size<Head>::value + typelist_size<Tail>::value };
+    enum V { value = typelist_size<Head>::value + typelist_size<Tail>::value };
 };
 
 // typelist index of type:
@@ -579,22 +579,23 @@ struct typelist_index_of;
 template< class T >
 struct typelist_index_of< nulltype, T >
 {
-    enum { value = -1 };
+    enum V { value = -1 };
 };
 
 template< class Tail, class T >
 struct typelist_index_of< typelist<T, Tail>, T >
 {
-    enum { value = 0 };
+    enum V { value = 0 };
 };
 
 template< class Head, class Tail, class T >
 struct typelist_index_of< typelist<Head, Tail>, T >
 {
 private:
-    enum { nextVal = typelist_index_of<Tail, T>::value };
+    enum TV { nextVal = typelist_index_of<Tail, T>::value };
+
 public:
-    enum { value = nextVal == -1 ? -1 : 1 + nextVal } ;
+    enum V { value = nextVal == -1 ? -1 : 1 + nextVal } ;
 };
 
 // typelist type at index:
@@ -695,13 +696,13 @@ struct alignment_of_hack
 template< size_t A, size_t S >
 struct alignment_logic
 {
-    enum { value = A < S ? A : S };
+    enum V { value = A < S ? A : S };
 };
 
 template< typename T >
 struct alignment_of
 {
-    enum { value = alignment_logic<
+    enum V { value = alignment_logic<
         sizeof( alignment_of_hack<T> ) - sizeof(T), sizeof(T) >::value, };
 };
 
