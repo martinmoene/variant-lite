@@ -239,8 +239,10 @@ namespace nonstd {
 // MSVC++ 14.1 _MSC_VER >= 1910 (Visual Studio 2017)
 
 #if defined( _MSC_VER ) && !defined( __clang__ )
+# define variant_COMPILER_MSVC_VER      (_MSC_VER )
 # define variant_COMPILER_MSVC_VERSION  (_MSC_VER / 10 - 10 * ( 5 + (_MSC_VER < 1900 ) ) )
 #else
+# define variant_COMPILER_MSVC_VER      0
 # define variant_COMPILER_MSVC_VERSION  0
 #endif
 
@@ -258,7 +260,7 @@ namespace nonstd {
 # define variant_COMPILER_GNUC_VERSION  0
 #endif
 
-#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 70, 140 )
+#if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( push )
 # pragma warning( disable: 4345 )   // initialization behavior changed
 #endif
@@ -275,37 +277,27 @@ namespace nonstd {
 
 // Unless defined otherwise below, consider VC14 as C++11 for variant-lite:
 
-#if variant_COMPILER_MSVC_VERSION >= 140
+#if variant_COMPILER_MSVC_VER >= 1900
 # undef  variant_CPP11_OR_GREATER
 # define variant_CPP11_OR_GREATER  1
 #endif
 
-#define variant_CPP11_90   (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >=  90)
-#define variant_CPP11_100  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 100)
-#define variant_CPP11_110  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 110)
-#define variant_CPP11_120  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 120)
-#define variant_CPP11_140  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VERSION >= 140)
+#define variant_CPP11_90   (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1500)
+#define variant_CPP11_100  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1600)
+#define variant_CPP11_110  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1700)
+#define variant_CPP11_120  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1800)
+#define variant_CPP11_140  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1900)
+#define variant_CPP11_141  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1910)
 
 #define variant_CPP14_000  (variant_CPP14_OR_GREATER)
 #define variant_CPP17_000  (variant_CPP17_OR_GREATER)
 
 // Presence of C++11 language features:
 
-#define variant_HAVE_AUTO               variant_CPP11_100
-#define variant_HAVE_NULLPTR            variant_CPP11_100
-#define variant_HAVE_STATIC_ASSERT      variant_CPP11_100
-
-#define variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG \
-                                        variant_CPP11_120
-#define variant_HAVE_INITIALIZER_LIST   variant_CPP11_120
-
-#define variant_HAVE_ALIAS_TEMPLATE     variant_CPP11_140
 #define variant_HAVE_CONSTEXPR_11       variant_CPP11_140
-#define variant_HAVE_ENUM_CLASS         variant_CPP11_140
-#define variant_HAVE_EXPLICIT_CONVERSION  variant_CPP11_140
-#define variant_HAVE_IS_DEFAULT         variant_CPP11_140
-#define variant_HAVE_IS_DELETE          variant_CPP11_140
+#define variant_HAVE_INITIALIZER_LIST   variant_CPP11_120
 #define variant_HAVE_NOEXCEPT           variant_CPP11_140
+#define variant_HAVE_NULLPTR            variant_CPP11_100
 #define variant_HAVE_OVERRIDE           variant_CPP11_140
 
 // Presence of C++14 language features:
@@ -314,27 +306,17 @@ namespace nonstd {
 
 // Presence of C++17 language features:
 
-#define variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE \
-                                        variant_CPP17_000
+// no flag
 
 // Presence of C++ library features:
 
 #define variant_HAVE_TR1_TYPE_TRAITS    (!! variant_COMPILER_GNUC_VERSION )
 #define variant_HAVE_TR1_ADD_POINTER    (!! variant_COMPILER_GNUC_VERSION )
 
-#define variant_HAVE_TYPE_TRAITS        variant_CPP11_90
-#define variant_HAVE_STD_ADD_POINTER    variant_CPP11_90
-
-#define variant_HAVE_ARRAY              variant_CPP11_110
-
 #define variant_HAVE_CONDITIONAL        variant_CPP11_120
-
 #define variant_HAVE_REMOVE_CV          variant_CPP11_120
-
-#define variant_HAVE_SIZED_TYPES        variant_CPP11_140
-
-#define variant_HAVE_CONTAINER_DATA_METHOD \
-    (variant_CPP11_140 || (variant_CPP11_90 && variant_HAS_CPP0X))
+#define variant_HAVE_STD_ADD_POINTER    variant_CPP11_90
+#define variant_HAVE_TYPE_TRAITS        variant_CPP11_90
 
 // C++ feature usage:
 
@@ -1768,7 +1750,7 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 
 #endif // variant_CPP11_OR_GREATER
 
-#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 10, 14 )
+#if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( pop )
 #endif
 

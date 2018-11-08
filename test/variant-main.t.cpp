@@ -59,20 +59,10 @@ CASE( "Presence of C++ language features" "[.stdlanguage]" )
 #if variant_USES_STD_VARIANT
     std::cout << "(Presence of C++ language features not available: using std::variant)\n";
 #else
-    variant_PRESENT( variant_HAVE_AUTO );
-    variant_PRESENT( variant_HAVE_NULLPTR );
-    variant_PRESENT( variant_HAVE_STATIC_ASSERT );
-    variant_PRESENT( variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG );
-    variant_PRESENT( variant_HAVE_ALIAS_TEMPLATE );
     variant_PRESENT( variant_HAVE_CONSTEXPR_11 );
     variant_PRESENT( variant_HAVE_CONSTEXPR_14 );
-    variant_PRESENT( variant_HAVE_ENUM_CLASS );
-    variant_PRESENT( variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE );
-    variant_PRESENT( variant_HAVE_EXPLICIT_CONVERSION );
-    variant_PRESENT( variant_HAVE_INITIALIZER_LIST );
-    variant_PRESENT( variant_HAVE_IS_DEFAULT );
-    variant_PRESENT( variant_HAVE_IS_DELETE );
     variant_PRESENT( variant_HAVE_NOEXCEPT );
+    variant_PRESENT( variant_HAVE_NULLPTR );
 #endif
 }
 
@@ -81,11 +71,8 @@ CASE( "Presence of C++ library features" "[.stdlibrary]" )
 #if variant_USES_STD_VARIANT
     std::cout << "(Presence of C++ library features not available: using std::variant)\n";
 #else
-    variant_PRESENT( variant_HAVE_ARRAY );
     variant_PRESENT( variant_HAVE_CONDITIONAL );
-    variant_PRESENT( variant_HAVE_CONTAINER_DATA_METHOD );
     variant_PRESENT( variant_HAVE_REMOVE_CV );
-    variant_PRESENT( variant_HAVE_SIZED_TYPES );
     variant_PRESENT( variant_HAVE_TYPE_TRAITS );
     variant_PRESENT( variant_HAS_CPP0X );
 #endif
