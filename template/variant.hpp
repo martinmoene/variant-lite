@@ -238,7 +238,7 @@ namespace nonstd {
 // MSVC++ 14.0 _MSC_VER == 1900 (Visual Studio 2015)
 // MSVC++ 14.1 _MSC_VER >= 1910 (Visual Studio 2017)
 
-#if defined( _MSC_VER ) && !defined( __clang__ )
+#if defined(_MSC_VER ) && !defined(__clang__)
 # define variant_COMPILER_MSVC_VER      (_MSC_VER )
 # define variant_COMPILER_MSVC_VERSION  (_MSC_VER / 10 - 10 * ( 5 + (_MSC_VER < 1900 ) ) )
 #else
