@@ -7,19 +7,27 @@
 
 cmake_minimum_required( VERSION 3.5 )
 
-# variant-lite version, updated by script/update-version.py:
+# variant-lite project and version, updated by script/update-version.py:
+
+project( variant_lite LANGUAGES CXX )
 
 set( variant_lite_version "1.1.0" )
 
+# At default, enable building and performing of tests and b# Toplevel or subproject:
+
+if ( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR )
+    set( variant_IS_TOPLEVEL_PROJECT TRUE )
+else()
+    set( variant_IS_TOPLEVEL_PROJECT FALSE )
+endif()
+
 # At default, enable building and performing of tests and building of examples:
 
-option( VARIANT_LITE_OPT_BUILD_TESTS    "Build and perform variant-lite tests" OFF )
+option( VARIANT_LITE_OPT_BUILD_TESTS    "Build and perform variant-lite tests" ${variant_IS_TOPLEVEL_PROJECT} )
 option( VARIANT_LITE_OPT_BUILD_EXAMPLES "Build variant-lite examples" OFF )
 
 option( VARIANT_LITE_OPT_SELECT_STD     "Select std::variant"    OFF )
 option( VARIANT_LITE_OPT_SELECT_NONSTD  "Select nonstd::variant" OFF )
-
-project( variant_lite LANGUAGES CXX )
 
 include( GNUInstallDirs )
 
