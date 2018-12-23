@@ -27,7 +27,7 @@ CASE( "variant-lite version" "[.variant][.version]" )
     variant_PRESENT( variant_lite_VERSION );
 }
 
-CASE( "vriant configuration" "[.variant][.config]" )
+CASE( "variant configuration" "[.variant][.config]" )
 {
     variant_PRESENT( variant_HAVE_STD_VARIANT );
     variant_PRESENT( variant_USES_STD_VARIANT );
