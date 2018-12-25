@@ -9,11 +9,16 @@ cmake_minimum_required( VERSION 3.5 )
 
 # variant-lite project and version, updated by script/update-version.py:
 
-project( variant_lite LANGUAGES CXX )
+project(
+    variant_lite
+    VERSION 1.1.0
+    DESCRIPTION "A C++17-like variant, a type-safe union for C++98, C++11 and later in a single-file header-only library"
+#   HOMEPAGE_URL "https://github.com/martinmoene/variant-lite"
+    LANGUAGES CXX )
 
-set( variant_lite_version "1.1.0" )
+set( ${PROJECT_NAME}_version "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}" )
 
-# At default, enable building and performing of tests and b# Toplevel or subproject:
+# Toplevel or subproject:
 
 if ( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR )
     set( variant_IS_TOPLEVEL_PROJECT TRUE )
@@ -21,7 +26,7 @@ else()
     set( variant_IS_TOPLEVEL_PROJECT FALSE )
 endif()
 
-# At default, enable building and performing of tests and building of examples:
+# If toplevel project, enable building and performing of tests, disable building of examples:
 
 option( VARIANT_LITE_OPT_BUILD_TESTS    "Build and perform variant-lite tests" ${variant_IS_TOPLEVEL_PROJECT} )
 option( VARIANT_LITE_OPT_BUILD_EXAMPLES "Build variant-lite examples" OFF )
