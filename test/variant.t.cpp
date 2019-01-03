@@ -36,7 +36,7 @@ enum State
     /* 7 */ value_copy_assigned,
     /* 8 */ value_move_assigned,
     /* 9 */ moved_from,
-    /*10 */ value_constructed,
+    /*10 */ value_constructed
 };
 
 #if variant_CPP11_OR_GREATER

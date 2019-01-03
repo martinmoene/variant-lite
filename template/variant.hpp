@@ -705,7 +705,7 @@ template< typename T >
 struct alignment_of
 {
     enum V { value = alignment_logic<
-        sizeof( alignment_of_hack<T> ) - sizeof(T), sizeof(T) >::value, };
+        sizeof( alignment_of_hack<T> ) - sizeof(T), sizeof(T) >::value };
 };
 
 template< typename List, size_t N >
