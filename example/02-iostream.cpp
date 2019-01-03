@@ -36,7 +36,7 @@ using namespace nonstd;
 int main()
 {
     variant< char, int, long, std::string > var;
-    
+
     var = 'v'; std::cout << "char:" << var << "\n";
     var =  7 ; std::cout << "int:"  << var << "\n";
     var = 42L; std::cout << "long:" << var << "\n";
@@ -44,6 +44,6 @@ int main()
 }
 
 #if 0
-cl -EHsc -I../include/nonstd 02-iostream.cpp && 02-iostream.exe
-g++ -std=c++03 -Wall -I../include/nonstd -o 02-iostream.exe 02-iostream.cpp && 02-iostream.exe
-#endif 
+cl -EHsc -I../include 02-iostream.cpp && 02-iostream.exe
+g++ -std=c++03 -Wall -I../include -o 02-iostream.exe 02-iostream.cpp && 02-iostream.exe
+#endif
