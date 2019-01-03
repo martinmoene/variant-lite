@@ -961,7 +961,7 @@ CASE( "variant: Allows to visit contents (args: 2)" )
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
     var_t vs = std::string("hello");
-    
+
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor2(), vi, vs);
 #else
@@ -1014,13 +1014,13 @@ struct RVRefTestVisitor
         os << val;
         return os.str();
     }
-    
+
     template< typename ... Args >
     std::string operator()( variant<Args...> const & var ) const
     {
         return visit( RVRefTestVisitor(), var );
     }
-    
+
     template< typename U >
     std::string operator()( U && ) const
     {
@@ -1032,24 +1032,24 @@ struct RVRefTestVisitor
 struct Unwrapper
 {
     RVRefTestVisitor * m_v;
-    
+
     Unwrapper( RVRefTestVisitor * v )
         : m_v( v )
     {}
-    
+
     template< typename T >
     auto & Unwrap( T && val ) const
     {
         return std::forward<T>( val );
     }
-    
+
     template< typename T >
     const auto & Unwrap( std::shared_ptr<T> val ) const
     {
         const auto & result = *val.get();
         return result;
     }
-    
+
     template< typename ... Args >
     auto operator()( Args &&... args ) const
     {
@@ -1069,7 +1069,7 @@ CASE( "variant: Allows to visit contents, rvalue reference (args: 1)" )
     var_t vstr1 = inner;
     var_t vstr2 = std::string("hello2");
     RVRefTestVisitor visitor;
-    
+
     std::string rs1 = visit( Unwrapper( &visitor ), vstr1 );
     std::string rs2 = visit( Unwrapper( &visitor ), vstr2 );
 
@@ -1340,6 +1340,31 @@ CASE( "std::hash<>: Allows to obtain hash (C++11)" )
     EXPECT( std::hash<variant<int> >()( var ) == std::hash<variant<int> >()( var ) );
 #else
     EXPECT( !!"std::hash<>: std::hash<> is not available (no C++11)" );
+#endif
+}
+
+CASE("index_of<>(): method should be static" "[.issue-30]")
+{
+#if variant_CPP11_OR_GREATER
+    typedef variant<int, double, std::string> Value;
+    Value value("Some string");
+
+    switch ( value.index() )
+    {
+    case Value::index_of<int>():
+        // do something
+        break;
+    case Value::index_of<double>():
+        // do something
+        break;
+    case Value::index_of<std::string>():
+        // do something
+        break;
+    }
+
+    EXPECT( !!"prevent warnings" );
+#else
+    EXPECT( !!"index_of<>(): test is not available (no C++11)" );
 #endif
 }
 

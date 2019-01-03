@@ -1306,7 +1306,7 @@ public:
     //
 
     template< class T >
-    variant_constexpr std::size_t index_of() const variant_noexcept
+    static variant_constexpr std::size_t index_of() variant_noexcept
     {
         return to_size_t( detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value );
     }
@@ -1377,9 +1377,9 @@ private:
     }
 
     template< class U >
-    static std::size_t to_size_t( U index )
+    static variant_constexpr std::size_t to_size_t( U index )
     {
-        return static_cast<std::size_t >( index );
+        return static_cast<std::size_t>( index );
     }
 
     variant_constexpr std::size_t max_index() const variant_noexcept
@@ -1545,7 +1545,7 @@ private:
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v ) variant_noexcept
 {
-    return v.index() == v.template index_of<T>();
+    return v.index() == variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>::template index_of<T>();
 }
 
 template< class R, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
@@ -1628,14 +1628,14 @@ template< class T, class T0, class T1, class T2, class T3, class T4, class T5, c
 inline typename detail::add_pointer<T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
+    return ( pv->index() == variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline typename detail::add_pointer<const T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T))
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
+    return ( pv->index() == variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >

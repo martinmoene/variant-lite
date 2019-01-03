@@ -1129,7 +1129,7 @@ public:
     //
 
     template< class T >
-    variant_constexpr std::size_t index_of() const variant_noexcept
+    static variant_constexpr std::size_t index_of() variant_noexcept
     {
         return to_size_t( detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value );
     }
@@ -1200,9 +1200,9 @@ private:
     }
 
     template< class U >
-    static std::size_t to_size_t( U index )
+    static variant_constexpr std::size_t to_size_t( U index )
     {
-        return static_cast<std::size_t >( index );
+        return static_cast<std::size_t>( index );
     }
 
     variant_constexpr std::size_t max_index() const variant_noexcept
@@ -1354,7 +1354,7 @@ private:
 template< class T, {{TplParamsList}} >
 inline bool holds_alternative( variant<{{TplArgsList}}> const & v ) variant_noexcept
 {
-    return v.index() == v.template index_of<T>();
+    return v.index() == variant<{{TplArgsList}}>::template index_of<T>();
 }
 
 template< class R, {{TplParamsList}} >
@@ -1437,14 +1437,14 @@ template< class T, {{TplParamsList}} >
 inline typename detail::add_pointer<T>::type
 get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
+    return ( pv->index() == variant<{{TplArgsList}}>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, {{TplParamsList}} >
 inline typename detail::add_pointer<const T>::type
 get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T))
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
+    return ( pv->index() == variant<{{TplArgsList}}>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, {{TplParamsList}} >
