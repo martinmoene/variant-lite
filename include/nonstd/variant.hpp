@@ -37,6 +37,16 @@
 # define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
 #endif
 
+// Control presence of exception handling (try and auto discover):
+
+#ifndef variant_CONFIG_NO_EXCEPTIONS
+# if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
+#  define variant_CONFIG_NO_EXCEPTIONS  0
+# else
+#  define variant_CONFIG_NO_EXCEPTIONS  1
+# endif
+#endif
+
 // C++ language version detection (C++20 is speculative):
 // Note: VC14.0/1900 (VS2015) lacks too much from C++14.
 
@@ -205,8 +215,13 @@ namespace nonstd {
 #include <cstddef>
 #include <limits>
 #include <new>
-#include <stdexcept>
 #include <utility>
+
+#if variant_CONFIG_NO_EXCEPTIONS
+# include <cassert>
+#else
+# include <stdexcept>
+#endif
 
 // variant-lite alignment configuration:
 
@@ -1316,11 +1331,14 @@ public:
     {
         const std::size_t i = index_of<T>();
 
+#if variant_CONFIG_NO_EXCEPTIONS
+        assert( i == index() );
+#else
         if ( i != index() || i == max_index() )
         {
             throw bad_variant_access();
         }
-
+#endif
         return *as<T>();
     }
 
@@ -1329,11 +1347,14 @@ public:
     {
         const std::size_t i = index_of<T>();
 
+#if variant_CONFIG_NO_EXCEPTIONS
+        assert( i == index() );
+#else
         if ( i != index() || i == max_index() )
         {
             throw bad_variant_access();
         }
-
+#endif
         return *as<const T>();
     }
 
@@ -1564,11 +1585,14 @@ template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class
 inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type &
 get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return v.template get<K>();
 }
 
@@ -1576,11 +1600,14 @@ template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class
 inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type const &
 get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return v.template get<K>();
 }
 
@@ -1602,11 +1629,14 @@ template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class
 inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type &&
 get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return std::move(v.template get<K>());
 }
 
@@ -1614,11 +1644,14 @@ template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class
 inline typename variant_alternative< K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type const &&
 get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return std::move(v.template get<K>());
 }
 

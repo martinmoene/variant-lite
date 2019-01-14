@@ -34,6 +34,7 @@
 		<Unit filename="../../conanfile.py" />
 		<Unit filename="../../example/01-basic.cpp" />
 		<Unit filename="../../example/02-iostream.cpp" />
+		<Unit filename="../../example/03-no-exceptions.cpp" />
 		<Unit filename="../../include/nonstd/variant.hpp" />
 		<Unit filename="../../script/generate_header.py" />
 		<Unit filename="../../script/update-version.py" />

@@ -2,7 +2,7 @@
 //
 // https://github.com/martinmoene/variant-lite
 //
-// Distributed under the Boost Software License, Version 1.0. 
+// Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "variant-main.t.hpp"
@@ -13,10 +13,10 @@
 #define variant_ABSENT( x ) \
     std::cout << #x << ": (undefined)\n"
 
-lest::tests & specification() 
-{ 
-    static lest::tests tests; 
-    return tests; 
+lest::tests & specification()
+{
+    static lest::tests tests;
+    return tests;
 }
 
 CASE( "variant-lite version" "[.variant][.version]" )
@@ -31,10 +31,11 @@ CASE( "variant configuration" "[.variant][.config]" )
 {
     variant_PRESENT( variant_HAVE_STD_VARIANT );
     variant_PRESENT( variant_USES_STD_VARIANT );
-    variant_PRESENT( variant_CONFIG_SELECT_VARIANT );
     variant_PRESENT( variant_VARIANT_DEFAULT );
     variant_PRESENT( variant_VARIANT_NONSTD );
     variant_PRESENT( variant_VARIANT_STD );
+    variant_PRESENT( variant_CONFIG_SELECT_VARIANT );
+    variant_PRESENT( variant_CONFIG_NO_EXCEPTIONS );
     variant_PRESENT( variant_CPLUSPLUS );
 }
 
