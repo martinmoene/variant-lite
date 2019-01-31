@@ -1345,7 +1345,7 @@ CASE( "std::hash<>: Allows to obtain hash (C++11)" )
 
 CASE("index_of<>(): method should be static" "[.issue-30]")
 {
-#if variant_CPP11_OR_GREATER
+#if variant_CPP11_OR_GREATER && ! variant_USES_STD_VARIANT
     typedef variant<int, double, std::string> Value;
     Value value("Some string");
 
@@ -1364,7 +1364,65 @@ CASE("index_of<>(): method should be static" "[.issue-30]")
 
     EXPECT( !!"prevent warnings" );
 #else
-    EXPECT( !!"index_of<>(): test is not available (no C++11)" );
+    EXPECT( !!"index_of<>(): test is not available (no C++11, or std::variant)" );
+#endif
+}
+
+namespace issue_31 {
+
+    int instances = 0;
+    
+    template< char >
+    struct S
+    {
+        ~S(          ) { instances--; }
+        S(           ) { instances++; }
+        S( S const & ) { instances++; }
+#if variant_CPP11_OR_GREATER
+        S( S &&      ) {              }
+#endif
+    };
+
+    typedef S<'x'> X;
+    typedef S<'y'> Y;
+    
+} // namespace issue_31
+
+CASE("variant: element copy-assignment must destruct assignee" "[.issue-31]")
+{
+    using namespace issue_31;
+
+    EXPECT( instances == 0 );
+    {
+        Y y;               EXPECT( instances == 1 );
+        variant<X,Y> v;    EXPECT( instances == 2 );
+        variant<X,Y> w;    EXPECT( instances == 3 );
+        variant<X,Y> z(y); EXPECT( instances == 4 );
+
+        v = w; EXPECT( instances == 4 );
+        v = z; EXPECT( instances == 4 );
+    }
+    EXPECT( instances == 0 );
+}
+
+CASE("variant: element move-assignment must destruct assignee" "[.issue-31]")
+{
+#if variant_CPP11_OR_GREATER
+    using namespace issue_31;
+
+    EXPECT( instances == 0 );
+    {
+        Y y;               EXPECT( instances == 1 );
+        variant<X,Y> v;    EXPECT( instances == 2 );
+        variant<X,Y> w;    EXPECT( instances == 3 );
+        variant<X,Y> z(y); EXPECT( instances == 4 );
+
+        v = std::move( w ); EXPECT( instances == 3 );
+        v = std::move( z ); EXPECT( instances == 2 );
+    }
+    EXPECT( instances == 0 );
+#else
+    EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
 }
 
