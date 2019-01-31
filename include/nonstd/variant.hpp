@@ -1426,6 +1426,7 @@ private:
         }
         else if ( index() == other.index() )
         {
+            helper_type::destroy( type_index, ptr() );
             type_index = helper_type::copy( other.type_index, other.ptr(), ptr() );
         }
         else
@@ -1437,6 +1438,7 @@ private:
             type_index = variant_npos_internal();
 #if variant_CPP11_OR_GREATER
             type_index = helper_type::move( other.type_index, tmp.ptr(), ptr() );
+            tmp.type_index = variant_npos_internal();
 #else
             type_index = helper_type::copy( other.type_index, tmp.ptr(), ptr() );
 #endif
