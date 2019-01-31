@@ -1284,13 +1284,16 @@ private:
         }
         else if ( index() == other.index() )
         {
+            helper_type::destroy( type_index, ptr() );
             type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
+            other.type_index = variant_npos_internal();
         }
         else
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
             type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
+            other.type_index = variant_npos_internal();
         }
         return *this;
     }
