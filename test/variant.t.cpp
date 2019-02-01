@@ -39,22 +39,29 @@ enum State
     /*10 */ value_constructed
 };
 
-#if variant_CPP11_OR_GREATER
-
 struct Tracer
 {
     State state;
+    static int instances;
 
-    Tracer() noexcept { state = default_constructed; }
+    static void reset() variant_noexcept { instances = 0; }
 
-    Tracer( Tracer && ) noexcept  { state = move_constructed; }
-    Tracer &  operator= ( Tracer && ) noexcept  { state = move_assigned; return *this; }
+    ~Tracer() variant_noexcept { --instances; }
+    Tracer()  variant_noexcept { ++instances; state = default_constructed; }
 
-    Tracer( const Tracer & ) noexcept  { state = copy_constructed; }
-    Tracer & operator= ( const Tracer & ) noexcept  { state = copy_assigned; return *this; }
+    Tracer( const Tracer & ) variant_noexcept  { ++instances; state = copy_constructed; }
+    Tracer & operator= ( const Tracer & ) variant_noexcept  { state = copy_assigned; return *this; }
+
+#if variant_CPP11_OR_GREATER
+    Tracer( Tracer && ) variant_noexcept  { /*+-instances;*/ state = move_constructed; }
+    Tracer &  operator= ( Tracer && ) variant_noexcept  { state = move_assigned; return *this; }
+#endif
 };
 
-#endif
+int Tracer::instances = 0;
+
+struct TracerX : Tracer{};
+struct TracerY : Tracer{};
 
 struct V
 {
@@ -233,19 +240,37 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 
 CASE( "variant: Allows to copy-assign from variant" )
 {
-    variant<S> var1;
-    variant<S> var2;
+    SETUP("") {
+    SECTION("Before assignment, assignee is destructed")
+    {
+        Tracer::reset();
+        {
+            TracerY y;
+            variant<TracerX, TracerY> var1;
+            variant<TracerX, TracerY> var2;
+            variant<TracerX, TracerY> var3(y);
+            
+            EXPECT( Tracer::instances == 4 );
+            
+            var1 = var2; EXPECT( Tracer::instances == 4 );
+            var1 = var3; EXPECT( Tracer::instances == 4 );
+        }
+        EXPECT( Tracer::instances == 0 );
+    }
+    SECTION("On assignment, assignee is copied-to")
+    {
+        variant<Tracer> var1;
+        variant<Tracer> var2;
 
-    var1 = var2;
+        var1 = var2;
 
-    EXPECT( get<S>(var1).value.value == V::deflt() );
 #if variant_USES_STD_VARIANT
-    EXPECT( get<S>(var1).value.state == copy_assigned );
-    EXPECT( get<S>(var1).state       == copy_assigned );
+        EXPECT( get<Tracer>(var1).state == copy_assigned );
 #else
-    EXPECT( get<S>(var1).value.state == copy_constructed );
-    EXPECT( get<S>(var1).state       == copy_constructed );
+        EXPECT( get<Tracer>(var1).state == copy_constructed );
 #endif
+    }
+    }
 }
 
 CASE( "variant: Allows to copy-assign mutually empty variant" )
@@ -296,18 +321,37 @@ CASE( "variant: Allows to copy-assign to empty variant" )
 CASE( "variant: Allows to move-assign from variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<S> var;
+    SETUP("") {
+    SECTION("Before assignment, assignee is destructed")
+    {
+        Tracer::reset();
+        {
+            TracerY y;
+            variant<TracerX, TracerY> var1;
+            variant<TracerX, TracerY> var2;
+            variant<TracerX, TracerY> var3(y);
+            
+            EXPECT( Tracer::instances == 4 );
+            
+            var1 = std::move(var2); EXPECT( Tracer::instances == 3 );
+            var1 = std::move(var3); EXPECT( Tracer::instances == 2 );
+        }
+        EXPECT( Tracer::instances == 0 );
+    }
+    SECTION("On assignment, assignee is moved-to")
+    {
+        variant<Tracer> var1;
+        variant<Tracer> var2;
 
-    var = variant<S>{};
+        var1 = std::move(var2);
 
-    EXPECT( get<S>(var).value.value == V::deflt() );
 #if variant_USES_STD_VARIANT
-    EXPECT( get<S>(var).value.state == move_assigned );
-    EXPECT( get<S>(var).state       == move_assigned );
+        EXPECT( get<Tracer>(var1).state == move_assigned );
 #else
-    EXPECT( get<S>(var).value.state == move_constructed );
-    EXPECT( get<S>(var).state       == move_constructed );
+        EXPECT( get<Tracer>(var1).state == move_constructed );
 #endif
+    }
+    }
 #else
     EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
