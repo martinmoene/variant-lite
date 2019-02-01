@@ -16,6 +16,7 @@ namespace {
 // ensure comparison of pointers for lest:
 
 #if variant_USES_STD_VARIANT
+#define variant_noexcept  noexcept
 const void * test_nullptr = nullptr;
 #else
 const void * test_nullptr = variant_nullptr;
