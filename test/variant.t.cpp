@@ -54,7 +54,7 @@ struct Tracer
     Tracer & operator= ( const Tracer & ) variant_noexcept  { state = copy_assigned; return *this; }
 
 #if variant_CPP11_OR_GREATER
-    Tracer( Tracer && ) variant_noexcept  { /*+-instances;*/ state = move_constructed; }
+    Tracer( Tracer && ) variant_noexcept  { ++instances; state = move_constructed; }
     Tracer &  operator= ( Tracer && ) variant_noexcept  { state = move_assigned; return *this; }
 #endif
 };
@@ -265,11 +265,7 @@ CASE( "variant: Allows to copy-assign from variant" )
 
         var1 = var2;
 
-#if variant_USES_STD_VARIANT
         EXPECT( get<Tracer>(var1).state == copy_assigned );
-#else
-        EXPECT( get<Tracer>(var1).state == copy_constructed );
-#endif
     }
     }
 }
@@ -334,8 +330,8 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
             
             EXPECT( Tracer::instances == 4 );
             
-            var1 = std::move(var2); EXPECT( Tracer::instances == 3 );
-            var1 = std::move(var3); EXPECT( Tracer::instances == 2 );
+            var1 = std::move(var2); EXPECT( Tracer::instances == 4 );
+            var1 = std::move(var3); EXPECT( Tracer::instances == 4 );
         }
         EXPECT( Tracer::instances == 0 );
     }
@@ -346,11 +342,7 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
 
         var1 = std::move(var2);
 
-#if variant_USES_STD_VARIANT
         EXPECT( get<Tracer>(var1).state == move_assigned );
-#else
-        EXPECT( get<Tracer>(var1).state == move_constructed );
-#endif
     }
     }
 #else
