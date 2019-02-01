@@ -906,7 +906,7 @@ struct helper
         return to_index_t( K );
     }
 
-    static type_index_t move( type_index_t const from_index, void * from_value, void * to_value )
+    static type_index_t move_construct( type_index_t const from_index, void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -930,9 +930,34 @@ struct helper
         }
         return from_index;
     }
+
+    static type_index_t move_assign( type_index_t const from_index, void * from_value, void * to_value )
+    {
+        switch ( from_index )
+        {
+        case 0: *as<T0>( to_value ) = std::move( *as<T0>( from_value ) ); break;
+        case 1: *as<T1>( to_value ) = std::move( *as<T1>( from_value ) ); break;
+        case 2: *as<T2>( to_value ) = std::move( *as<T2>( from_value ) ); break;
+        case 3: *as<T3>( to_value ) = std::move( *as<T3>( from_value ) ); break;
+        case 4: *as<T4>( to_value ) = std::move( *as<T4>( from_value ) ); break;
+        case 5: *as<T5>( to_value ) = std::move( *as<T5>( from_value ) ); break;
+        case 6: *as<T6>( to_value ) = std::move( *as<T6>( from_value ) ); break;
+        case 7: *as<T7>( to_value ) = std::move( *as<T7>( from_value ) ); break;
+        case 8: *as<T8>( to_value ) = std::move( *as<T8>( from_value ) ); break;
+        case 9: *as<T9>( to_value ) = std::move( *as<T9>( from_value ) ); break;
+        case 10: *as<T10>( to_value ) = std::move( *as<T10>( from_value ) ); break;
+        case 11: *as<T11>( to_value ) = std::move( *as<T11>( from_value ) ); break;
+        case 12: *as<T12>( to_value ) = std::move( *as<T12>( from_value ) ); break;
+        case 13: *as<T13>( to_value ) = std::move( *as<T13>( from_value ) ); break;
+        case 14: *as<T14>( to_value ) = std::move( *as<T14>( from_value ) ); break;
+        case 15: *as<T15>( to_value ) = std::move( *as<T15>( from_value ) ); break;
+        
+        }
+        return from_index;
+    }
 #endif
 
-    static type_index_t copy( type_index_t const from_index, const void * from_value, void * to_value )
+    static type_index_t copy_construct( type_index_t const from_index, const void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -952,6 +977,31 @@ struct helper
         case 13: new( to_value ) T13( *as<T13>( from_value ) ); break;
         case 14: new( to_value ) T14( *as<T14>( from_value ) ); break;
         case 15: new( to_value ) T15( *as<T15>( from_value ) ); break;
+        
+        }
+        return from_index;
+    }
+
+    static type_index_t copy_assign( type_index_t const from_index, const void * from_value, void * to_value )
+    {
+        switch ( from_index )
+        {
+        case 0: *as<T0>( to_value ) = *as<T0>( from_value ); break;
+        case 1: *as<T1>( to_value ) = *as<T1>( from_value ); break;
+        case 2: *as<T2>( to_value ) = *as<T2>( from_value ); break;
+        case 3: *as<T3>( to_value ) = *as<T3>( from_value ); break;
+        case 4: *as<T4>( to_value ) = *as<T4>( from_value ); break;
+        case 5: *as<T5>( to_value ) = *as<T5>( from_value ); break;
+        case 6: *as<T6>( to_value ) = *as<T6>( from_value ); break;
+        case 7: *as<T7>( to_value ) = *as<T7>( from_value ); break;
+        case 8: *as<T8>( to_value ) = *as<T8>( from_value ); break;
+        case 9: *as<T9>( to_value ) = *as<T9>( from_value ); break;
+        case 10: *as<T10>( to_value ) = *as<T10>( from_value ); break;
+        case 11: *as<T11>( to_value ) = *as<T11>( from_value ); break;
+        case 12: *as<T12>( to_value ) = *as<T12>( from_value ); break;
+        case 13: *as<T13>( to_value ) = *as<T13>( from_value ); break;
+        case 14: *as<T14>( to_value ) = *as<T14>( from_value ); break;
+        case 15: *as<T15>( to_value ) = *as<T15>( from_value ); break;
         
         }
         return from_index;
@@ -1107,7 +1157,7 @@ public:
     variant(variant const & other)
     : type_index( other.type_index )
     {
-        (void) helper_type::copy( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
@@ -1131,7 +1181,7 @@ public:
         std::is_nothrow_move_constructible<T15>::value)
         : type_index( other.type_index )
     {
-        (void) helper_type::move( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::move_construct( other.type_index, other.ptr(), ptr() );
     }
 
     template< std::size_t K >
@@ -1426,21 +1476,19 @@ private:
         }
         else if ( index() == other.index() )
         {
-            helper_type::destroy( type_index, ptr() );
-            type_index = helper_type::copy( other.type_index, other.ptr(), ptr() );
+            type_index = variant_npos_internal();
+            type_index = helper_type::copy_assign( other.type_index, other.ptr(), ptr() );
         }
         else
         {
-            // alas exception safety with pre-C++11 needs an extra copy:
-
+            // for exception safety, first move to an intermediate copy:
             variant tmp( other );
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
 #if variant_CPP11_OR_GREATER
-            type_index = helper_type::move( other.type_index, tmp.ptr(), ptr() );
-            tmp.type_index = variant_npos_internal();
+            type_index = helper_type::move_construct( other.type_index, tmp.ptr(), ptr() );
 #else
-            type_index = helper_type::copy( other.type_index, tmp.ptr(), ptr() );
+            type_index = helper_type::copy_construct( other.type_index, tmp.ptr(), ptr() );
 #endif
         }
         return *this;
@@ -1461,16 +1509,16 @@ private:
         }
         else if ( index() == other.index() )
         {
-            helper_type::destroy( type_index, ptr() );
-            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
-            other.type_index = variant_npos_internal();
+            type_index = variant_npos_internal();
+            type_index = helper_type::move_assign( other.type_index, other.ptr(), ptr() );
         }
         else
         {
+            // for exception safety, first move to an intermediate copy:
+            variant tmp( std::move( other ) );
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
-            other.type_index = variant_npos_internal();
+            type_index = helper_type::move_construct( other.type_index, tmp.ptr(), ptr() );
         }
         return *this;
     }
