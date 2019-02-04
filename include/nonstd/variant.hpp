@@ -1476,7 +1476,6 @@ private:
         }
         else if ( index() == other.index() )
         {
-            type_index = variant_npos_internal();
             type_index = helper_type::copy_assign( other.type_index, other.ptr(), ptr() );
         }
         else
@@ -1509,7 +1508,6 @@ private:
         }
         else if ( index() == other.index() )
         {
-            type_index = variant_npos_internal();
             type_index = helper_type::move_assign( other.type_index, other.ptr(), ptr() );
         }
         else
