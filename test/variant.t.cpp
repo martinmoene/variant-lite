@@ -250,9 +250,9 @@ CASE( "variant: Allows to copy-assign from variant" )
             variant<TracerX, TracerY> var1;
             variant<TracerX, TracerY> var2;
             variant<TracerX, TracerY> var3(y);
-            
+
             EXPECT( Tracer::instances == 4 );
-            
+
             var1 = var2; EXPECT( Tracer::instances == 4 );
             var1 = var3; EXPECT( Tracer::instances == 4 );
         }
@@ -327,9 +327,9 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
             variant<TracerX, TracerY> var1;
             variant<TracerX, TracerY> var2;
             variant<TracerX, TracerY> var3(y);
-            
+
             EXPECT( Tracer::instances == 4 );
-            
+
             var1 = std::move(var2); EXPECT( Tracer::instances == 4 );
             var1 = std::move(var3); EXPECT( Tracer::instances == 4 );
         }
@@ -1372,9 +1372,13 @@ CASE( "variant_alternative_T(): Allows to select type by index (non-standard: ma
 CASE( "std::hash<>: Allows to obtain hash (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int> var( 7 );
+    using variant_t = variant<char, unsigned int>;
+    variant_t var1('a');
+    variant_t var2( (std::numeric_limits<unsigned int>::max)() );
 
-    EXPECT( std::hash<variant<int> >()( var ) == std::hash<variant<int> >()( var ) );
+    var2 = var1;
+
+    EXPECT( std::hash<variant_t>{}( var1 ) == std::hash<variant_t>{}( var2 ) );
 #else
     EXPECT( !!"std::hash<>: std::hash<> is not available (no C++11)" );
 #endif
