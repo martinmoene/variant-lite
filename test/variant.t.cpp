@@ -119,19 +119,27 @@ class NoDefaultConstruct { NoDefaultConstruct(){} };
 
 struct BlowCopyMoveConstruct
 {
-    BlowCopyMoveConstruct() {}
-    BlowCopyMoveConstruct( BlowCopyMoveConstruct const & ) { throw 42; }
+    static bool blow;
+    static void enable_blow() { blow = true; }
+    static void disable_blow() { blow = false; }
+
+    ~BlowCopyMoveConstruct() {}
+    BlowCopyMoveConstruct( bool blow_ = true ) { blow = blow_; }
+    BlowCopyMoveConstruct( BlowCopyMoveConstruct const & ) { if ( blow ) throw 42; }
     BlowCopyMoveConstruct & operator=( BlowCopyMoveConstruct const & ) { return *this; }
 #if variant_CPP11_OR_GREATER
-    BlowCopyMoveConstruct( BlowCopyMoveConstruct && ) { throw 42; }
+    BlowCopyMoveConstruct( BlowCopyMoveConstruct && ) { if ( blow ) throw 42; }
     BlowCopyMoveConstruct & operator=( BlowCopyMoveConstruct && ) = default;
 #endif
 };
 
+bool BlowCopyMoveConstruct::blow = true;
+
 struct BlowCopyMoveAssign
 {
+    ~BlowCopyMoveAssign() {};
     BlowCopyMoveAssign() {}
-    BlowCopyMoveAssign( BlowCopyMoveAssign const & ) = default;
+    BlowCopyMoveAssign( BlowCopyMoveAssign const & ) {}
     BlowCopyMoveAssign & operator=( BlowCopyMoveAssign const & ) { throw 42; return *this; }
 #if variant_CPP11_OR_GREATER
     BlowCopyMoveAssign( BlowCopyMoveAssign && ) = default;
@@ -287,6 +295,33 @@ CASE( "variant: Allows to copy-assign from variant" )
 
         EXPECT_NOT( var1.valueless_by_exception() );
     }
+    SECTION("On non-same-alternative assignment, assignee may become valueless-by-exception")
+    {
+        variant<int, BlowCopyMoveConstruct> var1;
+        variant<int, BlowCopyMoveConstruct> var2( BlowCopyMoveConstruct( false ) );
+
+        BlowCopyMoveConstruct::enable_blow();
+
+        EXPECT_NOT( var1.valueless_by_exception() );
+
+        try { var1 = var2; } catch (...) {}
+
+#if     variant_USES_STD_VARIANT
+# if    variant_COMPILER_CLANG_VERSION
+        EXPECT( var1.valueless_by_exception() );
+# elif  variant_COMPILER_GNU_VERSION
+        EXPECT( var1.valueless_by_exception() );
+# elif  variant_COMPILER_MSVC_VERSION
+        EXPECT_NOT( var1.valueless_by_exception() );
+# endif
+#else // variant_USES_STD_VARIANT
+# if    variant_CPP11_OR_GREATER
+        EXPECT_NOT( var1.valueless_by_exception() );
+# else
+        EXPECT( var1.valueless_by_exception() );
+# endif
+#endif // variant_USES_STD_VARIANT
+    }
     }
 }
 
@@ -372,6 +407,16 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
         try { var1 = std::move(var2); } catch (...) {}
 
         EXPECT_NOT( var1.valueless_by_exception() );
+    }
+    SECTION("On non-same-alternative assignment, assignee may become valueless-by-exception")
+    {
+        variant<int, BlowCopyMoveConstruct> var1;
+        
+        EXPECT_NOT( var1.valueless_by_exception() );
+
+        try { var1 = BlowCopyMoveConstruct{}; } catch (...) {}
+
+        EXPECT( var1.valueless_by_exception() );
     }
     }
 #else
