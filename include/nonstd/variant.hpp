@@ -1077,6 +1077,8 @@ variant_constexpr std::size_t variant_npos = static_cast<std::size_t>( -1 );
 static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
 #endif
 
+#if ! variant_CONFIG_NO_EXCEPTIONS
+
 class bad_variant_access : public std::exception
 {
 public:
@@ -1089,6 +1091,8 @@ public:
         return "bad variant access";
     }
 };
+
+#endif // variant_CONFIG_NO_EXCEPTIONS
 
 template<
     class T0,
