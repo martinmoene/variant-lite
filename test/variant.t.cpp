@@ -117,24 +117,35 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 
 class NoDefaultConstruct { NoDefaultConstruct(){} };
 
-struct BlowCopyMove
+struct BlowCopyMoveConstruct
 {
-    BlowCopyMove() {}
-    BlowCopyMove( BlowCopyMove const & ) { throw 42; }
-    BlowCopyMove & operator=( BlowCopyMove const & ) { return *this; }
+    BlowCopyMoveConstruct() {}
+    BlowCopyMoveConstruct( BlowCopyMoveConstruct const & ) { throw 42; }
+    BlowCopyMoveConstruct & operator=( BlowCopyMoveConstruct const & ) { return *this; }
 #if variant_CPP11_OR_GREATER
-    BlowCopyMove( BlowCopyMove && ) { throw 42; }
-    BlowCopyMove & operator=( BlowCopyMove && ) = default;
+    BlowCopyMoveConstruct( BlowCopyMoveConstruct && ) { throw 42; }
+    BlowCopyMoveConstruct & operator=( BlowCopyMoveConstruct && ) = default;
 #endif
 };
 
-typedef variant<char, BlowCopyMove> empty_variant_t;
+struct BlowCopyMoveAssign
+{
+    BlowCopyMoveAssign() {}
+    BlowCopyMoveAssign( BlowCopyMoveAssign const & ) = default;
+    BlowCopyMoveAssign & operator=( BlowCopyMoveAssign const & ) { throw 42; return *this; }
+#if variant_CPP11_OR_GREATER
+    BlowCopyMoveAssign( BlowCopyMoveAssign && ) = default;
+    BlowCopyMoveAssign & operator=( BlowCopyMoveAssign && ) { throw 42; return *this; }
+#endif
+};
+
+typedef variant<char, BlowCopyMoveConstruct> empty_variant_t;
 
 empty_variant_t make_empty_variant()
 {
     empty_variant_t var = 'a';
 
-    try { var = BlowCopyMove(); } catch(...) {}
+    try { var = BlowCopyMoveConstruct(); } catch(...) {}
 
     return var;
 }
@@ -258,7 +269,7 @@ CASE( "variant: Allows to copy-assign from variant" )
         }
         EXPECT( Tracer::instances == 0 );
     }
-    SECTION("On assignment, assignee is copied-to")
+    SECTION("On same-alternative assignment, assignee is copied-to")
     {
         variant<Tracer> var1;
         variant<Tracer> var2;
@@ -266,6 +277,15 @@ CASE( "variant: Allows to copy-assign from variant" )
         var1 = var2;
 
         EXPECT( get<Tracer>(var1).state == copy_assigned );
+    }
+    SECTION("On same-alternative assignment, assignee does not become valueless-by-exception")
+    {
+        variant<BlowCopyMoveAssign> var1;
+        variant<BlowCopyMoveAssign> var2;
+
+        try { var1 = var2; } catch (...) {}
+
+        EXPECT_NOT( var1.valueless_by_exception() );
     }
     }
 }
@@ -335,7 +355,7 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
         }
         EXPECT( Tracer::instances == 0 );
     }
-    SECTION("On assignment, assignee is moved-to")
+    SECTION("On same-alternative assignment, assignee is moved-to")
     {
         variant<Tracer> var1;
         variant<Tracer> var2;
@@ -343,6 +363,15 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
         var1 = std::move(var2);
 
         EXPECT( get<Tracer>(var1).state == move_assigned );
+    }
+    SECTION("On same-alternative assignment, assignee does not become valueless-by-exception")
+    {
+        variant<BlowCopyMoveAssign> var1;
+        variant<BlowCopyMoveAssign> var2;
+
+        try { var1 = std::move(var2); } catch (...) {}
+
+        EXPECT_NOT( var1.valueless_by_exception() );
     }
     }
 #else
