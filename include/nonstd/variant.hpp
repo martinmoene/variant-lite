@@ -2206,7 +2206,27 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 {
     std::size_t operator()( nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v ) const variant_noexcept
     {
-        return nonstd::variants::detail::hash( v );
+        switch( v.index() )
+        {
+            case 0: return nonstd::variants::detail::hash( 0 ) ^ nonstd::variants::detail::hash( get<0>( v ) );
+            case 1: return nonstd::variants::detail::hash( 1 ) ^ nonstd::variants::detail::hash( get<1>( v ) );
+            case 2: return nonstd::variants::detail::hash( 2 ) ^ nonstd::variants::detail::hash( get<2>( v ) );
+            case 3: return nonstd::variants::detail::hash( 3 ) ^ nonstd::variants::detail::hash( get<3>( v ) );
+            case 4: return nonstd::variants::detail::hash( 4 ) ^ nonstd::variants::detail::hash( get<4>( v ) );
+            case 5: return nonstd::variants::detail::hash( 5 ) ^ nonstd::variants::detail::hash( get<5>( v ) );
+            case 6: return nonstd::variants::detail::hash( 6 ) ^ nonstd::variants::detail::hash( get<6>( v ) );
+            case 7: return nonstd::variants::detail::hash( 7 ) ^ nonstd::variants::detail::hash( get<7>( v ) );
+            case 8: return nonstd::variants::detail::hash( 8 ) ^ nonstd::variants::detail::hash( get<8>( v ) );
+            case 9: return nonstd::variants::detail::hash( 9 ) ^ nonstd::variants::detail::hash( get<9>( v ) );
+            case 10: return nonstd::variants::detail::hash( 10 ) ^ nonstd::variants::detail::hash( get<10>( v ) );
+            case 11: return nonstd::variants::detail::hash( 11 ) ^ nonstd::variants::detail::hash( get<11>( v ) );
+            case 12: return nonstd::variants::detail::hash( 12 ) ^ nonstd::variants::detail::hash( get<12>( v ) );
+            case 13: return nonstd::variants::detail::hash( 13 ) ^ nonstd::variants::detail::hash( get<13>( v ) );
+            case 14: return nonstd::variants::detail::hash( 14 ) ^ nonstd::variants::detail::hash( get<14>( v ) );
+            case 15: return nonstd::variants::detail::hash( 15 ) ^ nonstd::variants::detail::hash( get<15>( v ) );
+            
+            default: return false;
+        }
     }
 };
 

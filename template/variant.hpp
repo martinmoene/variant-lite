@@ -1800,7 +1800,13 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 {
     std::size_t operator()( nonstd::variant<{{TplArgsList}}> const & v ) const variant_noexcept
     {
-        return nonstd::variants::detail::hash( v );
+        switch( v.index() )
+        {
+            {% for n in range(NumParams) -%}
+            case {{n}}: return nonstd::variants::detail::hash( {{n}} ) ^ nonstd::variants::detail::hash( get<{{n}}>( v ) );
+            {% endfor %}
+            default: return false;
+        }
     }
 };
 
