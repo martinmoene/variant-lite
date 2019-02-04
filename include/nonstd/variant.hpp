@@ -1227,7 +1227,10 @@ public:
 
     ~variant()
     {
-        helper_type::destroy( type_index, ptr() );
+        if ( ! valueless_by_exception() )
+        {
+            helper_type::destroy( type_index, ptr() );
+        }
     }
 
     variant & operator=( variant const & other )
