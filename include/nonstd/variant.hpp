@@ -818,23 +818,33 @@ typedef
 
 #endif // variant_CONFIG_MAX_ALIGN_HACK
 
+#if variant_CPP11_OR_GREATER
+
 template< typename T>
 inline std::size_t hash( T const & v )
 {
-    // primes:
-    unsigned const int a  = 54059;
-    unsigned const int b  = 76963;
-    unsigned const int h0 = 37;
-
-    unsigned int h = h0;
-    unsigned char const * s = reinterpret_cast<unsigned char const *>( &v );
-
-    for ( std::size_t i = 0; i < sizeof(v); ++i, ++s )
-    {
-        h = (h * a) ^ (*s * b);
-    }
-    return h;
+    return std::hash<T>()( v );
 }
+
+inline std::size_t hash( T0 const & ) { return 0; }
+inline std::size_t hash( T1 const & ) { return 0; }
+inline std::size_t hash( T2 const & ) { return 0; }
+inline std::size_t hash( T3 const & ) { return 0; }
+inline std::size_t hash( T4 const & ) { return 0; }
+inline std::size_t hash( T5 const & ) { return 0; }
+inline std::size_t hash( T6 const & ) { return 0; }
+inline std::size_t hash( T7 const & ) { return 0; }
+inline std::size_t hash( T8 const & ) { return 0; }
+inline std::size_t hash( T9 const & ) { return 0; }
+inline std::size_t hash( T10 const & ) { return 0; }
+inline std::size_t hash( T11 const & ) { return 0; }
+inline std::size_t hash( T12 const & ) { return 0; }
+inline std::size_t hash( T13 const & ) { return 0; }
+inline std::size_t hash( T14 const & ) { return 0; }
+inline std::size_t hash( T15 const & ) { return 0; }
+
+
+#endif // variant_CPP11_OR_GREATER
 
 
 
@@ -1489,7 +1499,7 @@ private:
         {
 #if variant_CPP11_OR_GREATER
             // prevent this variant to become valueless-by-exception by making
-            // the mandatory copy before destruction of the current content, 
+            // the mandatory copy before destruction of the current content,
             // followed by moving the content (like STLSTL, unlike glibc++):
             variant tmp( other );
             helper_type::destroy( type_index, ptr() );
@@ -2214,24 +2224,26 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 {
     std::size_t operator()( nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v ) const variant_noexcept
     {
+        namespace nvd = nonstd::variants::detail;
+
         switch( v.index() )
         {
-            case 0: return nonstd::variants::detail::hash( 0 ) ^ nonstd::variants::detail::hash( get<0>( v ) );
-            case 1: return nonstd::variants::detail::hash( 1 ) ^ nonstd::variants::detail::hash( get<1>( v ) );
-            case 2: return nonstd::variants::detail::hash( 2 ) ^ nonstd::variants::detail::hash( get<2>( v ) );
-            case 3: return nonstd::variants::detail::hash( 3 ) ^ nonstd::variants::detail::hash( get<3>( v ) );
-            case 4: return nonstd::variants::detail::hash( 4 ) ^ nonstd::variants::detail::hash( get<4>( v ) );
-            case 5: return nonstd::variants::detail::hash( 5 ) ^ nonstd::variants::detail::hash( get<5>( v ) );
-            case 6: return nonstd::variants::detail::hash( 6 ) ^ nonstd::variants::detail::hash( get<6>( v ) );
-            case 7: return nonstd::variants::detail::hash( 7 ) ^ nonstd::variants::detail::hash( get<7>( v ) );
-            case 8: return nonstd::variants::detail::hash( 8 ) ^ nonstd::variants::detail::hash( get<8>( v ) );
-            case 9: return nonstd::variants::detail::hash( 9 ) ^ nonstd::variants::detail::hash( get<9>( v ) );
-            case 10: return nonstd::variants::detail::hash( 10 ) ^ nonstd::variants::detail::hash( get<10>( v ) );
-            case 11: return nonstd::variants::detail::hash( 11 ) ^ nonstd::variants::detail::hash( get<11>( v ) );
-            case 12: return nonstd::variants::detail::hash( 12 ) ^ nonstd::variants::detail::hash( get<12>( v ) );
-            case 13: return nonstd::variants::detail::hash( 13 ) ^ nonstd::variants::detail::hash( get<13>( v ) );
-            case 14: return nonstd::variants::detail::hash( 14 ) ^ nonstd::variants::detail::hash( get<14>( v ) );
-            case 15: return nonstd::variants::detail::hash( 15 ) ^ nonstd::variants::detail::hash( get<15>( v ) );
+            case 0: return nvd::hash( 0 ) ^ nvd::hash( get<0>( v ) );
+            case 1: return nvd::hash( 1 ) ^ nvd::hash( get<1>( v ) );
+            case 2: return nvd::hash( 2 ) ^ nvd::hash( get<2>( v ) );
+            case 3: return nvd::hash( 3 ) ^ nvd::hash( get<3>( v ) );
+            case 4: return nvd::hash( 4 ) ^ nvd::hash( get<4>( v ) );
+            case 5: return nvd::hash( 5 ) ^ nvd::hash( get<5>( v ) );
+            case 6: return nvd::hash( 6 ) ^ nvd::hash( get<6>( v ) );
+            case 7: return nvd::hash( 7 ) ^ nvd::hash( get<7>( v ) );
+            case 8: return nvd::hash( 8 ) ^ nvd::hash( get<8>( v ) );
+            case 9: return nvd::hash( 9 ) ^ nvd::hash( get<9>( v ) );
+            case 10: return nvd::hash( 10 ) ^ nvd::hash( get<10>( v ) );
+            case 11: return nvd::hash( 11 ) ^ nvd::hash( get<11>( v ) );
+            case 12: return nvd::hash( 12 ) ^ nvd::hash( get<12>( v ) );
+            case 13: return nvd::hash( 13 ) ^ nvd::hash( get<13>( v ) );
+            case 14: return nvd::hash( 14 ) ^ nvd::hash( get<14>( v ) );
+            case 15: return nvd::hash( 15 ) ^ nvd::hash( get<15>( v ) );
             
             default: return false;
         }

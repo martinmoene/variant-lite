@@ -777,23 +777,19 @@ typedef
 
 #endif // variant_CONFIG_MAX_ALIGN_HACK
 
+#if variant_CPP11_OR_GREATER
+
 template< typename T>
 inline std::size_t hash( T const & v )
 {
-    // primes:
-    unsigned const int a  = 54059;
-    unsigned const int b  = 76963;
-    unsigned const int h0 = 37;
-
-    unsigned int h = h0;
-    unsigned char const * s = reinterpret_cast<unsigned char const *>( &v );
-
-    for ( std::size_t i = 0; i < sizeof(v); ++i, ++s )
-    {
-        h = (h * a) ^ (*s * b);
-    }
-    return h;
+    return std::hash<T>()( v );
 }
+
+{% for n in range(NumParams) -%}
+inline std::size_t hash( T{{n}} const & ) { return 0; }
+{% endfor %}
+
+#endif // variant_CPP11_OR_GREATER
 
 {% set TplArgsList %}{% for n in range(NumParams) %}T{{n ~ (', ' if not loop.last)}}{% endfor %}{% endset %}
 {% set TplParamsList %}{% for n in range(NumParams) %}class T{{n ~ (', ' if not loop.last)}}{% endfor %}{% endset %}
@@ -1284,7 +1280,7 @@ private:
         {
 #if variant_CPP11_OR_GREATER
             // prevent this variant to become valueless-by-exception by making
-            // the mandatory copy before destruction of the current content, 
+            // the mandatory copy before destruction of the current content,
             // followed by moving the content (like STLSTL, unlike glibc++):
             variant tmp( other );
             helper_type::destroy( type_index, ptr() );
@@ -1808,10 +1804,12 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 {
     std::size_t operator()( nonstd::variant<{{TplArgsList}}> const & v ) const variant_noexcept
     {
+        namespace nvd = nonstd::variants::detail;
+
         switch( v.index() )
         {
             {% for n in range(NumParams) -%}
-            case {{n}}: return nonstd::variants::detail::hash( {{n}} ) ^ nonstd::variants::detail::hash( get<{{n}}>( v ) );
+            case {{n}}: return nvd::hash( {{n}} ) ^ nvd::hash( get<{{n}}>( v ) );
             {% endfor %}
             default: return false;
         }
