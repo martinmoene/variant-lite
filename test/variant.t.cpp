@@ -411,7 +411,7 @@ CASE( "variant: Allows to move-assign from variant (C++11)" )
     SECTION("On non-same-alternative assignment, assignee may become valueless-by-exception")
     {
         variant<int, BlowCopyMoveConstruct> var1;
-        
+
         EXPECT_NOT( var1.valueless_by_exception() );
 
         try { var1 = BlowCopyMoveConstruct{}; } catch (...) {}
@@ -1443,14 +1443,41 @@ CASE( "variant_alternative_T(): Allows to select type by index (non-standard: ma
 #endif
 }
 
+#if variant_CPP11_OR_GREATER
+
+namespace {
+
+struct Pad
+{
+    union { char c; int  i; };
+};
+
+// ensure non-char bits differ:
+
+Pad make_pad1() { Pad p; p.i =  0; p.c = 'x'; return p; }
+Pad make_pad2() { Pad p; p.i = ~0; p.c = 'x'; return p; }
+}
+
+namespace std {
+
+template<>
+struct hash<Pad>
+{
+    std::size_t operator()( Pad const & v ) const variant_noexcept
+    {
+        return std::hash<char>{}( v.c );
+    }
+};
+}
+
+#endif
+
 CASE( "std::hash<>: Allows to obtain hash (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    using variant_t = variant<char, unsigned int>;
-    variant_t var1('a');
-    variant_t var2( (std::numeric_limits<unsigned int>::max)() );
-
-    var2 = var1;
+    using variant_t = variant<char, Pad>;
+    variant_t var1( make_pad1() );
+    variant_t var2( make_pad2() );
 
     EXPECT( std::hash<variant_t>{}( var1 ) == std::hash<variant_t>{}( var2 ) );
 #else
