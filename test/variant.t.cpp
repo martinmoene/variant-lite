@@ -1517,10 +1517,17 @@ namespace issue_33 {
 
 CASE("max_index(): should not cause erroneous bad_variant_access in get()" "[.issue-33]")
 {
-    using issue_33::N;
-    using variant_t = variant<N<0>, N<1>, N<2>, N<3>, std::int32_t>;
+    if ( 4 == sizeof(int) )
+    {
+        using issue_33::N;
+        typedef variant<N<0>, N<1>, N<2>, N<3>, int> variant_t;
 
-    EXPECT_NO_THROW( get<std::int32_t>( variant_t( 13 ) ) );
+        EXPECT_NO_THROW( get<int>( variant_t( 13 ) ) );
+    }
+    else
+    {
+        EXPECT( !!"max_index(): test is not available (sizeof(int) != 4)" );
+    }
 }
 
 // end of file
