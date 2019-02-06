@@ -1510,4 +1510,17 @@ CASE("index_of<>(): method should be static" "[.issue-30]")
 #endif
 }
 
+namespace issue_33 {
+
+    template< size_t i > class N { int k; };
+}
+
+CASE("max_index(): should not cause erroneous bad_variant_access in get()" "[.issue-33]")
+{
+    using issue_33::N;
+    using variant_t = variant<N<0>, N<1>, N<2>, N<3>, std::int32_t>;
+
+    EXPECT_NO_THROW( get<std::int32_t>( variant_t( 13 ) ) );
+}
+
 // end of file
