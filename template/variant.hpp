@@ -1182,7 +1182,7 @@ public:
 #if variant_CONFIG_NO_EXCEPTIONS
         assert( i == index() );
 #else
-        if ( i != index() || i == max_index() )
+        if ( i != index() )
         {
             throw bad_variant_access();
         }
@@ -1198,7 +1198,7 @@ public:
 #if variant_CONFIG_NO_EXCEPTIONS
         assert( i == index() );
 #else
-        if ( i != index() || i == max_index() )
+        if ( i != index() )
         {
             throw bad_variant_access();
         }
@@ -1249,11 +1249,6 @@ private:
     static variant_constexpr std::size_t to_size_t( U index )
     {
         return static_cast<std::size_t>( index );
-    }
-
-    variant_constexpr std::size_t max_index() const variant_noexcept
-    {
-        return data_size;
     }
 
     variant_constexpr type_index_t variant_npos_internal() const variant_noexcept
