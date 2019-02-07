@@ -852,7 +852,7 @@ struct helper
         switch ( from_index )
         {
         {% for n in range(NumParams) -%}
-            case {{n}}: new( to_value ) T{{n}}( std::forward<T{{n}}>( *as<T{{n}}>( from_value ) ) ); break;
+            case {{n}}: new( to_value ) T{{n}}( std::move( *as<T{{n}}>( from_value ) ) ); break;
         {% endfor %}
         }
         return from_index;
@@ -1081,11 +1081,11 @@ public:
         std::is_nothrow_move_assignable<T{{n}}>::value{{')' if loop.last else ' &&'}}
         {% endfor -%}
     {
-        return move_assign( std::forward<variant>( other ) );
+        return move_assign( std::move( other ) );
     }
 
     {% for n in range(NumParams) -%}
-    variant & operator=( T{{n}} &&      t{{n}} ) { return move_assign_value<T{{n}},{{n}}>( std::forward<T{{n}}>( t{{n}} ) ); }
+    variant & operator=( T{{n}} &&      t{{n}} ) { return move_assign_value<T{{n}},{{n}}>( std::move( t{{n}} ) ); }
     {% endfor %}
 
 #endif

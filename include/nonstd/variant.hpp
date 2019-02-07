@@ -920,22 +920,22 @@ struct helper
     {
         switch ( from_index )
         {
-        case 0: new( to_value ) T0( std::forward<T0>( *as<T0>( from_value ) ) ); break;
-        case 1: new( to_value ) T1( std::forward<T1>( *as<T1>( from_value ) ) ); break;
-        case 2: new( to_value ) T2( std::forward<T2>( *as<T2>( from_value ) ) ); break;
-        case 3: new( to_value ) T3( std::forward<T3>( *as<T3>( from_value ) ) ); break;
-        case 4: new( to_value ) T4( std::forward<T4>( *as<T4>( from_value ) ) ); break;
-        case 5: new( to_value ) T5( std::forward<T5>( *as<T5>( from_value ) ) ); break;
-        case 6: new( to_value ) T6( std::forward<T6>( *as<T6>( from_value ) ) ); break;
-        case 7: new( to_value ) T7( std::forward<T7>( *as<T7>( from_value ) ) ); break;
-        case 8: new( to_value ) T8( std::forward<T8>( *as<T8>( from_value ) ) ); break;
-        case 9: new( to_value ) T9( std::forward<T9>( *as<T9>( from_value ) ) ); break;
-        case 10: new( to_value ) T10( std::forward<T10>( *as<T10>( from_value ) ) ); break;
-        case 11: new( to_value ) T11( std::forward<T11>( *as<T11>( from_value ) ) ); break;
-        case 12: new( to_value ) T12( std::forward<T12>( *as<T12>( from_value ) ) ); break;
-        case 13: new( to_value ) T13( std::forward<T13>( *as<T13>( from_value ) ) ); break;
-        case 14: new( to_value ) T14( std::forward<T14>( *as<T14>( from_value ) ) ); break;
-        case 15: new( to_value ) T15( std::forward<T15>( *as<T15>( from_value ) ) ); break;
+        case 0: new( to_value ) T0( std::move( *as<T0>( from_value ) ) ); break;
+        case 1: new( to_value ) T1( std::move( *as<T1>( from_value ) ) ); break;
+        case 2: new( to_value ) T2( std::move( *as<T2>( from_value ) ) ); break;
+        case 3: new( to_value ) T3( std::move( *as<T3>( from_value ) ) ); break;
+        case 4: new( to_value ) T4( std::move( *as<T4>( from_value ) ) ); break;
+        case 5: new( to_value ) T5( std::move( *as<T5>( from_value ) ) ); break;
+        case 6: new( to_value ) T6( std::move( *as<T6>( from_value ) ) ); break;
+        case 7: new( to_value ) T7( std::move( *as<T7>( from_value ) ) ); break;
+        case 8: new( to_value ) T8( std::move( *as<T8>( from_value ) ) ); break;
+        case 9: new( to_value ) T9( std::move( *as<T9>( from_value ) ) ); break;
+        case 10: new( to_value ) T10( std::move( *as<T10>( from_value ) ) ); break;
+        case 11: new( to_value ) T11( std::move( *as<T11>( from_value ) ) ); break;
+        case 12: new( to_value ) T12( std::move( *as<T12>( from_value ) ) ); break;
+        case 13: new( to_value ) T13( std::move( *as<T13>( from_value ) ) ); break;
+        case 14: new( to_value ) T14( std::move( *as<T14>( from_value ) ) ); break;
+        case 15: new( to_value ) T15( std::move( *as<T15>( from_value ) ) ); break;
         
         }
         return from_index;
@@ -1272,25 +1272,25 @@ public:
         std::is_nothrow_move_assignable<T14>::value &&
         std::is_nothrow_move_assignable<T15>::value)
         {
-        return move_assign( std::forward<variant>( other ) );
+        return move_assign( std::move( other ) );
     }
 
-    variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::forward<T0>( t0 ) ); }
-    variant & operator=( T1 &&      t1 ) { return move_assign_value<T1,1>( std::forward<T1>( t1 ) ); }
-    variant & operator=( T2 &&      t2 ) { return move_assign_value<T2,2>( std::forward<T2>( t2 ) ); }
-    variant & operator=( T3 &&      t3 ) { return move_assign_value<T3,3>( std::forward<T3>( t3 ) ); }
-    variant & operator=( T4 &&      t4 ) { return move_assign_value<T4,4>( std::forward<T4>( t4 ) ); }
-    variant & operator=( T5 &&      t5 ) { return move_assign_value<T5,5>( std::forward<T5>( t5 ) ); }
-    variant & operator=( T6 &&      t6 ) { return move_assign_value<T6,6>( std::forward<T6>( t6 ) ); }
-    variant & operator=( T7 &&      t7 ) { return move_assign_value<T7,7>( std::forward<T7>( t7 ) ); }
-    variant & operator=( T8 &&      t8 ) { return move_assign_value<T8,8>( std::forward<T8>( t8 ) ); }
-    variant & operator=( T9 &&      t9 ) { return move_assign_value<T9,9>( std::forward<T9>( t9 ) ); }
-    variant & operator=( T10 &&      t10 ) { return move_assign_value<T10,10>( std::forward<T10>( t10 ) ); }
-    variant & operator=( T11 &&      t11 ) { return move_assign_value<T11,11>( std::forward<T11>( t11 ) ); }
-    variant & operator=( T12 &&      t12 ) { return move_assign_value<T12,12>( std::forward<T12>( t12 ) ); }
-    variant & operator=( T13 &&      t13 ) { return move_assign_value<T13,13>( std::forward<T13>( t13 ) ); }
-    variant & operator=( T14 &&      t14 ) { return move_assign_value<T14,14>( std::forward<T14>( t14 ) ); }
-    variant & operator=( T15 &&      t15 ) { return move_assign_value<T15,15>( std::forward<T15>( t15 ) ); }
+    variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::move( t0 ) ); }
+    variant & operator=( T1 &&      t1 ) { return move_assign_value<T1,1>( std::move( t1 ) ); }
+    variant & operator=( T2 &&      t2 ) { return move_assign_value<T2,2>( std::move( t2 ) ); }
+    variant & operator=( T3 &&      t3 ) { return move_assign_value<T3,3>( std::move( t3 ) ); }
+    variant & operator=( T4 &&      t4 ) { return move_assign_value<T4,4>( std::move( t4 ) ); }
+    variant & operator=( T5 &&      t5 ) { return move_assign_value<T5,5>( std::move( t5 ) ); }
+    variant & operator=( T6 &&      t6 ) { return move_assign_value<T6,6>( std::move( t6 ) ); }
+    variant & operator=( T7 &&      t7 ) { return move_assign_value<T7,7>( std::move( t7 ) ); }
+    variant & operator=( T8 &&      t8 ) { return move_assign_value<T8,8>( std::move( t8 ) ); }
+    variant & operator=( T9 &&      t9 ) { return move_assign_value<T9,9>( std::move( t9 ) ); }
+    variant & operator=( T10 &&      t10 ) { return move_assign_value<T10,10>( std::move( t10 ) ); }
+    variant & operator=( T11 &&      t11 ) { return move_assign_value<T11,11>( std::move( t11 ) ); }
+    variant & operator=( T12 &&      t12 ) { return move_assign_value<T12,12>( std::move( t12 ) ); }
+    variant & operator=( T13 &&      t13 ) { return move_assign_value<T13,13>( std::move( t13 ) ); }
+    variant & operator=( T14 &&      t14 ) { return move_assign_value<T14,14>( std::move( t14 ) ); }
+    variant & operator=( T15 &&      t15 ) { return move_assign_value<T15,15>( std::move( t15 ) ); }
     
 
 #endif
