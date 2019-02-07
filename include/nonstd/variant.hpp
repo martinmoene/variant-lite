@@ -1493,20 +1493,9 @@ private:
         }
         else
         {
-#if variant_CPP11_OR_GREATER
-            // prevent this variant to become valueless-by-exception by making
-            // the mandatory copy before destruction of the current content,
-            // followed by moving the content (like STLSTL, unlike glibc++):
-            variant tmp( other );
-            helper_type::destroy( type_index, ptr() );
-            type_index = variant_npos_internal();
-            type_index = helper_type::move_construct( other.type_index, tmp.ptr(), ptr() );
-#else
-            // for pre-C++11, shy away from making an extra copy:
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
             type_index = helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
-#endif
         }
         return *this;
     }
