@@ -1523,9 +1523,9 @@ namespace issue_31 {
 
     struct CopyOnly
     {
-        CopyOnly() = default;
-        CopyOnly( CopyOnly const & ) = default;
-        CopyOnly & operator=( CopyOnly const & ) = default;
+        CopyOnly() {}
+        CopyOnly( CopyOnly const & ) {}
+        CopyOnly & operator=( CopyOnly const & ) { return *this; }
 
 #if variant_CPP11_OR_GREATER
         CopyOnly( CopyOnly && ) = delete;
