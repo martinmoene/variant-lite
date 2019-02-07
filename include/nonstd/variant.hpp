@@ -1292,7 +1292,9 @@ public:
     variant & operator=( T14 &&      t14 ) { return move_assign_value<T14,14>( std::forward<T14>( t14 ) ); }
     variant & operator=( T15 &&      t15 ) { return move_assign_value<T15,15>( std::forward<T15>( t15 ) ); }
     
-#else
+
+#endif
+
     variant & operator=( T0 const & t0 ) { return copy_assign_value<T0,0>( t0 ); }
     variant & operator=( T1 const & t1 ) { return copy_assign_value<T1,1>( t1 ); }
     variant & operator=( T2 const & t2 ) { return copy_assign_value<T2,2>( t2 ); }
@@ -1310,7 +1312,6 @@ public:
     variant & operator=( T14 const & t14 ) { return copy_assign_value<T14,14>( t14 ); }
     variant & operator=( T15 const & t15 ) { return copy_assign_value<T15,15>( t15 ); }
     
-#endif
 
     std::size_t index() const
     {
@@ -1552,7 +1553,9 @@ private:
         }
         return *this;
     }
-#else
+
+#endif // variant_CPP11_OR_GREATER
+
     template< class T, std::size_t K >
     variant & copy_assign_value( T const & value )
     {
@@ -1570,7 +1573,6 @@ private:
         return *this;
     }
 
-#endif // variant_CPP11_OR_GREATER
 
     void swap_value( type_index_t index, variant & other )
     {

@@ -1087,11 +1087,12 @@ public:
     {% for n in range(NumParams) -%}
     variant & operator=( T{{n}} &&      t{{n}} ) { return move_assign_value<T{{n}},{{n}}>( std::forward<T{{n}}>( t{{n}} ) ); }
     {% endfor %}
-#else
+
+#endif
+
     {% for n in range(NumParams) -%}
     variant & operator=( T{{n}} const & t{{n}} ) { return copy_assign_value<T{{n}},{{n}}>( t{{n}} ); }
     {% endfor %}
-#endif
 
     std::size_t index() const
     {
@@ -1333,7 +1334,9 @@ private:
         }
         return *this;
     }
-#else
+
+#endif // variant_CPP11_OR_GREATER
+
     template< class T, std::size_t K >
     variant & copy_assign_value( T const & value )
     {
@@ -1351,7 +1354,6 @@ private:
         return *this;
     }
 
-#endif // variant_CPP11_OR_GREATER
 
     void swap_value( type_index_t index, variant & other )
     {
