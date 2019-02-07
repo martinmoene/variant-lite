@@ -315,11 +315,7 @@ CASE( "variant: Allows to copy-assign from variant" )
         EXPECT_NOT( var1.valueless_by_exception() );
 # endif
 #else // variant_USES_STD_VARIANT
-# if    variant_CPP11_OR_GREATER
-        EXPECT_NOT( var1.valueless_by_exception() );
-# else
         EXPECT( var1.valueless_by_exception() );
-# endif
 #endif // variant_USES_STD_VARIANT
     }
     }
