@@ -1510,7 +1510,7 @@ CASE("index_of<>(): method should be static" "[.issue-30]")
 #endif
 }
 
-CASE("operator=(T const &): assignment from lvalue must use copy-assignment in C++11 and later" "[.issue-31]")
+CASE("operator=(T const &): assignment from element lvalue must use copy-assignment in C++11 and later" "[.issue-31]")
 {
     variant<V> var1;
     variant<V> var2;
@@ -1521,6 +1521,33 @@ CASE("operator=(T const &): assignment from lvalue must use copy-assignment in C
 
     EXPECT( get<V>(var1).state == (variant_CPP11_OR_GREATER ? move_assigned : copy_assigned) );
     EXPECT( get<V>(var2).state == copy_assigned );
+}
+
+namespace issue_31 {
+
+    struct CopyOnly
+    {
+        CopyOnly() = default;
+        CopyOnly( CopyOnly const & ) = default;
+        CopyOnly & operator=( CopyOnly const & ) = default;
+
+#if variant_CPP11_OR_GREATER
+        CopyOnly( CopyOnly && ) = delete;
+        CopyOnly & operator=( CopyOnly && ) = delete;
+#endif        
+    };
+}
+
+CASE("operator=(variant const &): copy-assignment from variant lvalue must not require element move-assignment in C++11 and later" "[.issue-31]")
+{
+    using namespace issue_31;
+    
+    variant<CopyOnly> var1;
+    variant<CopyOnly> var2;
+
+    var1 = var2;
+
+    EXPECT( true );
 }
 
 namespace issue_33 {
