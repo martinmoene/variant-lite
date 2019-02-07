@@ -1510,6 +1510,19 @@ CASE("index_of<>(): method should be static" "[.issue-30]")
 #endif
 }
 
+CASE("operator=(T const &): assignment from lvalue must use copy-assignment in C++11 and later" "[.issue-31]")
+{
+    variant<V> var1;
+    variant<V> var2;
+    V seven = 7;
+
+    var1 = 7;
+    var2 = seven;
+
+    EXPECT( get<V>(var1).state == (variant_CPP11_OR_GREATER ? move_assigned : copy_assigned) );
+    EXPECT( get<V>(var2).state == copy_assigned );
+}
+
 namespace issue_33 {
 
     template< size_t i > class N { int k; };
