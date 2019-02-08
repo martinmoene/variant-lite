@@ -1366,7 +1366,28 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap( variant & other ) variant_noexcept
+    void swap( variant & other )
+#if variant_CPP17_OR_GREATER
+        noexcept(
+            std::is_nothrow_move_constructible_v<T0> && std::is_nothrow_swappable_v<T0> &&
+            std::is_nothrow_move_constructible_v<T1> && std::is_nothrow_swappable_v<T1> &&
+            std::is_nothrow_move_constructible_v<T2> && std::is_nothrow_swappable_v<T2> &&
+            std::is_nothrow_move_constructible_v<T3> && std::is_nothrow_swappable_v<T3> &&
+            std::is_nothrow_move_constructible_v<T4> && std::is_nothrow_swappable_v<T4> &&
+            std::is_nothrow_move_constructible_v<T5> && std::is_nothrow_swappable_v<T5> &&
+            std::is_nothrow_move_constructible_v<T6> && std::is_nothrow_swappable_v<T6> &&
+            std::is_nothrow_move_constructible_v<T7> && std::is_nothrow_swappable_v<T7> &&
+            std::is_nothrow_move_constructible_v<T8> && std::is_nothrow_swappable_v<T8> &&
+            std::is_nothrow_move_constructible_v<T9> && std::is_nothrow_swappable_v<T9> &&
+            std::is_nothrow_move_constructible_v<T10> && std::is_nothrow_swappable_v<T10> &&
+            std::is_nothrow_move_constructible_v<T11> && std::is_nothrow_swappable_v<T11> &&
+            std::is_nothrow_move_constructible_v<T12> && std::is_nothrow_swappable_v<T12> &&
+            std::is_nothrow_move_constructible_v<T13> && std::is_nothrow_swappable_v<T13> &&
+            std::is_nothrow_move_constructible_v<T14> && std::is_nothrow_swappable_v<T14> &&
+            std::is_nothrow_move_constructible_v<T15> && std::is_nothrow_swappable_v<T15> 
+            
+        )
+#endif
     {
         if ( valueless_by_exception() && other.valueless_by_exception() )
         {

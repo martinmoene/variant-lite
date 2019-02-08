@@ -1147,7 +1147,14 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap( variant & other ) variant_noexcept
+    void swap( variant & other )
+#if variant_CPP17_OR_GREATER
+        noexcept(
+            {% for n in range(NumParams) -%}
+            std::is_nothrow_move_constructible_v<T{{n}}> && std::is_nothrow_swappable_v<T{{n}}> {{('&&' if not loop.last)}}
+            {% endfor %}
+        )
+#endif
     {
         if ( valueless_by_exception() && other.valueless_by_exception() )
         {
