@@ -1027,7 +1027,11 @@ struct helper
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 class variant;
 
+// 19.7.8 Class monostate
+
 class monostate{};
+
+// 19.7.9 monostate relational operators
 
 inline variant_constexpr bool operator< ( monostate, monostate ) variant_noexcept { return false; }
 inline variant_constexpr bool operator> ( monostate, monostate ) variant_noexcept { return false; }
@@ -1035,6 +1039,8 @@ inline variant_constexpr bool operator<=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
+
+// 19.7.4 variant helper classes
 
 // obtain the size of the variant's list of alternatives at compile time
 
@@ -1089,6 +1095,8 @@ static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
 
 #if ! variant_CONFIG_NO_EXCEPTIONS
 
+// 19.7.11 Class bad_variant_access
+
 class bad_variant_access : public std::exception
 {
 public:
@@ -1103,6 +1111,8 @@ public:
 };
 
 #endif // variant_CONFIG_NO_EXCEPTIONS
+
+// 19.7.3 Class template variant
 
 template<
     class T0,
@@ -1128,6 +1138,8 @@ class variant
     typedef variant_TL16( T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15 ) variant_types;
 
 public:
+    // 19.7.3.1 Constructors
+    
     variant() : type_index( 0 ) { new( ptr() ) T0(); }
 
     variant( T0 const & t0 ) : type_index( 0 ) { new( ptr() ) T0( t0 ); }
@@ -1239,6 +1251,8 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
+    // 19.7.3.2 Destructor
+    
     ~variant()
     {
         if ( ! valueless_by_exception() )
@@ -1247,6 +1261,8 @@ public:
         }
     }
 
+    // 19.7.3.3 Assignment
+    
     variant & operator=( variant const & other )
     {
         return copy_assign( other );
@@ -1318,11 +1334,8 @@ public:
         return variant_npos_internal() == type_index ? variant_npos : static_cast<std::size_t>( type_index );
     }
 
-    bool valueless_by_exception() const
-    {
-        return type_index == variant_npos_internal();
-    }
-
+    // 19.7.3.4 Modifiers
+    
 #if variant_CPP11_OR_GREATER
     template< class T, class... Args
         variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
@@ -1366,6 +1379,15 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
+    // 19.7.3.5 Value status
+    
+    bool valueless_by_exception() const
+    {
+        return type_index == variant_npos_internal();
+    }
+
+    // 19.7.3.6 Swap
+    
     void swap( variant & other )
 #if variant_CPP17_OR_GREATER
         noexcept(
@@ -1640,6 +1662,8 @@ private:
     type_index_t type_index;
 };
 
+// 19.7.5 Value access
+
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline bool holds_alternative( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const & v ) variant_noexcept
 {
@@ -1762,6 +1786,8 @@ get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
     return ( pv->index() == K ) ? &get<K>( *pv )  : variant_nullptr;
 }
 
+// 19.7.10 Specialized algorithms
+
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 inline void swap(
     variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & a,
@@ -1769,6 +1795,8 @@ inline void swap(
 {
     a.swap( b );
 }
+
+// 19.7.7 Visitation
 
 // Variant 'visitor' implementation
 
@@ -2091,6 +2119,7 @@ inline R visit(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3,
 
 #endif
 
+// 19.7.6 Relational operators
 
 namespace detail {
 
@@ -2212,7 +2241,7 @@ using namespace variants;
 
 #if variant_CPP11_OR_GREATER
 
-// specialize the std::hash algorithm:
+// 19.7.12 Hash support
 
 namespace std {
 
