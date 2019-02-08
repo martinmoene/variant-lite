@@ -1275,42 +1275,42 @@ public:
         return move_assign( std::move( other ) );
     }
 
-    variant & operator=( T0 &&      t0 ) { return move_assign_value<T0,0>( std::move( t0 ) ); }
-    variant & operator=( T1 &&      t1 ) { return move_assign_value<T1,1>( std::move( t1 ) ); }
-    variant & operator=( T2 &&      t2 ) { return move_assign_value<T2,2>( std::move( t2 ) ); }
-    variant & operator=( T3 &&      t3 ) { return move_assign_value<T3,3>( std::move( t3 ) ); }
-    variant & operator=( T4 &&      t4 ) { return move_assign_value<T4,4>( std::move( t4 ) ); }
-    variant & operator=( T5 &&      t5 ) { return move_assign_value<T5,5>( std::move( t5 ) ); }
-    variant & operator=( T6 &&      t6 ) { return move_assign_value<T6,6>( std::move( t6 ) ); }
-    variant & operator=( T7 &&      t7 ) { return move_assign_value<T7,7>( std::move( t7 ) ); }
-    variant & operator=( T8 &&      t8 ) { return move_assign_value<T8,8>( std::move( t8 ) ); }
-    variant & operator=( T9 &&      t9 ) { return move_assign_value<T9,9>( std::move( t9 ) ); }
-    variant & operator=( T10 &&      t10 ) { return move_assign_value<T10,10>( std::move( t10 ) ); }
-    variant & operator=( T11 &&      t11 ) { return move_assign_value<T11,11>( std::move( t11 ) ); }
-    variant & operator=( T12 &&      t12 ) { return move_assign_value<T12,12>( std::move( t12 ) ); }
-    variant & operator=( T13 &&      t13 ) { return move_assign_value<T13,13>( std::move( t13 ) ); }
-    variant & operator=( T14 &&      t14 ) { return move_assign_value<T14,14>( std::move( t14 ) ); }
-    variant & operator=( T15 &&      t15 ) { return move_assign_value<T15,15>( std::move( t15 ) ); }
+    variant & operator=( T0 &&      t0 ) { return assign_value<0>( std::move( t0 ) ); }
+    variant & operator=( T1 &&      t1 ) { return assign_value<1>( std::move( t1 ) ); }
+    variant & operator=( T2 &&      t2 ) { return assign_value<2>( std::move( t2 ) ); }
+    variant & operator=( T3 &&      t3 ) { return assign_value<3>( std::move( t3 ) ); }
+    variant & operator=( T4 &&      t4 ) { return assign_value<4>( std::move( t4 ) ); }
+    variant & operator=( T5 &&      t5 ) { return assign_value<5>( std::move( t5 ) ); }
+    variant & operator=( T6 &&      t6 ) { return assign_value<6>( std::move( t6 ) ); }
+    variant & operator=( T7 &&      t7 ) { return assign_value<7>( std::move( t7 ) ); }
+    variant & operator=( T8 &&      t8 ) { return assign_value<8>( std::move( t8 ) ); }
+    variant & operator=( T9 &&      t9 ) { return assign_value<9>( std::move( t9 ) ); }
+    variant & operator=( T10 &&      t10 ) { return assign_value<10>( std::move( t10 ) ); }
+    variant & operator=( T11 &&      t11 ) { return assign_value<11>( std::move( t11 ) ); }
+    variant & operator=( T12 &&      t12 ) { return assign_value<12>( std::move( t12 ) ); }
+    variant & operator=( T13 &&      t13 ) { return assign_value<13>( std::move( t13 ) ); }
+    variant & operator=( T14 &&      t14 ) { return assign_value<14>( std::move( t14 ) ); }
+    variant & operator=( T15 &&      t15 ) { return assign_value<15>( std::move( t15 ) ); }
     
 
 #endif
 
-    variant & operator=( T0 const & t0 ) { return copy_assign_value<T0,0>( t0 ); }
-    variant & operator=( T1 const & t1 ) { return copy_assign_value<T1,1>( t1 ); }
-    variant & operator=( T2 const & t2 ) { return copy_assign_value<T2,2>( t2 ); }
-    variant & operator=( T3 const & t3 ) { return copy_assign_value<T3,3>( t3 ); }
-    variant & operator=( T4 const & t4 ) { return copy_assign_value<T4,4>( t4 ); }
-    variant & operator=( T5 const & t5 ) { return copy_assign_value<T5,5>( t5 ); }
-    variant & operator=( T6 const & t6 ) { return copy_assign_value<T6,6>( t6 ); }
-    variant & operator=( T7 const & t7 ) { return copy_assign_value<T7,7>( t7 ); }
-    variant & operator=( T8 const & t8 ) { return copy_assign_value<T8,8>( t8 ); }
-    variant & operator=( T9 const & t9 ) { return copy_assign_value<T9,9>( t9 ); }
-    variant & operator=( T10 const & t10 ) { return copy_assign_value<T10,10>( t10 ); }
-    variant & operator=( T11 const & t11 ) { return copy_assign_value<T11,11>( t11 ); }
-    variant & operator=( T12 const & t12 ) { return copy_assign_value<T12,12>( t12 ); }
-    variant & operator=( T13 const & t13 ) { return copy_assign_value<T13,13>( t13 ); }
-    variant & operator=( T14 const & t14 ) { return copy_assign_value<T14,14>( t14 ); }
-    variant & operator=( T15 const & t15 ) { return copy_assign_value<T15,15>( t15 ); }
+    variant & operator=( T0 const & t0 ) { return assign_value<0>( t0 ); }
+    variant & operator=( T1 const & t1 ) { return assign_value<1>( t1 ); }
+    variant & operator=( T2 const & t2 ) { return assign_value<2>( t2 ); }
+    variant & operator=( T3 const & t3 ) { return assign_value<3>( t3 ); }
+    variant & operator=( T4 const & t4 ) { return assign_value<4>( t4 ); }
+    variant & operator=( T5 const & t5 ) { return assign_value<5>( t5 ); }
+    variant & operator=( T6 const & t6 ) { return assign_value<6>( t6 ); }
+    variant & operator=( T7 const & t7 ) { return assign_value<7>( t7 ); }
+    variant & operator=( T8 const & t8 ) { return assign_value<8>( t8 ); }
+    variant & operator=( T9 const & t9 ) { return assign_value<9>( t9 ); }
+    variant & operator=( T10 const & t10 ) { return assign_value<10>( t10 ); }
+    variant & operator=( T11 const & t11 ) { return assign_value<11>( t11 ); }
+    variant & operator=( T12 const & t12 ) { return assign_value<12>( t12 ); }
+    variant & operator=( T13 const & t13 ) { return assign_value<13>( t13 ); }
+    variant & operator=( T14 const & t14 ) { return assign_value<14>( t14 ); }
+    variant & operator=( T15 const & t15 ) { return assign_value<15>( t15 ); }
     
 
     std::size_t index() const
@@ -1526,8 +1526,8 @@ private:
         return *this;
     }
 
-    template< class T, std::size_t K >
-    variant & move_assign_value( T && value )
+    template< std::size_t K, class T >
+    variant & assign_value( T && value )
     {
         if( index() == K )
         {
@@ -1545,8 +1545,8 @@ private:
 
 #endif // variant_CPP11_OR_GREATER
 
-    template< class T, std::size_t K >
-    variant & copy_assign_value( T const & value )
+    template< std::size_t K, class T >
+    variant & assign_value( T const & value )
     {
         if( index() == K )
         {
@@ -1561,7 +1561,6 @@ private:
         }
         return *this;
     }
-
 
     void swap_value( type_index_t index, variant & other )
     {
