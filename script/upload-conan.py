@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017-2018 by Martin Moene
+# Copyright 2019-2019 by Martin Moene
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -35,26 +35,28 @@ def versionFrom( filename ):
         version = re.search(r'version\s=\s"(.*)"', content).group(1)
     return version
 
-def createConanPackage( project, user, channel, version, verbose ):
+def createConanPackage( args ):
     """Create conan package and upload it."""
-    cmd = tpl_conan_create.format(usr=user, chn=channel)
-    if verbose:
+    cmd = tpl_conan_create.format(usr=args.user, chn=args.channel)
+    if args.verbose:
         print( "> {}".format(cmd) )
-    subprocess.call( cmd, shell=False )
+    if not args.dry_run:
+        subprocess.call( cmd, shell=False )
     
-def uploadConanPackage( project, user, channel, version, verbose ):
+def uploadConanPackage( args ):
     """Create conan package and upload it."""
-    cmd = tpl_conan_upload.format(prj=project, usr=user, chn=channel, ver=version)
-    if verbose:
+    cmd = tpl_conan_upload.format(prj=args.project, usr=args.user, chn=args.channel, ver=args.version)
+    if args.verbose:
         print( "> {}".format(cmd) )
-    subprocess.call( cmd, shell=False )
+    if not args.dry_run:
+        subprocess.call( cmd, shell=False )
     
-def uploadToConan( project, user, channel, version, verbose ):
+def uploadToConan( args ):
     """Create conan package and upload it."""
     print( "Updating project '{prj}' to user '{usr}', channel '{chn}', version {ver}:".
-        format(prj=project, usr=user, chn=channel, ver=version) )
-    createConanPackage( project, user, channel, version, verbose )
-    uploadConanPackage( project, user, channel, version, verbose )
+        format(prj=args.project, usr=args.user, chn=args.channel, ver=args.version) )
+    createConanPackage( args )
+    uploadConanPackage( args )
     
 def uploadToConanFromCommandLine():
     """Collect arguments from the commandline and create conan package and upload it."""
@@ -65,9 +67,15 @@ def uploadToConanFromCommandLine():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
+        '-n', '--dry-run',
+        action='store_true',
+        help='do not execute conan commands')
+
+    parser.add_argument(
         '-v', '--verbose',
         action='count',
-        help='report upload')
+        default=0,
+        help='level of progress reporting')
 
     parser.add_argument(
         '--project',
@@ -97,9 +105,7 @@ def uploadToConanFromCommandLine():
         default=versionFrom( cfg_conanfile ),
         help='version number [from conanfile.py]')
 
-    args = parser.parse_args()
-
-    uploadToConan( args.project, args.user, args.channel, args.version, args.verbose )
+    uploadToConan( parser.parse_args() )
 
 
 if __name__ == '__main__':
