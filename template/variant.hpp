@@ -1188,9 +1188,15 @@ public:
         }
         else
         {
+#if variant_CPP11_OR_GREATER
+            variant tmp( std::move( *this ) );
+            *this = std::move( other );
+            other = std::move( tmp );
+#else
             variant tmp( *this );
             *this = other;
             other = tmp;
+#endif
         }
     }
 
