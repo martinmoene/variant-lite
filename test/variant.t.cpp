@@ -1301,9 +1301,12 @@ CASE( "monostate: Allows to make variant default-constructible" )
 CASE( "bad_variant_access: Indicates invalid variant access" )
 {
     variant< char, int > v = 7;
+    variant< char, int > const c = 7;
 
     EXPECT_THROWS_AS( get<  0 >( v ), bad_variant_access );
+    EXPECT_THROWS_AS( get<  0 >( c ), bad_variant_access );
     EXPECT_THROWS_AS( get<char>( v ), bad_variant_access );
+    EXPECT_THROWS_AS( get<char>( c ), bad_variant_access );
 }
 
 namespace {
@@ -1530,14 +1533,14 @@ namespace issue_31 {
 #if variant_CPP11_OR_GREATER
         CopyOnly( CopyOnly && ) = delete;
         CopyOnly & operator=( CopyOnly && ) = delete;
-#endif        
+#endif
     };
 }
 
 CASE("operator=(variant const &): copy-assignment from variant lvalue must not require element move-assignment in C++11 and later" "[.issue-31]")
 {
     using namespace issue_31;
-    
+
     variant<CopyOnly> var1;
     variant<CopyOnly> var2;
 
