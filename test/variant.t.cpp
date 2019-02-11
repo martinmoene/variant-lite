@@ -521,34 +521,61 @@ CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 
 CASE( "variant: Allows to copy-assign from element value" )
 {
-    V v( 7 );
-    variant<int, S> var1;
-    variant<int, S> var2;
+    SETUP("") {
+    SECTION("same-alternative copy-assignment")
+    {
+        int seven = 7;
+        variant<int> var = 42;
 
-    var1 = v;
-    var2 = V( 7 );  // copy for pre-C++11
+        var = seven;
 
-    EXPECT( get<S>(var1).value.value == 7 );
-    EXPECT(                 v.state != moved_from );
+        EXPECT( get<int>(var) == seven );
+    }
+    SECTION("non-same-alternative copy-assignment")
+    {
+        V v( 7 );
+        variant<int, S> var1;
+        variant<int, S> var2;
 
-    EXPECT( get<S>(var1).value.value == 7 );
+        var1 = v;
+        var2 = V( 7 );  // copy for pre-C++11
+
+        EXPECT( get<S>(var1).value.value == 7 );
+        EXPECT(                 v.state != moved_from );
+
+        EXPECT( get<S>(var1).value.value == 7 );
+    }
+    }
 }
 
 CASE( "variant: Allows to move-assign from element value" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, S> var;
+    SETUP("") {
+    SECTION("same-alternative move-assignment")
+    {
+        variant<int> var = 42;
 
-    var = V( 7 );
+        var = 7;
 
-    EXPECT( get<S>(var).value.value == 7 );
-    EXPECT( get<S>(var).value.state == move_constructed );
-    EXPECT( get<S>(var).value.state == move_constructed );
+        EXPECT( get<int>(var) == 7 );
+    }
+    SECTION("non-same-alternative move-assignment")
+    {
+        variant<int, S> var;
+
+        var = V( 7 );
+
+        EXPECT( get<S>(var).value.value == 7 );
+        EXPECT( get<S>(var).value.state == move_constructed );
+        EXPECT( get<S>(var).value.state == move_constructed );
 #if variant_USES_STD_VARIANT
-    EXPECT( get<S>(var).state       == value_move_constructed );
+        EXPECT( get<S>(var).state       == value_move_constructed );
 #else
-    EXPECT( get<S>(var).state       == move_constructed );
+        EXPECT( get<S>(var).state       == move_constructed );
 #endif
+    }
+    }
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
