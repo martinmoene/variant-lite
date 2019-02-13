@@ -223,6 +223,11 @@ namespace nonstd {
 # include <stdexcept>
 #endif
 
+// variant-lite type and visitor argument count configuration (script/generate_header.py):
+
+#define variant_CONFIG_MAX_TYPE_COUNT  16
+#define variant_CONFIG_MAX_VISITOR_ARG_COUNT  5
+
 // variant-lite alignment configuration:
 
 #ifndef  variant_CONFIG_MAX_ALIGN_HACK

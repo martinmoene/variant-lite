@@ -163,6 +163,13 @@ empty_variant_t make_non_empty_variant()
     return empty_variant_t( 'a' );
 }
 
+inline std::string to_string( const long x, const int base = 10 )
+{
+    char buf[ 65 ] = "";
+
+    return _ltoa( x, buf, base );
+}
+
 } // anonymous namespace
 
 //
@@ -1063,7 +1070,7 @@ struct GenericVisitor1
     }
 };
 
-CASE( "variant: Allows to visit contents (args: 1)" )
+CASE( "variant: Allows to visit contents (args: 1; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
@@ -1090,7 +1097,7 @@ struct GenericVisitor2
     }
 };
 
-CASE( "variant: Allows to visit contents (args: 2)" )
+CASE( "variant: Allows to visit contents (args: 2; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
@@ -1116,7 +1123,7 @@ struct GenericVisitor3
     }
 };
 
-CASE( "variant: Allows to visit contents (args: 3)" )
+CASE( "variant: Allows to visit contents (args: 3; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
     typedef variant< int, std::string, double > var_t;
     var_t vi = 7;
@@ -1193,7 +1200,7 @@ struct Unwrapper
 
 #endif
 
-CASE( "variant: Allows to visit contents, rvalue reference (args: 1)" )
+CASE( "variant: Allows to visit contents, rvalue reference (args: 1; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
 #if variant_CPP14_OR_GREATER
     typedef std::shared_ptr< std::string > string_ptr_t;
@@ -1347,7 +1354,7 @@ namespace {
     struct t8{};
 }
 
-CASE( "variant_size<>: Allows to obtain number of element types (non-standard: max 7)" )
+CASE( "variant_size<>: Allows to obtain number of element types (configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
 {
     typedef variant<t1> var1;
     typedef variant<t1, t2> var2;
@@ -1368,7 +1375,7 @@ CASE( "variant_size<>: Allows to obtain number of element types (non-standard: m
 //  EXPECT( 8u == variant_size<var8>::value );
 }
 
-CASE( "variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)" )
+CASE( "variant_size_v<>: Allows to obtain number of element types (C++14; configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
 {
 #if variant_CPP14_OR_GREATER
     typedef variant<t1> var1;
@@ -1393,7 +1400,7 @@ CASE( "variant_size_v<>: Allows to obtain number of element types (C++14, non-st
 #endif
 }
 
-CASE( "variant_size_V(): Allows to obtain number of element types (non-standard: max 7, macro)" )
+CASE( "variant_size_V(): Allows to obtain number of element types (non-standard: macro; configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
 {
     typedef variant<t1> var1;
     typedef variant<t1, t2> var2;

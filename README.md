@@ -94,6 +94,7 @@ Synopsis
 - [Types in namespace nonstd](#types-in-namespace-nonstd)  
 - [Interface of *variant lite*](#interface-of-variant-lite)  
 - [Algorithms for *variant lite*](#algorithms-for-variant-lite)  
+- [Information macros](#information-macros)
 - [Configuration macros](#configuration-macros)
 - [Macros to control alignment](#macros-to-control-alignment)  
 
@@ -176,6 +177,14 @@ Synopsis
 | monostate                   |C++11 | template<> struct **hash**< monostate >;       |
 
 Note 1: visitor is limited to always return a Variant.
+
+### Information macros
+
+<b>variant_CONFIG_MAX_TYPE_COUNT</b>
+The maximum number of types thevariant can hold as configured via script [generate_header.py](script/generate_header.py).
+
+<b>variant_CONFIG_MAX_VISITOR_ARG_COUNT</b>
+The maximum number of visitor arguments as configured via script [generate_header.py](script/generate_header.py).
 
 ### Configuration macros
 
@@ -404,10 +413,10 @@ variant: Allows to copy-emplace elements from intializer-list based on index (C+
 variant: Allows to move-emplace elements from intializer-list based on index (C++11)
 variant: Allows to swap variants, same index (member)
 variant: Allows to swap variants, different index (member)
-variant: Allows to visit contents (args: 1)
-variant: Allows to visit contents (args: 2)
-variant: Allows to visit contents (args: 3)
-variant: Allows to visit contents, rvalue reference (args: 1)
+variant: Allows to visit contents (args: 1; configured max args: 5)
+variant: Allows to visit contents (args: 2; configured max args: 5)
+variant: Allows to visit contents (args: 3; configured max args: 5)
+variant: Allows to visit contents, rvalue reference (args: 1; configured max args: 5)
 variant: Allows to check for content by type
 variant: Allows to get element by type
 variant: Allows to get element by index
@@ -418,9 +427,9 @@ variant: Allows to swap variants, same index (non-member)
 variant: Allows to swap variants, different index (non-member)
 monostate: Allows to make variant default-constructible
 bad_variant_access: Indicates invalid variant access
-variant_size<>: Allows to obtain number of element types (non-standard: max 7)
-variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)
-variant_size_V(): Allows to obtain number of element types (non-standard: max 7, macro)
+variant_size<>: Allows to obtain number of element types (configured max types: 16)
+variant_size_v<>: Allows to obtain number of element types (C++14; configured max types: 16)
+variant_size_V(): Allows to obtain number of element types (non-standard: macro; configured max types: 16)
 variant_alternative<>: Allows to select type by index
 variant_alternative_t<>: Allows to select type by index (C++11)
 variant_alternative_T(): Allows to select type by index (non-standard: macro)

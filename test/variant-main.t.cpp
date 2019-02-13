@@ -36,6 +36,8 @@ CASE( "variant configuration" "[.variant][.config]" )
     variant_PRESENT( variant_VARIANT_STD );
     variant_PRESENT( variant_CONFIG_SELECT_VARIANT );
     variant_PRESENT( variant_CONFIG_NO_EXCEPTIONS );
+    variant_PRESENT( variant_CONFIG_MAX_TYPE_COUNT );
+    variant_PRESENT( variant_CONFIG_MAX_VISITOR_ARG_COUNT );
     variant_PRESENT( variant_CPLUSPLUS );
 }
 
