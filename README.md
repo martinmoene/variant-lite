@@ -180,10 +180,10 @@ Note 1: visitor is limited to always return a Variant.
 
 ### Information macros
 
-<b>variant_CONFIG_MAX_TYPE_COUNT</b>
+<b>variant_CONFIG_MAX_TYPE_COUNT</b>  
 The maximum number of types thevariant can hold as configured via script [generate_header.py](script/generate_header.py).
 
-<b>variant_CONFIG_MAX_VISITOR_ARG_COUNT</b>
+<b>variant_CONFIG_MAX_VISITOR_ARG_COUNT</b>  
 The maximum number of visitor arguments as configured via script [generate_header.py](script/generate_header.py).
 
 ### Configuration macros
