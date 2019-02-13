@@ -12,6 +12,8 @@
 using namespace nonstd;
 
 namespace {
+    
+using lest::to_string;
 
 // ensure comparison of pointers for lest:
 
@@ -161,13 +163,6 @@ empty_variant_t make_empty_variant()
 empty_variant_t make_non_empty_variant()
 {
     return empty_variant_t( 'a' );
-}
-
-inline std::string to_string( const long x, const int base = 10 )
-{
-    char buf[ 65 ] = "";
-
-    return _ltoa( x, buf, base );
 }
 
 } // anonymous namespace
