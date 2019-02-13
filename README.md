@@ -325,6 +325,7 @@ Notes and References
 ### Acknowledgments
 
 Thanks to @flexferrum for making the number of variant types and visitor arguments [configurable](#in-a-nutshell).
+Thanks to @siffiejoe for contributing to fixing [lifetime](#31), [noexcept](34) and [hash](#32) issues. 
 
 
 ### References
