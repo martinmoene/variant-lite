@@ -364,7 +364,12 @@ Thanks to @siffiejoe for contributing to fixing [lifetime](#31), [noexcept](34) 
 
 Appendix
 --------
-### A.1 Variant Lite test specification
+
+### A.1 Compile-time information
+
+The version of *variant lite* is available via tag `[.version]`. The following tags are available for information on the compiler and on the C++ standard library used: `[.compiler]`, `[.stdc++]`, `[.stdlanguage]` and `[.stdlibrary]`.
+
+### A.2 Variant lite test specification
 
 ```
 variant: Disallows non-default constructible as first type
