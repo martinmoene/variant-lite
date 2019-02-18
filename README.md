@@ -192,20 +192,21 @@ The maximum number of visitor arguments as configured via script [generate_heade
 \-D<b>variant\_CPLUSPLUS</b>=199711L  
 Define this macro to override the auto-detection of the supported C++ standard, or if your compiler does not set the `__cplusplus` macro correctly.
 
-#### Disable exceptions
--D<b>variant_CONFIG_NO_EXCEPTIONS</b>=0
-Define this to 1 if you want to compile without exceptions. If not defined, the header tries and detect if exceptions have been disabled (e.g. via `-fno-exceptions`). Default is undefined.
-
 #### Select `std::variant` or `nonstd::variant`
 At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
 
--D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
+\-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
 Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
 
-#### Presence of simulation macros
+#### Disable exceptions
+-D<b>variant_CONFIG_NO_EXCEPTIONS</b>=0  
+Define this to 1 if you want to compile without exceptions. If not defined, the header tries and detect if exceptions have been disabled (e.g. via `-fno-exceptions`). Default is undefined.
+
+#### Presence of `variant_size_V()` simulation macro
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_SIZE\_V\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
 
+#### Presence of `variant_alternative_T()` simulation macro
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
