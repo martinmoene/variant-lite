@@ -165,6 +165,12 @@ empty_variant_t make_non_empty_variant()
     return empty_variant_t( 'a' );
 }
 
+template< typename T >
+std::size_t to_size_t( T v )
+{
+    return v;
+}
+
 } // anonymous namespace
 
 //
@@ -1360,14 +1366,14 @@ CASE( "variant_size<>: Allows to obtain number of element types (configured max 
     typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
 //  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
 
-    EXPECT( 1u == variant_size<var1>::value );
-    EXPECT( 2u == variant_size<var2>::value );
-    EXPECT( 3u == variant_size<var3>::value );
-    EXPECT( 4u == variant_size<var4>::value );
-    EXPECT( 5u == variant_size<var5>::value );
-    EXPECT( 6u == variant_size<var6>::value );
-    EXPECT( 7u == variant_size<var7>::value );
-//  EXPECT( 8u == variant_size<var8>::value );
+    EXPECT( 1u == to_size_t( variant_size<var1>::value ) );
+    EXPECT( 2u == to_size_t( variant_size<var2>::value ) );
+    EXPECT( 3u == to_size_t( variant_size<var3>::value ) );
+    EXPECT( 4u == to_size_t( variant_size<var4>::value ) );
+    EXPECT( 5u == to_size_t( variant_size<var5>::value ) );
+    EXPECT( 6u == to_size_t( variant_size<var6>::value ) );
+    EXPECT( 7u == to_size_t( variant_size<var7>::value ) );
+//  EXPECT( 8u == to_size_t( variant_size<var8>::value ) );
 }
 
 CASE( "variant_size_v<>: Allows to obtain number of element types (C++14; configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
@@ -1406,14 +1412,14 @@ CASE( "variant_size_V(): Allows to obtain number of element types (non-standard:
     typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
 //  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
 
-    EXPECT( 1u == variant_size_V( var1 ) );
-    EXPECT( 2u == variant_size_V( var2 ) );
-    EXPECT( 3u == variant_size_V( var3 ) );
-    EXPECT( 4u == variant_size_V( var4 ) );
-    EXPECT( 5u == variant_size_V( var5 ) );
-    EXPECT( 6u == variant_size_V( var6 ) );
-    EXPECT( 7u == variant_size_V( var7 ) );
-//  EXPECT( 8u == variant_size_V( var8 ) );
+    EXPECT( 1u == to_size_t( variant_size_V( var1 ) ) );
+    EXPECT( 2u == to_size_t( variant_size_V( var2 ) ) );
+    EXPECT( 3u == to_size_t( variant_size_V( var3 ) ) );
+    EXPECT( 4u == to_size_t( variant_size_V( var4 ) ) );
+    EXPECT( 5u == to_size_t( variant_size_V( var5 ) ) );
+    EXPECT( 6u == to_size_t( variant_size_V( var6 ) ) );
+    EXPECT( 7u == to_size_t( variant_size_V( var7 ) ) );
+//  EXPECT( 8u == to_size_t( variant_size_V( var8 ) ) );
 }
 
 CASE( "variant_alternative<>: Allows to select type by index" )
