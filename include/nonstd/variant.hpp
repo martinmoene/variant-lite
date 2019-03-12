@@ -1812,10 +1812,34 @@ get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
 
 // 19.7.10 Specialized algorithms
 
-template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
+template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15
+#if variant_CPP17_OR_GREATER
+    variant_REQUIRES_T(
+        std::is_move_constructible_v<T0> && std::is_swappable_v<T0> &&
+        std::is_move_constructible_v<T1> && std::is_swappable_v<T1> &&
+        std::is_move_constructible_v<T2> && std::is_swappable_v<T2> &&
+        std::is_move_constructible_v<T3> && std::is_swappable_v<T3> &&
+        std::is_move_constructible_v<T4> && std::is_swappable_v<T4> &&
+        std::is_move_constructible_v<T5> && std::is_swappable_v<T5> &&
+        std::is_move_constructible_v<T6> && std::is_swappable_v<T6> &&
+        std::is_move_constructible_v<T7> && std::is_swappable_v<T7> &&
+        std::is_move_constructible_v<T8> && std::is_swappable_v<T8> &&
+        std::is_move_constructible_v<T9> && std::is_swappable_v<T9> &&
+        std::is_move_constructible_v<T10> && std::is_swappable_v<T10> &&
+        std::is_move_constructible_v<T11> && std::is_swappable_v<T11> &&
+        std::is_move_constructible_v<T12> && std::is_swappable_v<T12> &&
+        std::is_move_constructible_v<T13> && std::is_swappable_v<T13> &&
+        std::is_move_constructible_v<T14> && std::is_swappable_v<T14> &&
+        std::is_move_constructible_v<T15> && std::is_swappable_v<T15> 
+         )
+#endif
+>
 inline void swap(
     variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & a,
-    variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & b ) variant_noexcept
+    variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> & b ) 
+#if variant_CPP11_OR_GREATER
+    noexcept( noexcept( a.swap( b ) ) )
+#endif
 {
     a.swap( b );
 }

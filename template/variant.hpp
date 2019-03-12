@@ -1565,10 +1565,20 @@ get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_index_t(K) = n
 
 // 19.7.10 Specialized algorithms
 
-template< {{TplParamsList}} >
+template< {{TplParamsList}}
+#if variant_CPP17_OR_GREATER
+    variant_REQUIRES_T(
+        {% for n in range(NumParams) -%}
+        std::is_move_constructible_v<T{{n}}> && std::is_swappable_v<T{{n}}> {{('&&' if not loop.last)}}
+        {% endfor %} )
+#endif
+>
 inline void swap(
     variant<{{TplArgsList}}> & a,
-    variant<{{TplArgsList}}> & b ) variant_noexcept
+    variant<{{TplArgsList}}> & b ) 
+#if variant_CPP11_OR_GREATER
+    noexcept( noexcept( a.swap( b ) ) )
+#endif
 {
     a.swap( b );
 }
