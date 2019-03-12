@@ -390,14 +390,17 @@ namespace nonstd {
 
 #if variant_CPP11_OR_GREATER
 
-# define variant_REQUIRES_T(...) \
-    , typename = typename std::enable_if<__VA_ARGS__>::type
+#define variant_REQUIRES_0(...) \
+    template< bool B = (__VA_ARGS__), typename std::enable_if<B, int>::type = 0 >
 
-# define variant_REQUIRES_R(R, ...) \
-    typename std::enable_if<__VA_ARGS__, R>::type
+#define variant_REQUIRES_T(...) \
+    , typename = typename std::enable_if< (__VA_ARGS__), nonstd::variants::detail::enabler >::type
 
-# define variant_REQUIRES_A(...) \
-    , typename std::enable_if<__VA_ARGS__, void*>::type = variant_nullptr
+#define variant_REQUIRES_R(R, ...) \
+    typename std::enable_if< (__VA_ARGS__), R>::type
+
+#define variant_REQUIRES_A(...) \
+    , typename std::enable_if< (__VA_ARGS__), void*>::type = nullptr
 
 #endif
 
@@ -407,9 +410,9 @@ namespace nonstd {
 
 namespace nonstd { namespace variants {
 
-namespace detail {
-
 // C++11 emulation:
+
+namespace std11 {
 
 #if variant_HAVE_STD_ADD_POINTER
 
@@ -467,6 +470,16 @@ template< class Then, class Else >
 struct conditional< false, Then, Else > { typedef Else type; };
 
 #endif // variant_HAVE_CONDITIONAL
+
+} // namespace std11
+
+// detail:
+
+namespace detail {
+
+// for variant_REQUIRES_T():
+
+/*enum*/ class enabler{};
 
 // typelist:
 
@@ -572,7 +585,7 @@ private:
 public:
     enum V { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
 
-    typedef typename conditional< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
+    typedef typename std11::conditional< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
 };
 
 #if variant_CPP11_OR_GREATER
@@ -772,7 +785,7 @@ struct alignment_of
 template< typename List, size_t N >
 struct type_of_size
 {
-    typedef typename conditional<
+    typedef typename std11::conditional<
         N == sizeof( typename List::head ),
             typename List::head,
             typename type_of_size<typename List::tail, N >::type >::type type;
@@ -1445,7 +1458,7 @@ public:
     template< class T >
     static variant_constexpr std::size_t index_of() variant_noexcept
     {
-        return to_size_t( detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value );
+        return to_size_t( detail::typelist_index_of<variant_types, typename std11::remove_cv<T>::type >::value );
     }
 
     template< class T >
@@ -1770,28 +1783,28 @@ get( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T1
 #endif // variant_CPP11_OR_GREATER
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename detail::add_pointer<T>::type
+inline typename std11::add_pointer<T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
 {
     return ( pv->index() == variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename detail::add_pointer<const T>::type
+inline typename std11::add_pointer<const T>::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T))
 {
     return ( pv->index() == variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename detail::add_pointer< typename variant_alternative<K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
+inline typename std11::add_pointer< typename variant_alternative<K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
     return ( pv->index() == K ) ? &get<K>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
-inline typename detail::add_pointer< const typename variant_alternative<K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
+inline typename std11::add_pointer< const typename variant_alternative<K, variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >::type >::type
 get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> const * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
     return ( pv->index() == K ) ? &get<K>( *pv )  : variant_nullptr;
