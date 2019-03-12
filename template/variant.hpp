@@ -473,6 +473,61 @@ struct conditional< false, Then, Else > { typedef Else type; };
 
 } // namespace std11
 
+/// type traits C++17:
+
+namespace std17 {
+
+#if variant_CPP17_OR_GREATER
+
+using std::is_swappable;
+using std::is_nothrow_swappable;
+
+#elif variant_CPP11_OR_GREATER
+
+namespace detail {
+
+using std::swap;
+
+struct is_swappable
+{
+    template< typename T, typename = decltype( swap( std::declval<T&>(), std::declval<T&>() ) ) >
+    static std::true_type test( int );
+
+    template< typename >
+    static std::false_type test(...);
+};
+
+struct is_nothrow_swappable
+{
+    // wrap noexcept(epr) in separate function as work-around for VC140 (VS2015):
+
+    template< typename T >
+    static constexpr bool test()
+    {
+        return noexcept( swap( std::declval<T&>(), std::declval<T&>() ) );
+    }
+
+    template< typename T >
+    static auto test( int ) -> std::integral_constant<bool, test<T>()>{}
+
+    template< typename >
+    static std::false_type test(...);
+};
+
+} // namespace detail
+
+// is [nothow] swappable:
+
+template< typename T >
+struct is_swappable : decltype( detail::is_swappable::test<T>(0) ){};
+
+template< typename T >
+struct is_nothrow_swappable : decltype( detail::is_nothrow_swappable::test<T>(0) ){};
+
+#endif // variant_CPP17_OR_GREATER
+
+} // namespace std17
+
 // detail:
 
 namespace detail {
@@ -1188,10 +1243,10 @@ public:
     // 19.7.3.6 Swap
     
     void swap( variant & other )
-#if variant_CPP17_OR_GREATER
+#if variant_CPP11_OR_GREATER
         noexcept(
             {% for n in range(NumParams) -%}
-            std::is_nothrow_move_constructible_v<T{{n}}> && std::is_nothrow_swappable_v<T{{n}}> {{('&&' if not loop.last)}}
+            std::is_nothrow_move_constructible<T{{n}}>::value && std17::is_nothrow_swappable<T{{n}}>::value {{('&&' if not loop.last)}}
             {% endfor %}
         )
 #endif
@@ -1566,10 +1621,10 @@ get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_index_t(K) = n
 // 19.7.10 Specialized algorithms
 
 template< {{TplParamsList}}
-#if variant_CPP17_OR_GREATER
+#if variant_CPP11_OR_GREATER
     variant_REQUIRES_T(
         {% for n in range(NumParams) -%}
-        std::is_move_constructible_v<T{{n}}> && std::is_swappable_v<T{{n}}> {{('&&' if not loop.last)}}
+        std::is_move_constructible<T{{n}}>::value && std17::is_swappable<T{{n}}>::value {{('&&' if not loop.last)}}
         {% endfor %} )
 #endif
 >

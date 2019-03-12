@@ -473,6 +473,61 @@ struct conditional< false, Then, Else > { typedef Else type; };
 
 } // namespace std11
 
+/// type traits C++17:
+
+namespace std17 {
+
+#if variant_CPP17_OR_GREATER
+
+using std::is_swappable;
+using std::is_nothrow_swappable;
+
+#elif variant_CPP11_OR_GREATER
+
+namespace detail {
+
+using std::swap;
+
+struct is_swappable
+{
+    template< typename T, typename = decltype( swap( std::declval<T&>(), std::declval<T&>() ) ) >
+    static std::true_type test( int );
+
+    template< typename >
+    static std::false_type test(...);
+};
+
+struct is_nothrow_swappable
+{
+    // wrap noexcept(epr) in separate function as work-around for VC140 (VS2015):
+
+    template< typename T >
+    static constexpr bool test()
+    {
+        return noexcept( swap( std::declval<T&>(), std::declval<T&>() ) );
+    }
+
+    template< typename T >
+    static auto test( int ) -> std::integral_constant<bool, test<T>()>{}
+
+    template< typename >
+    static std::false_type test(...);
+};
+
+} // namespace detail
+
+// is [nothow] swappable:
+
+template< typename T >
+struct is_swappable : decltype( detail::is_swappable::test<T>(0) ){};
+
+template< typename T >
+struct is_nothrow_swappable : decltype( detail::is_nothrow_swappable::test<T>(0) ){};
+
+#endif // variant_CPP17_OR_GREATER
+
+} // namespace std17
+
 // detail:
 
 namespace detail {
@@ -1407,24 +1462,24 @@ public:
     // 19.7.3.6 Swap
     
     void swap( variant & other )
-#if variant_CPP17_OR_GREATER
+#if variant_CPP11_OR_GREATER
         noexcept(
-            std::is_nothrow_move_constructible_v<T0> && std::is_nothrow_swappable_v<T0> &&
-            std::is_nothrow_move_constructible_v<T1> && std::is_nothrow_swappable_v<T1> &&
-            std::is_nothrow_move_constructible_v<T2> && std::is_nothrow_swappable_v<T2> &&
-            std::is_nothrow_move_constructible_v<T3> && std::is_nothrow_swappable_v<T3> &&
-            std::is_nothrow_move_constructible_v<T4> && std::is_nothrow_swappable_v<T4> &&
-            std::is_nothrow_move_constructible_v<T5> && std::is_nothrow_swappable_v<T5> &&
-            std::is_nothrow_move_constructible_v<T6> && std::is_nothrow_swappable_v<T6> &&
-            std::is_nothrow_move_constructible_v<T7> && std::is_nothrow_swappable_v<T7> &&
-            std::is_nothrow_move_constructible_v<T8> && std::is_nothrow_swappable_v<T8> &&
-            std::is_nothrow_move_constructible_v<T9> && std::is_nothrow_swappable_v<T9> &&
-            std::is_nothrow_move_constructible_v<T10> && std::is_nothrow_swappable_v<T10> &&
-            std::is_nothrow_move_constructible_v<T11> && std::is_nothrow_swappable_v<T11> &&
-            std::is_nothrow_move_constructible_v<T12> && std::is_nothrow_swappable_v<T12> &&
-            std::is_nothrow_move_constructible_v<T13> && std::is_nothrow_swappable_v<T13> &&
-            std::is_nothrow_move_constructible_v<T14> && std::is_nothrow_swappable_v<T14> &&
-            std::is_nothrow_move_constructible_v<T15> && std::is_nothrow_swappable_v<T15> 
+            std::is_nothrow_move_constructible<T0>::value && std17::is_nothrow_swappable<T0>::value &&
+            std::is_nothrow_move_constructible<T1>::value && std17::is_nothrow_swappable<T1>::value &&
+            std::is_nothrow_move_constructible<T2>::value && std17::is_nothrow_swappable<T2>::value &&
+            std::is_nothrow_move_constructible<T3>::value && std17::is_nothrow_swappable<T3>::value &&
+            std::is_nothrow_move_constructible<T4>::value && std17::is_nothrow_swappable<T4>::value &&
+            std::is_nothrow_move_constructible<T5>::value && std17::is_nothrow_swappable<T5>::value &&
+            std::is_nothrow_move_constructible<T6>::value && std17::is_nothrow_swappable<T6>::value &&
+            std::is_nothrow_move_constructible<T7>::value && std17::is_nothrow_swappable<T7>::value &&
+            std::is_nothrow_move_constructible<T8>::value && std17::is_nothrow_swappable<T8>::value &&
+            std::is_nothrow_move_constructible<T9>::value && std17::is_nothrow_swappable<T9>::value &&
+            std::is_nothrow_move_constructible<T10>::value && std17::is_nothrow_swappable<T10>::value &&
+            std::is_nothrow_move_constructible<T11>::value && std17::is_nothrow_swappable<T11>::value &&
+            std::is_nothrow_move_constructible<T12>::value && std17::is_nothrow_swappable<T12>::value &&
+            std::is_nothrow_move_constructible<T13>::value && std17::is_nothrow_swappable<T13>::value &&
+            std::is_nothrow_move_constructible<T14>::value && std17::is_nothrow_swappable<T14>::value &&
+            std::is_nothrow_move_constructible<T15>::value && std17::is_nothrow_swappable<T15>::value 
             
         )
 #endif
@@ -1813,24 +1868,24 @@ get_if( variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
 // 19.7.10 Specialized algorithms
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15
-#if variant_CPP17_OR_GREATER
+#if variant_CPP11_OR_GREATER
     variant_REQUIRES_T(
-        std::is_move_constructible_v<T0> && std::is_swappable_v<T0> &&
-        std::is_move_constructible_v<T1> && std::is_swappable_v<T1> &&
-        std::is_move_constructible_v<T2> && std::is_swappable_v<T2> &&
-        std::is_move_constructible_v<T3> && std::is_swappable_v<T3> &&
-        std::is_move_constructible_v<T4> && std::is_swappable_v<T4> &&
-        std::is_move_constructible_v<T5> && std::is_swappable_v<T5> &&
-        std::is_move_constructible_v<T6> && std::is_swappable_v<T6> &&
-        std::is_move_constructible_v<T7> && std::is_swappable_v<T7> &&
-        std::is_move_constructible_v<T8> && std::is_swappable_v<T8> &&
-        std::is_move_constructible_v<T9> && std::is_swappable_v<T9> &&
-        std::is_move_constructible_v<T10> && std::is_swappable_v<T10> &&
-        std::is_move_constructible_v<T11> && std::is_swappable_v<T11> &&
-        std::is_move_constructible_v<T12> && std::is_swappable_v<T12> &&
-        std::is_move_constructible_v<T13> && std::is_swappable_v<T13> &&
-        std::is_move_constructible_v<T14> && std::is_swappable_v<T14> &&
-        std::is_move_constructible_v<T15> && std::is_swappable_v<T15> 
+        std::is_move_constructible<T0>::value && std17::is_swappable<T0>::value &&
+        std::is_move_constructible<T1>::value && std17::is_swappable<T1>::value &&
+        std::is_move_constructible<T2>::value && std17::is_swappable<T2>::value &&
+        std::is_move_constructible<T3>::value && std17::is_swappable<T3>::value &&
+        std::is_move_constructible<T4>::value && std17::is_swappable<T4>::value &&
+        std::is_move_constructible<T5>::value && std17::is_swappable<T5>::value &&
+        std::is_move_constructible<T6>::value && std17::is_swappable<T6>::value &&
+        std::is_move_constructible<T7>::value && std17::is_swappable<T7>::value &&
+        std::is_move_constructible<T8>::value && std17::is_swappable<T8>::value &&
+        std::is_move_constructible<T9>::value && std17::is_swappable<T9>::value &&
+        std::is_move_constructible<T10>::value && std17::is_swappable<T10>::value &&
+        std::is_move_constructible<T11>::value && std17::is_swappable<T11>::value &&
+        std::is_move_constructible<T12>::value && std17::is_swappable<T12>::value &&
+        std::is_move_constructible<T13>::value && std17::is_swappable<T13>::value &&
+        std::is_move_constructible<T14>::value && std17::is_swappable<T14>::value &&
+        std::is_move_constructible<T15>::value && std17::is_swappable<T15>::value 
          )
 #endif
 >
