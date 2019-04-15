@@ -35,6 +35,7 @@
 		<Unit filename="../../example/01-basic.cpp" />
 		<Unit filename="../../example/02-iostream.cpp" />
 		<Unit filename="../../example/03-no-exceptions.cpp" />
+		<Unit filename="../../example/04-state-machine.cpp" />
 		<Unit filename="../../include/nonstd/variant.hpp" />
 		<Unit filename="../../script/create-cov-rpt.py" />
 		<Unit filename="../../script/create-vcpkg.py" />
