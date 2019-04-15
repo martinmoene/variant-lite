@@ -1,6 +1,8 @@
 // C++14/C++17 finite state machine example based on code from Mateusz Pusz,
 // https://github.com/mpusz/fsm-variant (MIT-license)
 
+// Note: unlike std::visit(), variant-lite's visit() passes the variant by const &.
+
 #include "nonstd/optional.hpp"
 #include "nonstd/variant.hpp"
 
