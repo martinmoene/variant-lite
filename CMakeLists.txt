@@ -11,7 +11,7 @@ cmake_minimum_required( VERSION 3.5 FATAL_ERROR )
 
 project(
     variant_lite
-    VERSION 1.1.0
+    VERSION 1.2.0
 #   DESCRIPTION "A C++17-like variant, a type-safe union for C++98, C++11 and later in a single-file header-only library"
 #   HOMEPAGE_URL "https://github.com/martinmoene/variant-lite"
     LANGUAGES CXX )
