@@ -17,8 +17,8 @@ class VariantLiteConan(ConanFile):
     def package(self):
         """Run CMake install"""
         cmake = CMake(self)
-        cmake.definitions["VARIANT_LITE__OPT_BUILD_TESTS"] = "OFF"
-        cmake.definitions["VARIANT_LITE__OPT_BUILD_EXAMPLES"] = "OFF"
+        cmake.definitions["VARIANT_LITE_OPT_BUILD_TESTS"] = "OFF"
+        cmake.definitions["VARIANT_LITE_OPT_BUILD_EXAMPLES"] = "OFF"
         cmake.configure()
         cmake.install()
 
