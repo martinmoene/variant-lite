@@ -9,11 +9,23 @@
 
 #include <memory>
 
+<<<<<<< HEAD
+=======
+using namespace nonstd;
+
+>>>>>>> 985cdeefcf74f5db67bd1d46ca7f7f11634dd609
 namespace {
+    
+using lest::to_string;
 
 // ensure comparison of pointers for lest:
 
-const void * test_nullptr = 0;
+#if variant_USES_STD_VARIANT
+#define variant_noexcept  noexcept
+const void * test_nullptr = nullptr;
+#else
+const void * test_nullptr = variant_nullptr;
+#endif
 
 // The following tracer code originates as Oracle from Optional by
 // Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
@@ -30,25 +42,32 @@ enum State
     /* 7 */ value_copy_assigned,
     /* 8 */ value_move_assigned,
     /* 9 */ moved_from,
-    /*10 */ value_constructed,
+    /*10 */ value_constructed
 };
-
-#if variant_CPP11_OR_GREATER
 
 struct Tracer
 {
     State state;
+    static int instances;
 
-    Tracer() noexcept { state = default_constructed; }
+    static void reset() variant_noexcept { instances = 0; }
 
-    Tracer( Tracer && ) noexcept  { state = move_constructed; }
-    Tracer &  operator= ( Tracer && ) noexcept  { state = move_assigned; return *this; }
+    ~Tracer() variant_noexcept { --instances; }
+    Tracer()  variant_noexcept { ++instances; state = default_constructed; }
 
-    Tracer( const Tracer & ) noexcept  { state = copy_constructed; }
-    Tracer & operator= ( const Tracer & ) noexcept  { state = copy_assigned; return *this; }
+    Tracer( const Tracer & ) variant_noexcept  { ++instances; state = copy_constructed; }
+    Tracer & operator= ( const Tracer & ) variant_noexcept  { state = copy_assigned; return *this; }
+
+#if variant_CPP11_OR_GREATER
+    Tracer( Tracer && ) variant_noexcept  { ++instances; state = move_constructed; }
+    Tracer &  operator= ( Tracer && ) variant_noexcept  { state = move_assigned; return *this; }
+#endif
 };
 
-#endif
+int Tracer::instances = 0;
+
+struct TracerX : Tracer{};
+struct TracerY : Tracer{};
 
 struct V
 {
@@ -103,24 +122,43 @@ inline std::ostream & operator<<( std::ostream & os, V const & v )
 
 class NoDefaultConstruct { NoDefaultConstruct(){} };
 
-struct BlowCopyMove
+struct BlowCopyMoveConstruct
 {
-    BlowCopyMove() {}
-    BlowCopyMove( BlowCopyMove const & ) { throw 42; }
-    BlowCopyMove & operator=( BlowCopyMove const & ) { return *this; }
+    static bool blow;
+    static void enable_blow() { blow = true; }
+    static void disable_blow() { blow = false; }
+
+    ~BlowCopyMoveConstruct() {}
+    BlowCopyMoveConstruct( bool blow_ = true ) { blow = blow_; }
+    BlowCopyMoveConstruct( BlowCopyMoveConstruct const & ) { if ( blow ) throw 42; }
+    BlowCopyMoveConstruct & operator=( BlowCopyMoveConstruct const & ) { return *this; }
 #if variant_CPP11_OR_GREATER
-    BlowCopyMove( BlowCopyMove && ) { throw 42; }
-    BlowCopyMove & operator=( BlowCopyMove && ) = default;
+    BlowCopyMoveConstruct( BlowCopyMoveConstruct && ) { if ( blow ) throw 42; }
+    BlowCopyMoveConstruct & operator=( BlowCopyMoveConstruct && ) = default;
 #endif
 };
 
-typedef variant<char, BlowCopyMove> empty_variant_t;
+bool BlowCopyMoveConstruct::blow = true;
+
+struct BlowCopyMoveAssign
+{
+    ~BlowCopyMoveAssign() {};
+    BlowCopyMoveAssign() {}
+    BlowCopyMoveAssign( BlowCopyMoveAssign const & ) {}
+    BlowCopyMoveAssign & operator=( BlowCopyMoveAssign const & ) { throw 42; return *this; }
+#if variant_CPP11_OR_GREATER
+    BlowCopyMoveAssign( BlowCopyMoveAssign && ) = default;
+    BlowCopyMoveAssign & operator=( BlowCopyMoveAssign && ) { throw 42; return *this; }
+#endif
+};
+
+typedef variant<char, BlowCopyMoveConstruct> empty_variant_t;
 
 empty_variant_t make_empty_variant()
 {
     empty_variant_t var = 'a';
 
-    try { var = BlowCopyMove(); } catch(...) {}
+    try { var = BlowCopyMoveConstruct(); } catch(...) {}
 
     return var;
 }
@@ -128,6 +166,12 @@ empty_variant_t make_empty_variant()
 empty_variant_t make_non_empty_variant()
 {
     return empty_variant_t( 'a' );
+}
+
+template< typename T >
+std::size_t to_size_t( T v )
+{
+    return v;
 }
 
 } // anonymous namespace
@@ -227,19 +271,65 @@ CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 
 CASE( "variant: Allows to copy-assign from variant" )
 {
-    variant<S> var1;
-    variant<S> var2;
+    SETUP("") {
+    SECTION("Before assignment, assignee is destructed")
+    {
+        Tracer::reset();
+        {
+            TracerY y;
+            variant<TracerX, TracerY> var1;
+            variant<TracerX, TracerY> var2;
+            variant<TracerX, TracerY> var3(y);
 
-    var1 = var2;
+            EXPECT( Tracer::instances == 4 );
 
-    EXPECT( get<S>(var1).value.value == V::deflt() );
-#if variant_USES_STD_VARIANT
-    EXPECT( get<S>(var1).value.state == copy_assigned );
-    EXPECT( get<S>(var1).state       == copy_assigned );
-#else
-    EXPECT( get<S>(var1).value.state == copy_constructed );
-    EXPECT( get<S>(var1).state       == copy_constructed );
-#endif
+            var1 = var2; EXPECT( Tracer::instances == 4 );
+            var1 = var3; EXPECT( Tracer::instances == 4 );
+        }
+        EXPECT( Tracer::instances == 0 );
+    }
+    SECTION("On same-alternative assignment, assignee is copied-to")
+    {
+        variant<Tracer> var1;
+        variant<Tracer> var2;
+
+        var1 = var2;
+
+        EXPECT( get<Tracer>(var1).state == copy_assigned );
+    }
+    SECTION("On same-alternative assignment, assignee does not become valueless-by-exception")
+    {
+        variant<BlowCopyMoveAssign> var1;
+        variant<BlowCopyMoveAssign> var2;
+
+        try { var1 = var2; } catch (...) {}
+
+        EXPECT_NOT( var1.valueless_by_exception() );
+    }
+    SECTION("On non-same-alternative assignment, assignee may become valueless-by-exception")
+    {
+        variant<int, BlowCopyMoveConstruct> var1;
+        variant<int, BlowCopyMoveConstruct> var2( BlowCopyMoveConstruct( false ) );
+
+        BlowCopyMoveConstruct::enable_blow();
+
+        EXPECT_NOT( var1.valueless_by_exception() );
+
+        try { var1 = var2; } catch (...) {}
+
+#if     variant_USES_STD_VARIANT
+# if    variant_COMPILER_CLANG_VERSION
+        EXPECT( var1.valueless_by_exception() );
+# elif  variant_COMPILER_GNU_VERSION
+        EXPECT( var1.valueless_by_exception() );
+# elif  variant_COMPILER_MSVC_VERSION
+        EXPECT_NOT( var1.valueless_by_exception() );
+# endif
+#else // variant_USES_STD_VARIANT
+        EXPECT( var1.valueless_by_exception() );
+#endif // variant_USES_STD_VARIANT
+    }
+    }
 }
 
 CASE( "variant: Allows to copy-assign mutually empty variant" )
@@ -290,18 +380,52 @@ CASE( "variant: Allows to copy-assign to empty variant" )
 CASE( "variant: Allows to move-assign from variant (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<S> var;
+    SETUP("") {
+    SECTION("Before assignment, assignee is destructed")
+    {
+        Tracer::reset();
+        {
+            TracerY y;
+            variant<TracerX, TracerY> var1;
+            variant<TracerX, TracerY> var2;
+            variant<TracerX, TracerY> var3(y);
 
-    var = variant<S>{};
+            EXPECT( Tracer::instances == 4 );
 
-    EXPECT( get<S>(var).value.value == V::deflt() );
-#if variant_USES_STD_VARIANT
-    EXPECT( get<S>(var).value.state == move_assigned );
-    EXPECT( get<S>(var).state       == move_assigned );
-#else
-    EXPECT( get<S>(var).value.state == move_constructed );
-    EXPECT( get<S>(var).state       == move_constructed );
-#endif
+            var1 = std::move(var2); EXPECT( Tracer::instances == 4 );
+            var1 = std::move(var3); EXPECT( Tracer::instances == 4 );
+        }
+        EXPECT( Tracer::instances == 0 );
+    }
+    SECTION("On same-alternative assignment, assignee is moved-to")
+    {
+        variant<Tracer> var1;
+        variant<Tracer> var2;
+
+        var1 = std::move(var2);
+
+        EXPECT( get<Tracer>(var1).state == move_assigned );
+    }
+    SECTION("On same-alternative assignment, assignee does not become valueless-by-exception")
+    {
+        variant<BlowCopyMoveAssign> var1;
+        variant<BlowCopyMoveAssign> var2;
+
+        try { var1 = std::move(var2); } catch (...) {}
+
+        EXPECT_NOT( var1.valueless_by_exception() );
+    }
+    SECTION("On non-same-alternative assignment, assignee may become valueless-by-exception")
+    {
+        variant<int, BlowCopyMoveConstruct> var1;
+
+        EXPECT_NOT( var1.valueless_by_exception() );
+
+        try { var1 = BlowCopyMoveConstruct{}; } catch (...) {}
+
+        EXPECT( var1.valueless_by_exception() );
+    }
+    }
 #else
     EXPECT( !!"variant: move-assignment is not available (no C++11)" );
 #endif
@@ -382,14 +506,14 @@ CASE( "variant: Allows to convert-copy-construct from element" )
 {
     int i = 7;
 
-    variant<double, std::string> var1(  i    );
-    variant<double, std::string> var2(  7    );
+    variant<double, std::string> var1(  i );
+    variant<double, std::string> var2(  7 );
 
-    EXPECT( var1.index() == 0u );
-    EXPECT( get<0>(var1) == 7  );
+    EXPECT( var1.index() == 0u              );
+    EXPECT( get<0>(var1) == lest::approx(7) );
 
-    EXPECT( var2.index() == 0u );
-    EXPECT( get<0>(var2) == 7  );
+    EXPECT( var2.index() == 0u              );
+    EXPECT( get<0>(var2) == lest::approx(7) );
 }
 
 CASE( "variant: Allows to convert-move-construct from element (C++11)" )
@@ -399,8 +523,8 @@ CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 
     variant<double, std::string> var( Int{} );
 
-    EXPECT( var.index() == 0u );
-    EXPECT( get<0>(var) == 7  );
+    EXPECT( var.index() == 0u              );
+    EXPECT( get<0>(var) == lest::approx(7) );
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
@@ -408,34 +532,61 @@ CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 
 CASE( "variant: Allows to copy-assign from element value" )
 {
-    V v( 7 );
-    variant<int, S> var1;
-    variant<int, S> var2;
+    SETUP("") {
+    SECTION("same-alternative copy-assignment")
+    {
+        int seven = 7;
+        variant<int> var = 42;
 
-    var1 = v;
-    var2 = V( 7 );  // copy for pre-C++11
+        var = seven;
 
-    EXPECT( get<S>(var1).value.value == 7 );
-    EXPECT(                 v.state != moved_from );
+        EXPECT( get<int>(var) == seven );
+    }
+    SECTION("non-same-alternative copy-assignment")
+    {
+        V v( 7 );
+        variant<int, S> var1;
+        variant<int, S> var2;
 
-    EXPECT( get<S>(var1).value.value == 7 );
+        var1 = v;
+        var2 = V( 7 );  // copy for pre-C++11
+
+        EXPECT( get<S>(var1).value.value == 7 );
+        EXPECT(                 v.state != moved_from );
+
+        EXPECT( get<S>(var1).value.value == 7 );
+    }
+    }
 }
 
 CASE( "variant: Allows to move-assign from element value" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int, S> var;
+    SETUP("") {
+    SECTION("same-alternative move-assignment")
+    {
+        variant<int> var = 42;
 
-    var = V( 7 );
+        var = 7;
 
-    EXPECT( get<S>(var).value.value == 7 );
-    EXPECT( get<S>(var).value.state == move_constructed );
-    EXPECT( get<S>(var).value.state == move_constructed );
+        EXPECT( get<int>(var) == 7 );
+    }
+    SECTION("non-same-alternative move-assignment")
+    {
+        variant<int, S> var;
+
+        var = V( 7 );
+
+        EXPECT( get<S>(var).value.value == 7 );
+        EXPECT( get<S>(var).value.state == move_constructed );
+        EXPECT( get<S>(var).value.state == move_constructed );
 #if variant_USES_STD_VARIANT
-    EXPECT( get<S>(var).state       == value_move_constructed );
+        EXPECT( get<S>(var).state       == value_move_constructed );
 #else
-    EXPECT( get<S>(var).state       == move_constructed );
+        EXPECT( get<S>(var).state       == move_constructed );
 #endif
+    }
+    }
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
@@ -494,7 +645,7 @@ CASE( "variant: Allows to copy-construct from elements in intializer-list based 
 
     EXPECT( get<0>( vec[0] ) == 10    );
     EXPECT( get<1>( vec[1] ) == 15L   );
-    EXPECT( get<2>( vec[2] ) == 1.5   );
+    EXPECT( get<2>( vec[2] ) == lest::approx(1.5) );
     EXPECT( get<3>( vec[3] ) == hello );
     EXPECT( get<4>( vec[4] ).value.value == 7 );
     EXPECT( get<4>( vec[4] ).state       == copy_constructed );
@@ -525,8 +676,8 @@ struct NoCopyMove
 {
     S s; int  value;
 
-    NoCopyMove( S const& s, int v  ) : s( s ), value( v ) {}
-    NoCopyMove( S && s    , int v  ) : s( std::move(s) ), value( v ) {}
+    NoCopyMove( S const& t, int v  ) : s( t ), value( v ) {}
+    NoCopyMove( S && t    , int v  ) : s( std::move(t) ), value( v ) {}
     NoCopyMove(                    ) = delete;
     NoCopyMove( NoCopyMove const & ) = delete;
     NoCopyMove( NoCopyMove &&      ) = delete;
@@ -614,11 +765,11 @@ struct InitList
     char c;
     S s;
 
-    InitList( std::initializer_list<int> il, char c, S const & s)
-    : vec( il ), c( c ), s( s ) {}
+    InitList( std::initializer_list<int> il, char k, S const & t)
+    : vec( il ), c( k ), s( t ) {}
 
-    InitList( std::initializer_list<int> il, char c, S && s)
-    : vec( il ), c( c ), s( std::forward<S>(s) ) {}
+    InitList( std::initializer_list<int> il, char k, S && t)
+    : vec( il ), c( k ), s( std::forward<S>(t) ) {}
 };
 #endif
 
@@ -908,13 +1059,14 @@ struct Doubler
 
 struct GenericVisitor1
 {
-    std::string operator()(int val) const
+    std::string operator()( int val ) const
     {
         std::ostringstream os;
         os << val;
         return os.str();
     }
-    std::string operator()(const std::string& val) const
+
+    std::string operator()( std::string const & val ) const
     {
         std::ostringstream os;
         os << val;
@@ -922,7 +1074,7 @@ struct GenericVisitor1
     }
 };
 
-CASE( "variant: Allows to visit contents (args: 1)" )
+CASE( "variant: Allows to visit contents (args: 1; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
@@ -940,8 +1092,8 @@ CASE( "variant: Allows to visit contents (args: 1)" )
 
 struct GenericVisitor2
 {
-    template<typename T1, typename T2>
-    std::string operator()(const T1& v1, const T2& v2) const
+    template< typename T1, typename T2 >
+    std::string operator()( T1 const & v1, T2 const & v2 ) const
     {
         std::ostringstream os;
         os << v1 << v2;
@@ -949,16 +1101,18 @@ struct GenericVisitor2
     }
 };
 
-CASE( "variant: Allows to visit contents (args: 2)" )
+CASE( "variant: Allows to visit contents (args: 2; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
     typedef variant< int, std::string > var_t;
     var_t vi = 7;
     var_t vs = std::string("hello");
+
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor2(), vi, vs);
-    #else
+#else
     std::string r = visit<std::string>(GenericVisitor2(), vi, vs);
 #endif
+
     EXPECT( r == "7hello" );
 }
 
@@ -973,18 +1127,102 @@ struct GenericVisitor3
     }
 };
 
-CASE( "variant: Allows to visit contents (args: 3)" )
+CASE( "variant: Allows to visit contents (args: 3; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
 {
     typedef variant< int, std::string, double > var_t;
     var_t vi = 7;
     var_t vs = std::string("hello");
     var_t vd = 0.5;
+
 #if variant_CPP11_OR_GREATER
     std::string r = visit(GenericVisitor3(), vi, vs, vd);
 #else
     std::string r = visit<std::string>(GenericVisitor3(), vi, vs, vd);
 #endif
+
     EXPECT( r == "7hello0.5" );
+}
+
+#if variant_CPP14_OR_GREATER
+
+struct RVRefTestVisitor
+{
+    std::string operator()( int val ) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+    std::string operator()( std::string const & val ) const
+    {
+        std::ostringstream os;
+        os << val;
+        return os.str();
+    }
+
+    template< typename ... Args >
+    std::string operator()( variant<Args...> const & var ) const
+    {
+        return visit( RVRefTestVisitor(), var );
+    }
+
+    template< typename U >
+    std::string operator()( U && ) const
+    {
+        static_assert( std::is_const<U>::value, "Wrong branch!" );
+        return ">>> Broken branch! <<<";
+    }
+};
+
+struct Unwrapper
+{
+    RVRefTestVisitor * m_v;
+
+    Unwrapper( RVRefTestVisitor * v )
+        : m_v( v )
+    {}
+
+    template< typename T >
+    auto & Unwrap( T && val ) const
+    {
+        return std::forward<T>( val );
+    }
+
+    template< typename T >
+    const auto & Unwrap( std::shared_ptr<T> val ) const
+    {
+        const auto & result = *val.get();
+        return result;
+    }
+
+    template< typename ... Args >
+    auto operator()( Args &&... args ) const
+    {
+        return (*m_v)( Unwrap( std::forward<Args>(args))...);
+    }
+};
+
+#endif
+
+CASE( "variant: Allows to visit contents, rvalue reference (args: 1; configured max args: " + to_string(variant_CONFIG_MAX_VISITOR_ARG_COUNT) + ")" )
+{
+#if variant_CPP14_OR_GREATER
+    typedef std::shared_ptr< std::string > string_ptr_t;
+    typedef variant< int, std::string, string_ptr_t > var_t;
+    string_ptr_t inner = std::make_shared< std::string >("hello1");
+
+    var_t vstr1 = inner;
+    var_t vstr2 = std::string("hello2");
+    RVRefTestVisitor visitor;
+
+    std::string rs1 = visit( Unwrapper( &visitor ), vstr1 );
+    std::string rs2 = visit( Unwrapper( &visitor ), vstr2 );
+
+    EXPECT( rs1 == "hello1" );
+    EXPECT( rs2 == "hello2" );
+#else
+    EXPECT( !!"variant: return type deduction is not available (no C++14)" );
+#endif
 }
 
 CASE( "variant: Allows to check for content by type" )
@@ -1178,9 +1416,12 @@ CASE( "monostate: Allows to make variant default-constructible" )
 CASE( "bad_variant_access: Indicates invalid variant access" )
 {
     variant< char, int > v = 7;
+    variant< char, int > const c = 7;
 
     EXPECT_THROWS_AS( get<  0 >( v ), bad_variant_access );
+    EXPECT_THROWS_AS( get<  0 >( c ), bad_variant_access );
     EXPECT_THROWS_AS( get<char>( v ), bad_variant_access );
+    EXPECT_THROWS_AS( get<char>( c ), bad_variant_access );
 }
 
 namespace {
@@ -1194,7 +1435,7 @@ namespace {
     struct t8{};
 }
 
-CASE( "variant_size<>: Allows to obtain number of element types (non-standard: max 7)" )
+CASE( "variant_size<>: Allows to obtain number of element types (configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
 {
     typedef variant<t1> var1;
     typedef variant<t1, t2> var2;
@@ -1205,17 +1446,17 @@ CASE( "variant_size<>: Allows to obtain number of element types (non-standard: m
     typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
 //  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
 
-    EXPECT( 1u == variant_size<var1>::value );
-    EXPECT( 2u == variant_size<var2>::value );
-    EXPECT( 3u == variant_size<var3>::value );
-    EXPECT( 4u == variant_size<var4>::value );
-    EXPECT( 5u == variant_size<var5>::value );
-    EXPECT( 6u == variant_size<var6>::value );
-    EXPECT( 7u == variant_size<var7>::value );
-//  EXPECT( 8u == variant_size<var8>::value );
+    EXPECT( 1u == to_size_t( variant_size<var1>::value ) );
+    EXPECT( 2u == to_size_t( variant_size<var2>::value ) );
+    EXPECT( 3u == to_size_t( variant_size<var3>::value ) );
+    EXPECT( 4u == to_size_t( variant_size<var4>::value ) );
+    EXPECT( 5u == to_size_t( variant_size<var5>::value ) );
+    EXPECT( 6u == to_size_t( variant_size<var6>::value ) );
+    EXPECT( 7u == to_size_t( variant_size<var7>::value ) );
+//  EXPECT( 8u == to_size_t( variant_size<var8>::value ) );
 }
 
-CASE( "variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)" )
+CASE( "variant_size_v<>: Allows to obtain number of element types (C++14; configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
 {
 #if variant_CPP14_OR_GREATER
     typedef variant<t1> var1;
@@ -1240,7 +1481,7 @@ CASE( "variant_size_v<>: Allows to obtain number of element types (C++14, non-st
 #endif
 }
 
-CASE( "variant_size_V(): Allows to obtain number of element types (non-standard: max 7, macro)" )
+CASE( "variant_size_V(): Allows to obtain number of element types (non-standard: macro; configured max types: " + to_string(variant_CONFIG_MAX_TYPE_COUNT) + ")" )
 {
     typedef variant<t1> var1;
     typedef variant<t1, t2> var2;
@@ -1251,19 +1492,19 @@ CASE( "variant_size_V(): Allows to obtain number of element types (non-standard:
     typedef variant<t1, t2, t3, t4, t5, t6, t7> var7;
 //  typedef variant<t1, t2, t3, t4, t5, t6, t7, t8> var8;
 
-    EXPECT( 1u == variant_size_V( var1 ) );
-    EXPECT( 2u == variant_size_V( var2 ) );
-    EXPECT( 3u == variant_size_V( var3 ) );
-    EXPECT( 4u == variant_size_V( var4 ) );
-    EXPECT( 5u == variant_size_V( var5 ) );
-    EXPECT( 6u == variant_size_V( var6 ) );
-    EXPECT( 7u == variant_size_V( var7 ) );
-//  EXPECT( 8u == variant_size_V( var8 ) );
+    EXPECT( 1u == to_size_t( variant_size_V( var1 ) ) );
+    EXPECT( 2u == to_size_t( variant_size_V( var2 ) ) );
+    EXPECT( 3u == to_size_t( variant_size_V( var3 ) ) );
+    EXPECT( 4u == to_size_t( variant_size_V( var4 ) ) );
+    EXPECT( 5u == to_size_t( variant_size_V( var5 ) ) );
+    EXPECT( 6u == to_size_t( variant_size_V( var6 ) ) );
+    EXPECT( 7u == to_size_t( variant_size_V( var7 ) ) );
+//  EXPECT( 8u == to_size_t( variant_size_V( var8 ) ) );
 }
 
 CASE( "variant_alternative<>: Allows to select type by index" )
 {
-#if variant_HAVE_STATIC_ASSERT
+#if variant_CPP11_OR_GREATER
     static_assert( std::is_same<char, typename variant_alternative< 0, variant<char> >::type >::value, "variant_alternative<0,...>" );
     static_assert( std::is_same<char, typename variant_alternative< 1, variant<int, char> >::type >::value, "variant_alternative<1,...>" );
     static_assert( std::is_same<char, typename variant_alternative< 2, variant<int, int, char> >::type >::value, "variant_alternative<2,...>" );
@@ -1293,7 +1534,7 @@ CASE( "variant_alternative_t<>: Allows to select type by index (C++11)" )
 
 CASE( "variant_alternative_T(): Allows to select type by index (non-standard: macro)" )
 {
-#if variant_HAVE_STATIC_ASSERT
+#if variant_CPP11_OR_GREATER
     // cannot use variant<int, char> in macro due to comma:
 
     typedef variant<char> var0;
@@ -1316,15 +1557,131 @@ CASE( "variant_alternative_T(): Allows to select type by index (non-standard: ma
 #endif
 }
 
+#if variant_CPP11_OR_GREATER
+
+namespace {
+
+struct Pad
+{
+    union { char c; int  i; };
+};
+
+// ensure non-char bits differ:
+
+Pad make_pad1() { Pad p; p.i =  0; p.c = 'x'; return p; }
+Pad make_pad2() { Pad p; p.i = ~0; p.c = 'x'; return p; }
+}
+
+namespace std {
+
+template<>
+struct hash<Pad>
+{
+    std::size_t operator()( Pad const & v ) const variant_noexcept
+    {
+        return std::hash<char>{}( v.c );
+    }
+};
+}
+
+#endif
+
 CASE( "std::hash<>: Allows to obtain hash (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-    variant<int> var( 7 );
+    using variant_t = variant<char, Pad>;
+    variant_t var1( make_pad1() );
+    variant_t var2( make_pad2() );
 
-    EXPECT( std::hash<variant<int> >()( var ) == std::hash<variant<int> >()( var ) );
+    EXPECT( std::hash<variant_t>{}( var1 ) == std::hash<variant_t>{}( var2 ) );
 #else
     EXPECT( !!"std::hash<>: std::hash<> is not available (no C++11)" );
 #endif
+}
+
+CASE("index_of<>(): method should be static" "[.issue-30]")
+{
+#if variant_CPP11_OR_GREATER && ! variant_USES_STD_VARIANT
+    typedef variant<int, double, std::string> Value;
+    Value value("Some string");
+
+    switch ( value.index() )
+    {
+    case Value::index_of<int>():
+        // do something
+        break;
+    case Value::index_of<double>():
+        // do something
+        break;
+    case Value::index_of<std::string>():
+        // do something
+        break;
+    }
+
+    EXPECT( !!"prevent warnings" );
+#else
+    EXPECT( !!"index_of<>(): test is not available (no C++11, or std::variant)" );
+#endif
+}
+
+CASE("operator=(T const &): assignment from element lvalue must use copy-assignment in C++11 and later" "[.issue-31]")
+{
+    variant<V> var1;
+    variant<V> var2;
+    V seven = 7;
+
+    var1 = 7;
+    var2 = seven;
+
+    EXPECT( get<V>(var1).state == (variant_CPP11_OR_GREATER ? move_assigned : copy_assigned) );
+    EXPECT( get<V>(var2).state == copy_assigned );
+}
+
+namespace issue_31 {
+
+    struct CopyOnly
+    {
+        CopyOnly() {}
+        CopyOnly( CopyOnly const & ) {}
+        CopyOnly & operator=( CopyOnly const & ) { return *this; }
+
+#if variant_CPP11_OR_GREATER
+        CopyOnly( CopyOnly && ) = delete;
+        CopyOnly & operator=( CopyOnly && ) = delete;
+#endif
+    };
+}
+
+CASE("operator=(variant const &): copy-assignment from variant lvalue must not require element move-assignment in C++11 and later" "[.issue-31]")
+{
+    using namespace issue_31;
+
+    variant<CopyOnly> var1;
+    variant<CopyOnly> var2;
+
+    var1 = var2;
+
+    EXPECT( true );
+}
+
+namespace issue_33 {
+
+    template< size_t i > class N { int k; };
+}
+
+CASE("max_index(): should not cause erroneous bad_variant_access in get()" "[.issue-33]")
+{
+    if ( 4 == sizeof(int) )
+    {
+        using issue_33::N;
+        typedef variant<N<0>, N<1>, N<2>, N<3>, int> variant_t;
+
+        EXPECT_NO_THROW( get<int>( variant_t( 13 ) ) );
+    }
+    else
+    {
+        EXPECT( !!"max_index(): test is not available (sizeof(int) != 4)" );
+    }
 }
 
 // end of file

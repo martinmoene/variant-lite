@@ -27,7 +27,11 @@
 #include <cstdlib>
 #include <ctime>
 
-#define  lest_VERSION "1.33.1"
+#define lest_MAJOR  1
+#define lest_MINOR  35
+#define lest_PATCH  1
+
+#define  lest_VERSION  lest_STRINGIFY(lest_MAJOR) "." lest_STRINGIFY(lest_MINOR) "." lest_STRINGIFY(lest_PATCH)
 
 #ifndef  lest_FEATURE_COLOURISE
 # define lest_FEATURE_COLOURISE 0
@@ -71,26 +75,26 @@
 
 // Compiler warning suppression:
 
-#ifdef __clang__
+#if defined (__clang__)
 # pragma clang diagnostic ignored "-Waggregate-return"
 # pragma clang diagnostic ignored "-Woverloaded-shift-op-parentheses"
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wdate-time"
-#elif defined __GNUC__
+#elif defined (__GNUC__)
 # pragma GCC   diagnostic ignored "-Waggregate-return"
 # pragma GCC   diagnostic push
 #endif
 
 // Suppress shadow and unused-value warning for sections:
 
-#if defined __clang__
+#if defined (__clang__)
 # define lest_SUPPRESS_WSHADOW    _Pragma( "clang diagnostic push" ) \
                                   _Pragma( "clang diagnostic ignored \"-Wshadow\"" )
 # define lest_SUPPRESS_WUNUSED    _Pragma( "clang diagnostic push" ) \
                                   _Pragma( "clang diagnostic ignored \"-Wunused-value\"" )
 # define lest_RESTORE_WARNINGS    _Pragma( "clang diagnostic pop"  )
 
-#elif defined __GNUC__
+#elif defined (__GNUC__)
 # define lest_SUPPRESS_WSHADOW    _Pragma( "GCC diagnostic push" ) \
                                   _Pragma( "GCC diagnostic ignored \"-Wshadow\"" )
 # define lest_SUPPRESS_WUNUSED    _Pragma( "GCC diagnostic push" ) \
@@ -102,6 +106,11 @@
 # define lest_RESTORE_WARNINGS    /*empty*/
 #endif
 
+// Stringify:
+
+#define lest_STRINGIFY(  x )  lest_STRINGIFY_( x )
+#define lest_STRINGIFY_( x )  #x
+
 // Compiler versions:
 
 #if defined( _MSC_VER ) && !defined( __clang__ )
@@ -112,32 +121,50 @@
 
 #define lest_COMPILER_VERSION( major, minor, patch ) ( 10 * ( 10 * major + minor ) + patch )
 
-#if defined __clang__
+#if defined (__clang__)
 # define lest_COMPILER_CLANG_VERSION lest_COMPILER_VERSION( __clang_major__, __clang_minor__, __clang_patchlevel__ )
 #else
 # define lest_COMPILER_CLANG_VERSION 0
 #endif
 
-#if defined __GNUC__
+#if defined (__GNUC__)
 # define lest_COMPILER_GNUC_VERSION lest_COMPILER_VERSION( __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__ )
 #else
 # define lest_COMPILER_GNUC_VERSION 0
 #endif
 
-// C++ language support detection (C++20 is speculative):
-// Note: MSVC supports C++14 since it supports C++17.
+// C++ language version detection (C++20 is speculative):
+// Note: VC14.0/1900 (VS2015) lacks too much from C++14.
 
-#ifdef _MSVC_LANG
-# define lest_MSVC_LANG  _MSVC_LANG
-#else
-# define lest_MSVC_LANG  0
+#ifndef   lest_CPLUSPLUS
+# if defined(_MSVC_LANG ) && !defined(__clang__)
+#  define lest_CPLUSPLUS  (_MSC_VER == 1900 ? 201103L : _MSVC_LANG )
+# else
+#  define lest_CPLUSPLUS  __cplusplus
+# endif
 #endif
 
-#define lest_CPP11             (__cplusplus == 201103L )
-#define lest_CPP11_OR_GREATER  (__cplusplus >= 201103L || lest_MSVC_LANG >= 201103L || lest_COMPILER_MSVC_VERSION >= 120 )
-#define lest_CPP14_OR_GREATER  (__cplusplus >= 201402L || lest_MSVC_LANG >= 201703L )
-#define lest_CPP17_OR_GREATER  (__cplusplus >= 201703L || lest_MSVC_LANG >= 201703L )
-#define lest_CPP20_OR_GREATER  (__cplusplus >= 202000L || lest_MSVC_LANG >= 202000L )
+#define lest_CPP98_OR_GREATER  ( lest_CPLUSPLUS >= 199711L )
+#define lest_CPP11_OR_GREATER  ( lest_CPLUSPLUS >= 201103L || lest_COMPILER_MSVC_VERSION >= 120 )
+#define lest_CPP14_OR_GREATER  ( lest_CPLUSPLUS >= 201402L )
+#define lest_CPP17_OR_GREATER  ( lest_CPLUSPLUS >= 201703L )
+#define lest_CPP20_OR_GREATER  ( lest_CPLUSPLUS >= 202000L )
+
+#define lest_CPP11_100  (lest_CPP11_OR_GREATER || lest_COMPILER_MSVC_VERSION >= 100)
+
+#ifndef  __has_cpp_attribute
+# define __has_cpp_attribute(name)  0
+#endif
+
+// Indicate argument as possibly unused, if possible:
+
+#if __has_cpp_attribute(maybe_unused) && lest_CPP17_OR_GREATER
+# define lest_MAYBE_UNUSED(ARG)  [[maybe_unused]] ARG
+#elif defined (__GNUC__)
+# define lest_MAYBE_UNUSED(ARG)  ARG __attribute((unused))
+#else
+# define lest_MAYBE_UNUSED(ARG)  ARG
+#endif
 
 // Presence of language and library features:
 
@@ -145,7 +172,8 @@
 
 // Presence of C++11 language features:
 
-#define lest_HAVE_NULLPTR  ( lest_CPP11_OR_GREATER || lest_COMPILER_MSVC_VERSION >= 100 )
+#define lest_HAVE_NOEXCEPT ( lest_CPP11_100 )
+#define lest_HAVE_NULLPTR  ( lest_CPP11_100 )
 
 // C++ feature usage:
 
@@ -157,7 +185,7 @@
 
 // Additional includes and tie:
 
-#if lest_CPP11_OR_GREATER || lest_COMPILER_MSVC_VERSION >= 100
+#if lest_CPP11_100
 
 # include <cstdint>
 # include <random>
@@ -211,7 +239,7 @@ namespace lest
 #  pragma GCC diagnostic pop
 # endif
 
-#endif // lest_CPP11_OR_GREATER
+#endif // lest_CPP11_100
 
 namespace lest
 {
@@ -251,7 +279,7 @@ namespace lest
 #define lest_CASE( specification, proposition ) \
     static void lest_FUNCTION( lest::env & ); \
     namespace { lest::add_test lest_REGISTRAR( specification, lest::test( proposition, lest_FUNCTION ) ); } \
-    static void lest_FUNCTION( lest::env & lest_env )
+    static void lest_FUNCTION( lest_MAYBE_UNUSED( lest::env & lest_env ) )
 
 #define lest_ADD_TEST( specification, test ) \
     specification.push_back( test )
@@ -275,7 +303,7 @@ namespace lest
             if ( lest::result score = lest_DECOMPOSE( expr ) ) \
                 throw lest::failure( lest_LOCATION, #expr, score.decomposition ); \
             else if ( lest_env.pass() ) \
-                lest::report( lest_env.os, lest::passing( lest_LOCATION, #expr, score.decomposition ), lest_env.context() ); \
+                lest::report( lest_env.os, lest::passing( lest_LOCATION, #expr, score.decomposition, lest_env.zen() ), lest_env.context() ); \
         } \
         catch(...) \
         { \
@@ -290,7 +318,7 @@ namespace lest
             if ( lest::result score = lest_DECOMPOSE( expr ) ) \
             { \
                 if ( lest_env.pass() ) \
-                    lest::report( lest_env.os, lest::passing( lest_LOCATION, lest::not_expr( #expr ), lest::not_expr( score.decomposition ) ), lest_env.context() ); \
+                    lest::report( lest_env.os, lest::passing( lest_LOCATION, lest::not_expr( #expr ), lest::not_expr( score.decomposition ), lest_env.zen() ), lest_env.context() ); \
             } \
             else \
                 throw lest::failure( lest_LOCATION, lest::not_expr( #expr ), lest::not_expr( score.decomposition ) ); \
@@ -456,8 +484,8 @@ struct success : message
 
 struct passing : success
 {
-    passing( location where_, text expr_, text decomposition_)
-    : success( "passed", where_, expr_ + " for " + decomposition_) {}
+    passing( location where_, text expr_, text decomposition_, bool zen )
+    : success( "passed", where_, expr_ + (zen ? "":" for " + decomposition_) ) {}
 };
 
 struct got_none : success
@@ -587,21 +615,20 @@ inline void inform( location where, text expr )
 
 inline bool unprintable( char c ) { return 0 <= c && c < ' '; }
 
-template< typename T >
-inline std::string to_string( T const & value );
+inline std::string to_hex_string(char c)
+{
+    std::ostringstream os;
+    os << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>( static_cast<unsigned char>(c) );
+    return os.str();
+}
 
-#if lest_CPP11_OR_GREATER || lest_COMPILER_MSVC_VERSION >= 100
-inline std::string to_string( std::nullptr_t const &     ) { return "nullptr"; }
-#endif
-inline std::string to_string( std::string    const & txt ) { return "\"" + txt + "\"" ; }
-inline std::string to_string( char const *   const & txt ) { return "\"" + std::string( txt ) + "\"" ; }
-
-inline std::string to_string(          char  const & chr )
+inline std::string transformed( char chr )
 {
     struct Tr { char chr; char const * str; } table[] =
     {
-        {'\r', "'\\r'" }, {'\f', "'\\f'" },
-        {'\n', "'\\n'" }, {'\t', "'\\t'" },
+        {'\\', "\\\\" },
+        {'\r', "\\r"  }, {'\f', "\\f" },
+        {'\n', "\\n"  }, {'\t', "\\t" },
     };
 
     for ( Tr * pos = table; pos != table + lest_DIMENSION_OF( table ); ++pos )
@@ -610,10 +637,26 @@ inline std::string to_string(          char  const & chr )
             return pos->str;
     }
 
-    return unprintable( chr )
-        ? to_string<unsigned int>( static_cast<unsigned int>( chr ) )
-        : "\'" + std::string( 1, chr ) + "\'";
+    return unprintable( chr  ) ? to_hex_string( chr ) : std::string( 1, chr );
 }
+
+inline std::string make_tran_string( std::string const & txt )
+{
+    std::ostringstream os;
+    for( std::string::const_iterator pos = txt.begin(); pos != txt.end(); ++pos )
+        os << transformed( *pos );
+    return os.str();
+}
+
+template< typename T >
+inline std::string to_string( T const & value );
+
+#if lest_CPP11_OR_GREATER || lest_COMPILER_MSVC_VERSION >= 100
+inline std::string to_string( std::nullptr_t const &     ) { return "nullptr"; }
+#endif
+inline std::string to_string( std::string    const & txt ) { return "\"" + make_tran_string(                 txt   ) + "\""; }
+inline std::string to_string( char const *   const & txt ) { return "\"" + make_tran_string(                 txt   ) + "\""; }
+inline std::string to_string(          char  const & chr ) { return  "'" + make_tran_string( std::string( 1, chr ) ) +  "'"; }
 
 inline std::string to_string(   signed char const & chr ) { return to_string( static_cast<char const &>( chr ) ); }
 inline std::string to_string( unsigned char const & chr ) { return to_string( static_cast<char const &>( chr ) ); }
@@ -894,13 +937,17 @@ inline bool select( text name, texts include )
 
 inline int indefinite( int repeat ) { return repeat == -1; }
 
-typedef unsigned long seed_t;
+#if lest_CPP11_OR_GREATER
+typedef std::mt19937::result_type seed_t;
+#else
+typedef unsigned int seed_t;
+#endif
 
 struct options
 {
     options()
     : help(false), abort(false), count(false), list(false), tags(false), time(false)
-    , pass(false), lexical(false), random(false), verbose(false), version(false), repeat(1), seed(0) {}
+    , pass(false), zen(false), lexical(false), random(false), verbose(false), version(false), repeat(1), seed(0) {}
 
     bool help;
     bool abort;
@@ -909,6 +956,7 @@ struct options
     bool tags;
     bool time;
     bool pass;
+    bool zen;
     bool lexical;
     bool random;
     bool verbose;
@@ -929,12 +977,14 @@ struct env
 
     env & operator()( text test )
     {
-        testing = test; return *this;
+        clear(); testing = test; return *this;
     }
 
     bool abort() { return opt.abort; }
     bool pass()  { return opt.pass; }
+    bool zen()   { return opt.zen; }
 
+    void clear() { ctx.clear(); }
     void pop()   { ctx.pop_back(); }
     void push( text proposition ) { ctx.push_back( proposition ); }
 
@@ -1226,7 +1276,7 @@ inline void shuffle( tests & specification, options option )
 #if lest_CPP11_OR_GREATER
     std::shuffle( specification.begin(), specification.end(), std::mt19937( option.seed ) );
 #else
-    lest::srand( static_cast<unsigned int>( option.seed ) );
+    lest::srand( option.seed );
 
     rng generator;
     std::random_shuffle( specification.begin(), specification.end(), generator );
@@ -1301,6 +1351,7 @@ split_arguments( texts args )
             else if ( opt == "-l"      || "--list-tests" == opt ) { option.list    =  true; continue; }
             else if ( opt == "-t"      || "--time"       == opt ) { option.time    =  true; continue; }
             else if ( opt == "-p"      || "--pass"       == opt ) { option.pass    =  true; continue; }
+            else if ( opt == "-z"      || "--pass-zen"   == opt ) { option.zen     =  true; continue; }
             else if ( opt == "-v"      || "--verbose"    == opt ) { option.verbose =  true; continue; }
             else if (                     "--version"    == opt ) { option.version =  true; continue; }
             else if ( opt == "--order" && "declared"     == val ) { /* by definition */   ; continue; }
@@ -1312,6 +1363,8 @@ split_arguments( texts args )
         }
         in.push_back( arg );
     }
+    option.pass = option.pass || option.zen;
+
     return std::make_pair( option, in );
 }
 
@@ -1327,6 +1380,7 @@ inline int usage( std::ostream & os )
         "  -g, --list-tags    list tags of selected tests\n"
         "  -l, --list-tests   list selected tests\n"
         "  -p, --pass         also report passing tests\n"
+        "  -z, --pass-zen     ... without expansion\n"
 #if lest_FEATURE_TIME
         "  -t, --time         list duration of selected tests\n"
 #endif
@@ -1437,7 +1491,7 @@ template< typename C > char const * const *   text_end( C const & c ) { return t
 template< typename C > tests make_tests( C const & c ) { return make_tests( test_begin( c ), test_end( c ) ); }
 template< typename C > texts make_texts( C const & c ) { return make_texts( text_begin( c ), text_end( c ) ); }
 
-inline int run( tests const & specification, int argc, char * argv[], std::ostream & os = std::cout )
+inline int run( tests const & specification, int argc, char ** argv, std::ostream & os = std::cout )
 {
     return run( specification, make_texts( argv + 1, argv + argc ), os  );
 }
@@ -1455,7 +1509,7 @@ int run(  C const & specification, texts args, std::ostream & os = std::cout )
 }
 
 template< typename C >
-int run(  C const & specification, int argc, char * argv[], std::ostream & os = std::cout )
+int run(  C const & specification, int argc, char ** argv, std::ostream & os = std::cout )
 {
     return run( make_tests( specification ), argv, argc, os  );
 }
@@ -1468,9 +1522,9 @@ int run(  C const & specification, std::ostream & os = std::cout )
 
 } // namespace lest
 
-#ifdef __clang__
+#if defined (__clang__)
 # pragma clang diagnostic pop
-#elif defined __GNUC__
+#elif defined (__GNUC__)
 # pragma GCC   diagnostic pop
 #endif
 

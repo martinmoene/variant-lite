@@ -1,6 +1,6 @@
 # variant lite: A single-file header-only version of a C++17-like variant, a type-safe union for C++98, C++11 and later
 
-[![Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [![Conan](https://img.shields.io/badge/conan-download-blue.svg)](https://bintray.com/martinmoene/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://wandbox.org/permlink/TDg24BSSfesvjX3o)
+[![Language](https://img.shields.io/badge/C%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization) [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.0) [![Build Status](https://travis-ci.org/martinmoene/variant-lite.svg?branch=master)](https://travis-ci.org/martinmoene/variant-lite) [![Build status](https://ci.appveyor.com/api/projects/status/w2dgn3fxyrd6vcq8?svg=true)](https://ci.appveyor.com/project/martinmoene/variant-lite) [![Version](https://badge.fury.io/gh/martinmoene%2Fvariant-lite.svg)](https://github.com/martinmoene/variant-lite/releases) [![Latest download](https://img.shields.io/badge/latest-download-blue.svg)](https://raw.githubusercontent.com/martinmoene/variant-lite/master/include/nonstd/variant.hpp) [![Conan](https://img.shields.io/badge/on-conan-blue.svg)](https://bintray.com/martinmoene/nonstd-lite/variant-lite%3Anonstd-lite/_latestVersion) [![Try it online](https://img.shields.io/badge/on-wandbox-blue.svg)](https://wandbox.org/permlink/OyNSGFat1cRbEYxW)
 
 **Contents**  
 - [Example usage](#example-usage)
@@ -21,7 +21,7 @@ Example usage
 -------------
 
 ```Cpp
-#include "variant.hpp"
+#include "nonstd/variant.hpp"
 
 #include <cassert>
 #include <string>
@@ -45,7 +45,7 @@ int main()
 ### Compile and run
 
 ```
-prompt>g++ -std=c++98 -Wall -I../include/nonstd -o 01-basic.exe 01-basic.cpp && 01-basic.exe
+prompt>g++ -std=c++98 -Wall -I../include -o 01-basic.exe 01-basic.cpp && 01-basic.exe
 ```
 
 In a nutshell
@@ -94,6 +94,7 @@ Synopsis
 - [Types in namespace nonstd](#types-in-namespace-nonstd)  
 - [Interface of *variant lite*](#interface-of-variant-lite)  
 - [Algorithms for *variant lite*](#algorithms-for-variant-lite)  
+- [Information macros](#information-macros)
 - [Configuration macros](#configuration-macros)
 - [Macros to control alignment](#macros-to-control-alignment)  
 
@@ -177,18 +178,35 @@ Synopsis
 
 Note 1: visitor is limited to always return a Variant.
 
+### Information macros
+
+<b>variant_CONFIG_MAX_TYPE_COUNT</b>  
+The maximum number of types thevariant can hold as configured via script [generate_header.py](script/generate_header.py).
+
+<b>variant_CONFIG_MAX_VISITOR_ARG_COUNT</b>  
+The maximum number of visitor arguments as configured via script [generate_header.py](script/generate_header.py).
+
 ### Configuration macros
+
+#### Standard selection macro
+\-D<b>variant\_CPLUSPLUS</b>=199711L  
+Define this macro to override the auto-detection of the supported C++ standard, or if your compiler does not set the `__cplusplus` macro correctly.
 
 #### Select `std::variant` or `nonstd::variant`
 At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
 
--D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
+\-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
 Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
 
-#### Presence of simulation macros
+#### Disable exceptions
+-D<b>variant_CONFIG_NO_EXCEPTIONS</b>=0  
+Define this to 1 if you want to compile without exceptions. If not defined, the header tries and detect if exceptions have been disabled (e.g. via `-fno-exceptions`). Default is undefined.
+
+#### Presence of `variant_size_V()` simulation macro
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_SIZE\_V\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
 
+#### Presence of `variant_alternative_T()` simulation macro
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
@@ -308,6 +326,7 @@ Notes and References
 ### Acknowledgments
 
 Thanks to @flexferrum for making the number of variant types and visitor arguments [configurable](#in-a-nutshell).
+Thanks to @siffiejoe for contributing to fixing [lifetime](#31), [noexcept](34) and [hash](#32) issues. 
 
 
 ### References
@@ -346,7 +365,12 @@ Thanks to @flexferrum for making the number of variant types and visitor argumen
 
 Appendix
 --------
-### A.1 Variant Lite test specification
+
+### A.1 Compile-time information
+
+The version of *variant lite* is available via tag `[.version]`. The following tags are available for information on the compiler and on the C++ standard library used: `[.compiler]`, `[.stdc++]`, `[.stdlanguage]` and `[.stdlibrary]`.
+
+### A.2 Variant lite test specification
 
 ```
 variant: Disallows non-default constructible as first type
@@ -396,7 +420,10 @@ variant: Allows to copy-emplace elements from intializer-list based on index (C+
 variant: Allows to move-emplace elements from intializer-list based on index (C++11)
 variant: Allows to swap variants, same index (member)
 variant: Allows to swap variants, different index (member)
-variant: Allows to visit contents (non-standard: always returning variant)
+variant: Allows to visit contents (args: 1; configured max args: 5)
+variant: Allows to visit contents (args: 2; configured max args: 5)
+variant: Allows to visit contents (args: 3; configured max args: 5)
+variant: Allows to visit contents, rvalue reference (args: 1; configured max args: 5)
 variant: Allows to check for content by type
 variant: Allows to get element by type
 variant: Allows to get element by index
@@ -407,9 +434,9 @@ variant: Allows to swap variants, same index (non-member)
 variant: Allows to swap variants, different index (non-member)
 monostate: Allows to make variant default-constructible
 bad_variant_access: Indicates invalid variant access
-variant_size<>: Allows to obtain number of element types (non-standard: max 7)
-variant_size_v<>: Allows to obtain number of element types (C++14, non-standard: max 7)
-variant_size_V(): Allows to obtain number of element types (non-standard: max 7, macro)
+variant_size<>: Allows to obtain number of element types (configured max types: 16)
+variant_size_v<>: Allows to obtain number of element types (C++14; configured max types: 16)
+variant_size_V(): Allows to obtain number of element types (non-standard: macro; configured max types: 16)
 variant_alternative<>: Allows to select type by index
 variant_alternative_t<>: Allows to select type by index (C++11)
 variant_alternative_T(): Allows to select type by index (non-standard: macro)

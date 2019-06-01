@@ -11,8 +11,8 @@
 #define NONSTD_VARIANT_LITE_HPP
 
 #define variant_lite_MAJOR  1
-#define variant_lite_MINOR  1
-#define variant_lite_PATCH  0
+#define variant_lite_MINOR  2
+#define variant_lite_PATCH  1
 
 #define variant_lite_VERSION  variant_STRINGIFY(variant_lite_MAJOR) "." variant_STRINGIFY(variant_lite_MINOR) "." variant_STRINGIFY(variant_lite_PATCH)
 
@@ -37,11 +37,21 @@
 # define variant_CONFIG_OMIT_VARIANT_ALTERNATIVE_T_MACRO  0
 #endif
 
+// Control presence of exception handling (try and auto discover):
+
+#ifndef variant_CONFIG_NO_EXCEPTIONS
+# if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
+#  define variant_CONFIG_NO_EXCEPTIONS  0
+# else
+#  define variant_CONFIG_NO_EXCEPTIONS  1
+# endif
+#endif
+
 // C++ language version detection (C++20 is speculative):
 // Note: VC14.0/1900 (VS2015) lacks too much from C++14.
 
 #ifndef   variant_CPLUSPLUS
-# ifdef  _MSVC_LANG
+# if defined(_MSVC_LANG ) && !defined(__clang__)
 #  define variant_CPLUSPLUS  (_MSC_VER == 1900 ? 201103L : _MSVC_LANG )
 # else
 #  define variant_CPLUSPLUS  __cplusplus
@@ -50,6 +60,7 @@
 
 #define variant_CPP98_OR_GREATER  ( variant_CPLUSPLUS >= 199711L )
 #define variant_CPP11_OR_GREATER  ( variant_CPLUSPLUS >= 201103L )
+#define variant_CPP11_OR_GREATER_ ( variant_CPLUSPLUS >= 201103L )
 #define variant_CPP14_OR_GREATER  ( variant_CPLUSPLUS >= 201402L )
 #define variant_CPP17_OR_GREATER  ( variant_CPLUSPLUS >= 201703L )
 #define variant_CPP20_OR_GREATER  ( variant_CPLUSPLUS >= 202000L )
@@ -204,8 +215,18 @@ namespace nonstd {
 #include <cstddef>
 #include <limits>
 #include <new>
-#include <stdexcept>
 #include <utility>
+
+#if variant_CONFIG_NO_EXCEPTIONS
+# include <cassert>
+#else
+# include <stdexcept>
+#endif
+
+// variant-lite type and visitor argument count configuration (script/generate_header.py):
+
+#define variant_CONFIG_MAX_TYPE_COUNT  {{NumParams}}
+#define variant_CONFIG_MAX_VISITOR_ARG_COUNT  {{VisitorArgs}}
 
 // variant-lite alignment configuration:
 
@@ -222,99 +243,100 @@ namespace nonstd {
 #endif
 
 // half-open range [lo..hi):
-#define variant_BETWEEN( v, lo, hi ) ( lo <= v && v < hi )
+#define variant_BETWEEN( v, lo, hi ) ( (lo) <= (v) && (v) < (hi) )
 
-#if defined(_MSC_VER) && !defined(__clang__)
-# define variant_COMPILER_MSVC_VERSION   (_MSC_VER / 100 - 5 - (_MSC_VER < 1900))
+// Compiler versions:
+//
+// MSVC++ 6.0  _MSC_VER == 1200 (Visual Studio 6.0)
+// MSVC++ 7.0  _MSC_VER == 1300 (Visual Studio .NET 2002)
+// MSVC++ 7.1  _MSC_VER == 1310 (Visual Studio .NET 2003)
+// MSVC++ 8.0  _MSC_VER == 1400 (Visual Studio 2005)
+// MSVC++ 9.0  _MSC_VER == 1500 (Visual Studio 2008)
+// MSVC++ 10.0 _MSC_VER == 1600 (Visual Studio 2010)
+// MSVC++ 11.0 _MSC_VER == 1700 (Visual Studio 2012)
+// MSVC++ 12.0 _MSC_VER == 1800 (Visual Studio 2013)
+// MSVC++ 14.0 _MSC_VER == 1900 (Visual Studio 2015)
+// MSVC++ 14.1 _MSC_VER >= 1910 (Visual Studio 2017)
+
+#if defined(_MSC_VER ) && !defined(__clang__)
+# define variant_COMPILER_MSVC_VER      (_MSC_VER )
+# define variant_COMPILER_MSVC_VERSION  (_MSC_VER / 10 - 10 * ( 5 + (_MSC_VER < 1900 ) ) )
 #else
-# define variant_COMPILER_MSVC_VERSION   0
+# define variant_COMPILER_MSVC_VER      0
+# define variant_COMPILER_MSVC_VERSION  0
+#endif
+
+#define variant_COMPILER_VERSION( major, minor, patch )  ( 10 * ( 10 * (major) + (minor) ) + (patch) )
+
+#if defined(__clang__)
+# define variant_COMPILER_CLANG_VERSION  variant_COMPILER_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
+#else
+# define variant_COMPILER_CLANG_VERSION  0
 #endif
 
 #if defined(__GNUC__) && !defined(__clang__)
-# define variant_COMPILER_GNUC_VERSION  __GNUC__
+# define variant_COMPILER_GNUC_VERSION  variant_COMPILER_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 #else
-# define variant_COMPILER_GNUC_VERSION    0
+# define variant_COMPILER_GNUC_VERSION  0
 #endif
 
-#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 7, 14 )
+#if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( push )
 # pragma warning( disable: 4345 )   // initialization behavior changed
 #endif
 
-// Presence of C++11 language features:
+// Presence of language and library features:
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 10
-# define variant_HAVE_AUTO  1
-# define variant_HAVE_NULLPTR  1
-# define variant_HAVE_STATIC_ASSERT  1
+#define variant_HAVE( feature )  ( variant_HAVE_##feature )
+
+#ifdef _HAS_CPP0X
+# define variant_HAS_CPP0X  _HAS_CPP0X
+#else
+# define variant_HAS_CPP0X  0
 #endif
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_DEFAULT_FUNCTION_TEMPLATE_ARG  1
-# define variant_HAVE_INITIALIZER_LIST  1
-#endif
+// Unless defined otherwise below, consider VC14 as C++11 for variant-lite:
 
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
-# define variant_HAVE_ALIAS_TEMPLATE  1
-# define variant_HAVE_CONSTEXPR_11  1
-# define variant_HAVE_ENUM_CLASS  1
-# define variant_HAVE_EXPLICIT_CONVERSION  1
-# define variant_HAVE_IS_DEFAULT  1
-# define variant_HAVE_IS_DELETE  1
-# define variant_HAVE_NOEXCEPT  1
-# define variant_HAVE_OVERRIDE  1
-#endif
-
-// Presence of C++14 language features:
-
-#if variant_CPP14_OR_GREATER
-# define variant_HAVE_CONSTEXPR_14  1
-#endif
-
-// Presence of C++17 language features:
-
-#if variant_CPP17_OR_GREATER
-# define variant_HAVE_ENUM_CLASS_CONSTRUCTION_FROM_UNDERLYING_TYPE  1
-#endif
-
-// Presence of C++ library features:
-
-#if variant_COMPILER_GNUC_VERSION
-# define variant_HAVE_TR1_TYPE_TRAITS  1
-# define variant_HAVE_TR1_ADD_POINTER  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 9
-# define variant_HAVE_TYPE_TRAITS  1
-# define variant_HAVE_STD_ADD_POINTER  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 11
-# define variant_HAVE_ARRAY  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_CONDITIONAL  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14 || (variant_COMPILER_MSVC_VERSION >= 9 && _HAS_CPP0X)
-# define variant_HAVE_CONTAINER_DATA_METHOD  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 12
-# define variant_HAVE_REMOVE_CV  1
-#endif
-
-#if variant_CPP11_OR_GREATER || variant_COMPILER_MSVC_VERSION >= 14
-# define variant_HAVE_SIZED_TYPES  1
-#endif
-
-// For the rest, consider VC14 as C++11 for variant-lite:
-
-#if variant_COMPILER_MSVC_VERSION >= 14
+#if variant_COMPILER_MSVC_VER >= 1900
 # undef  variant_CPP11_OR_GREATER
 # define variant_CPP11_OR_GREATER  1
 #endif
+
+#define variant_CPP11_90   (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1500)
+#define variant_CPP11_100  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1600)
+#define variant_CPP11_110  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1700)
+#define variant_CPP11_120  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1800)
+#define variant_CPP11_140  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1900)
+#define variant_CPP11_141  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1910)
+
+#define variant_CPP14_000  (variant_CPP14_OR_GREATER)
+#define variant_CPP17_000  (variant_CPP17_OR_GREATER)
+
+// Presence of C++11 language features:
+
+#define variant_HAVE_CONSTEXPR_11       variant_CPP11_140
+#define variant_HAVE_INITIALIZER_LIST   variant_CPP11_120
+#define variant_HAVE_NOEXCEPT           variant_CPP11_140
+#define variant_HAVE_NULLPTR            variant_CPP11_100
+#define variant_HAVE_OVERRIDE           variant_CPP11_140
+
+// Presence of C++14 language features:
+
+#define variant_HAVE_CONSTEXPR_14       variant_CPP14_000
+
+// Presence of C++17 language features:
+
+// no flag
+
+// Presence of C++ library features:
+
+#define variant_HAVE_CONDITIONAL        variant_CPP11_120
+#define variant_HAVE_REMOVE_CV          variant_CPP11_120
+#define variant_HAVE_STD_ADD_POINTER    variant_CPP11_90
+#define variant_HAVE_TYPE_TRAITS        variant_CPP11_90
+
+#define variant_HAVE_TR1_TYPE_TRAITS    (!! variant_COMPILER_GNUC_VERSION )
+#define variant_HAVE_TR1_ADD_POINTER    (!! variant_COMPILER_GNUC_VERSION )
 
 // C++ feature usage:
 
@@ -368,14 +390,17 @@ namespace nonstd {
 
 #if variant_CPP11_OR_GREATER
 
-# define variant_REQUIRES_T(...) \
-    , typename = typename std::enable_if<__VA_ARGS__>::type
+#define variant_REQUIRES_0(...) \
+    template< bool B = (__VA_ARGS__), typename std::enable_if<B, int>::type = 0 >
 
-# define variant_REQUIRES_R(R, ...) \
-    typename std::enable_if<__VA_ARGS__, R>::type
+#define variant_REQUIRES_T(...) \
+    , typename = typename std::enable_if< (__VA_ARGS__), nonstd::variants::detail::enabler >::type
 
-# define variant_REQUIRES_A(...) \
-    , typename std::enable_if<__VA_ARGS__, void*>::type = variant_nullptr
+#define variant_REQUIRES_R(R, ...) \
+    typename std::enable_if< (__VA_ARGS__), R>::type
+
+#define variant_REQUIRES_A(...) \
+    , typename std::enable_if< (__VA_ARGS__), void*>::type = nullptr
 
 #endif
 
@@ -385,9 +410,9 @@ namespace nonstd {
 
 namespace nonstd { namespace variants {
 
-namespace detail {
-
 // C++11 emulation:
+
+namespace std11 {
 
 #if variant_HAVE_STD_ADD_POINTER
 
@@ -445,6 +470,71 @@ template< class Then, class Else >
 struct conditional< false, Then, Else > { typedef Else type; };
 
 #endif // variant_HAVE_CONDITIONAL
+
+} // namespace std11
+
+/// type traits C++17:
+
+namespace std17 {
+
+#if variant_CPP17_OR_GREATER
+
+using std::is_swappable;
+using std::is_nothrow_swappable;
+
+#elif variant_CPP11_OR_GREATER
+
+namespace detail {
+
+using std::swap;
+
+struct is_swappable
+{
+    template< typename T, typename = decltype( swap( std::declval<T&>(), std::declval<T&>() ) ) >
+    static std::true_type test( int );
+
+    template< typename >
+    static std::false_type test(...);
+};
+
+struct is_nothrow_swappable
+{
+    // wrap noexcept(epr) in separate function as work-around for VC140 (VS2015):
+
+    template< typename T >
+    static constexpr bool test()
+    {
+        return noexcept( swap( std::declval<T&>(), std::declval<T&>() ) );
+    }
+
+    template< typename T >
+    static auto test( int ) -> std::integral_constant<bool, test<T>()>{}
+
+    template< typename >
+    static std::false_type test(...);
+};
+
+} // namespace detail
+
+// is [nothow] swappable:
+
+template< typename T >
+struct is_swappable : decltype( detail::is_swappable::test<T>(0) ){};
+
+template< typename T >
+struct is_nothrow_swappable : decltype( detail::is_nothrow_swappable::test<T>(0) ){};
+
+#endif // variant_CPP17_OR_GREATER
+
+} // namespace std17
+
+// detail:
+
+namespace detail {
+
+// for variant_REQUIRES_T():
+
+/*enum*/ class enabler{};
 
 // typelist:
 
@@ -508,7 +598,7 @@ struct typelist_max;
 template<>
 struct typelist_max< nulltype >
 {
-    enum { value = 0 } ;
+    enum V { value = 0 } ;
     typedef void type;
 };
 
@@ -516,14 +606,14 @@ template< class Head, class Tail >
 struct typelist_max< typelist<Head, Tail> >
 {
 private:
-    enum { tail_value = size_t( typelist_max<Tail>::value ) };
+    enum TV { tail_value = size_t( typelist_max<Tail>::value ) };
 
     typedef typename typelist_max<Tail>::type tail_type;
 
 public:
-    enum { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
+    enum V { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
 
-    typedef typename conditional< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
+    typedef typename std11::conditional< (sizeof( Head ) > tail_value), Head, tail_type>::type type;
 };
 
 #if variant_CPP11_OR_GREATER
@@ -536,17 +626,17 @@ struct typelist_max_alignof;
 template<>
 struct typelist_max_alignof< nulltype >
 {
-    enum { value = 0 } ;
+    enum V { value = 0 } ;
 };
 
 template< class Head, class Tail >
 struct typelist_max_alignof< typelist<Head, Tail> >
 {
 private:
-    enum { tail_value = size_t( typelist_max_alignof<Tail>::value ) };
+    enum TV { tail_value = size_t( typelist_max_alignof<Tail>::value ) };
 
 public:
-    enum { value = (alignof( Head ) > tail_value) ? alignof( Head ) : std::size_t( tail_value ) };
+    enum V { value = (alignof( Head ) > tail_value) ? alignof( Head ) : std::size_t( tail_value ) };
 };
 
 #endif
@@ -556,19 +646,19 @@ public:
 template< class List >
 struct typelist_size
 {
-   enum { value = 1 };
+   enum V { value = 1 };
 };
 
 {% for n in range(NumParams) -%}
-template<> struct typelist_size< T{{n}} > { enum { value = 0 }; };
+template<> struct typelist_size< T{{n}} > { enum V { value = 0 }; };
 {% endfor %}
 
-template<> struct typelist_size< nulltype > { enum { value = 0 } ; };
+template<> struct typelist_size< nulltype > { enum V { value = 0 } ; };
 
 template< class Head, class Tail >
 struct typelist_size< typelist<Head, Tail> >
 {
-    enum { value = typelist_size<Head>::value + typelist_size<Tail>::value };
+    enum V { value = typelist_size<Head>::value + typelist_size<Tail>::value };
 };
 
 // typelist index of type:
@@ -579,22 +669,23 @@ struct typelist_index_of;
 template< class T >
 struct typelist_index_of< nulltype, T >
 {
-    enum { value = -1 };
+    enum V { value = -1 };
 };
 
 template< class Tail, class T >
 struct typelist_index_of< typelist<T, Tail>, T >
 {
-    enum { value = 0 };
+    enum V { value = 0 };
 };
 
 template< class Head, class Tail, class T >
 struct typelist_index_of< typelist<Head, Tail>, T >
 {
 private:
-    enum { nextVal = typelist_index_of<Tail, T>::value };
+    enum TV { nextVal = typelist_index_of<Tail, T>::value };
+
 public:
-    enum { value = nextVal == -1 ? -1 : 1 + nextVal } ;
+    enum V { value = nextVal == -1 ? -1 : 1 + nextVal } ;
 };
 
 // typelist type at index:
@@ -695,20 +786,20 @@ struct alignment_of_hack
 template< size_t A, size_t S >
 struct alignment_logic
 {
-    enum { value = A < S ? A : S };
+    enum V { value = A < S ? A : S };
 };
 
 template< typename T >
 struct alignment_of
 {
-    enum { value = alignment_logic<
-        sizeof( alignment_of_hack<T> ) - sizeof(T), sizeof(T) >::value, };
+    enum V { value = alignment_logic<
+        sizeof( alignment_of_hack<T> ) - sizeof(T), sizeof(T) >::value };
 };
 
 template< typename List, size_t N >
 struct type_of_size
 {
-    typedef typename conditional<
+    typedef typename std11::conditional<
         N == sizeof( typename List::head ),
             typename List::head,
             typename type_of_size<typename List::tail, N >::type >::type type;
@@ -759,23 +850,19 @@ typedef
 
 #endif // variant_CONFIG_MAX_ALIGN_HACK
 
+#if variant_CPP11_OR_GREATER
+
 template< typename T>
 inline std::size_t hash( T const & v )
 {
-    // primes:
-    unsigned const int a  = 54059;
-    unsigned const int b  = 76963;
-    unsigned const int h0 = 37;
-
-    unsigned int h = h0;
-    unsigned char const * s = reinterpret_cast<unsigned char const *>( &v );
-
-    for ( std::size_t i = 0; i < sizeof(v); ++i, ++s )
-    {
-        h = (h * a) ^ (*s * b);
-    }
-    return h;
+    return std::hash<T>()( v );
 }
+
+{% for n in range(NumParams) -%}
+inline std::size_t hash( T{{n}} const & ) { return 0; }
+{% endfor %}
+
+#endif // variant_CPP11_OR_GREATER
 
 {% set TplArgsList %}{% for n in range(NumParams) %}T{{n ~ (', ' if not loop.last)}}{% endfor %}{% endset %}
 {% set TplParamsList %}{% for n in range(NumParams) %}class T{{n ~ (', ' if not loop.last)}}{% endfor %}{% endset %}
@@ -804,7 +891,7 @@ struct helper
         return static_cast<type_index_t>( index );
     }
 
-    static void destroy( std::size_t index, void * data )
+    static void destroy( type_index_t index, void * data )
     {
         switch ( index )
         {
@@ -833,19 +920,30 @@ struct helper
         return to_index_t( K );
     }
 
-    static type_index_t move( std::size_t const from_index, void * from_value, void * to_value )
+    static type_index_t move_construct( type_index_t const from_index, void * from_value, void * to_value )
     {
         switch ( from_index )
         {
         {% for n in range(NumParams) -%}
-            case {{n}}: new( to_value ) T{{n}}( std::forward<T{{n}}>( *as<T{{n}}>( from_value ) ) ); break;
+            case {{n}}: new( to_value ) T{{n}}( std::move( *as<T{{n}}>( from_value ) ) ); break;
         {% endfor %}
         }
-        return to_index_t( from_index );
+        return from_index;
+    }
+
+    static type_index_t move_assign( type_index_t const from_index, void * from_value, void * to_value )
+    {
+        switch ( from_index )
+        {
+        {% for n in range(NumParams) -%}
+            case {{n}}: *as<T{{n}}>( to_value ) = std::move( *as<T{{n}}>( from_value ) ); break;
+        {% endfor %}
+        }
+        return from_index;
     }
 #endif
 
-    static type_index_t copy( std::size_t const from_index, const void * from_value, void * to_value )
+    static type_index_t copy_construct( type_index_t const from_index, const void * from_value, void * to_value )
     {
         switch ( from_index )
         {
@@ -853,7 +951,18 @@ struct helper
             case {{n}}: new( to_value ) T{{n}}( *as<T{{n}}>( from_value ) ); break;
         {% endfor %}
         }
-        return to_index_t( from_index );
+        return from_index;
+    }
+
+    static type_index_t copy_assign( type_index_t const from_index, const void * from_value, void * to_value )
+    {
+        switch ( from_index )
+        {
+        {% for n in range(NumParams) -%}
+            case {{n}}: *as<T{{n}}>( to_value ) = *as<T{{n}}>( from_value ); break;
+        {% endfor %}
+        }
+        return from_index;
     }
 };
 
@@ -866,7 +975,11 @@ struct helper
 template< {{TplParamsList}} >
 class variant;
 
+// 19.7.8 Class monostate
+
 class monostate{};
+
+// 19.7.9 monostate relational operators
 
 inline variant_constexpr bool operator< ( monostate, monostate ) variant_noexcept { return false; }
 inline variant_constexpr bool operator> ( monostate, monostate ) variant_noexcept { return false; }
@@ -874,6 +987,8 @@ inline variant_constexpr bool operator<=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
+
+// 19.7.4 variant helper classes
 
 // obtain the size of the variant's list of alternatives at compile time
 
@@ -926,6 +1041,10 @@ variant_constexpr std::size_t variant_npos = static_cast<std::size_t>( -1 );
 static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
 #endif
 
+#if ! variant_CONFIG_NO_EXCEPTIONS
+
+// 19.7.11 Class bad_variant_access
+
 class bad_variant_access : public std::exception
 {
 public:
@@ -939,6 +1058,10 @@ public:
     }
 };
 
+#endif // variant_CONFIG_NO_EXCEPTIONS
+
+// 19.7.3 Class template variant
+
 template<
     class T0,
     {% for n in range(1, NumParams) -%}
@@ -951,6 +1074,8 @@ class variant
     typedef {{TLMacroName}}( {{TplArgsList}} ) variant_types;
 
 public:
+    // 19.7.3.1 Constructors
+    
     variant() : type_index( 0 ) { new( ptr() ) T0(); }
 
     {% for n in range(NumParams) -%}
@@ -966,7 +1091,7 @@ public:
     variant(variant const & other)
     : type_index( other.type_index )
     {
-        (void) helper_type::copy( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
@@ -977,7 +1102,7 @@ public:
         {% endfor -%}
     : type_index( other.type_index )
     {
-        (void) helper_type::move( other.type_index, other.ptr(), ptr() );
+        (void) helper_type::move_construct( other.type_index, other.ptr(), ptr() );
     }
 
     template< std::size_t K >
@@ -1021,11 +1146,18 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
+    // 19.7.3.2 Destructor
+    
     ~variant()
     {
-        helper_type::destroy( index(), ptr() );
+        if ( ! valueless_by_exception() )
+        {
+            helper_type::destroy( type_index, ptr() );
+        }
     }
 
+    // 19.7.3.3 Assignment
+    
     variant & operator=( variant const & other )
     {
         return copy_assign( other );
@@ -1038,28 +1170,26 @@ public:
         std::is_nothrow_move_assignable<T{{n}}>::value{{')' if loop.last else ' &&'}}
         {% endfor -%}
     {
-        return move_assign( std::forward<variant>( other ) );
+        return move_assign( std::move( other ) );
     }
 
     {% for n in range(NumParams) -%}
-    variant & operator=( T{{n}} &&      t{{n}} ) { return move_assign_value<T{{n}},{{n}}>( std::forward<T{{n}}>( t{{n}} ) ); }
+    variant & operator=( T{{n}} &&      t{{n}} ) { return assign_value<{{n}}>( std::move( t{{n}} ) ); }
     {% endfor %}
-#else
-    {% for n in range(NumParams) -%}
-    variant & operator=( T{{n}} const & t{{n}} ) { return copy_assign_value<T{{n}},{{n}}>( t{{n}} ); }
-    {% endfor %}
+
 #endif
+
+    {% for n in range(NumParams) -%}
+    variant & operator=( T{{n}} const & t{{n}} ) { return assign_value<{{n}}>( t{{n}} ); }
+    {% endfor %}
 
     std::size_t index() const
     {
-        return variant_npos_internal() == type_index ? variant_npos : type_index;
+        return variant_npos_internal() == type_index ? variant_npos : static_cast<std::size_t>( type_index );
     }
 
-    bool valueless_by_exception() const
-    {
-        return type_index == variant_npos_internal();
-    }
-
+    // 19.7.3.4 Modifiers
+    
 #if variant_CPP11_OR_GREATER
     template< class T, class... Args
         variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
@@ -1103,21 +1233,43 @@ public:
 
 #endif // variant_CPP11_OR_GREATER
 
-    void swap( variant & other ) variant_noexcept
+    // 19.7.3.5 Value status
+    
+    bool valueless_by_exception() const
+    {
+        return type_index == variant_npos_internal();
+    }
+
+    // 19.7.3.6 Swap
+    
+    void swap( variant & other )
+#if variant_CPP11_OR_GREATER
+        noexcept(
+            {% for n in range(NumParams) -%}
+            std::is_nothrow_move_constructible<T{{n}}>::value && std17::is_nothrow_swappable<T{{n}}>::value {{('&&' if not loop.last)}}
+            {% endfor %}
+        )
+#endif
     {
         if ( valueless_by_exception() && other.valueless_by_exception() )
         {
             // no effect
         }
-        else if ( index() == other.index() )
+        else if ( type_index == other.type_index )
         {
-            this->swap_value( index(), other );
+            this->swap_value( type_index, other );
         }
         else
         {
+#if variant_CPP11_OR_GREATER
+            variant tmp( std::move( *this ) );
+            *this = std::move( other );
+            other = std::move( tmp );
+#else
             variant tmp( *this );
             *this = other;
             other = tmp;
+#endif
         }
     }
 
@@ -1126,9 +1278,9 @@ public:
     //
 
     template< class T >
-    variant_constexpr std::size_t index_of() const variant_noexcept
+    static variant_constexpr std::size_t index_of() variant_noexcept
     {
-        return detail::typelist_index_of<variant_types, typename detail::remove_cv<T>::type >::value;
+        return to_size_t( detail::typelist_index_of<variant_types, typename std11::remove_cv<T>::type >::value );
     }
 
     template< class T >
@@ -1136,11 +1288,14 @@ public:
     {
         const std::size_t i = index_of<T>();
 
-        if ( i != index() || i == max_index() )
+#if variant_CONFIG_NO_EXCEPTIONS
+        assert( i == index() );
+#else
+        if ( i != index() )
         {
             throw bad_variant_access();
         }
-
+#endif
         return *as<T>();
     }
 
@@ -1149,11 +1304,14 @@ public:
     {
         const std::size_t i = index_of<T>();
 
-        if ( i != index() || i == max_index() )
+#if variant_CONFIG_NO_EXCEPTIONS
+        assert( i == index() );
+#else
+        if ( i != index() )
         {
             throw bad_variant_access();
         }
-
+#endif
         return *as<const T>();
     }
 
@@ -1196,9 +1354,10 @@ private:
         return reinterpret_cast<U const *>( ptr() );
     }
 
-    variant_constexpr std::size_t max_index() const variant_noexcept
+    template< class U >
+    static variant_constexpr std::size_t to_size_t( U index )
     {
-        return data_size;
+        return static_cast<std::size_t>( index );
     }
 
     variant_constexpr type_index_t variant_npos_internal() const variant_noexcept
@@ -1219,20 +1378,13 @@ private:
         }
         else if ( index() == other.index() )
         {
-            type_index = helper_type::copy( other.type_index, other.ptr(), ptr() );
+            type_index = helper_type::copy_assign( other.type_index, other.ptr(), ptr() );
         }
         else
         {
-            // alas exception safety with pre-C++11 needs an extra copy:
-
-            variant tmp( other );
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-#if variant_CPP11_OR_GREATER
-            type_index = helper_type::move( other.type_index, tmp.ptr(), ptr() );
-#else
-            type_index = helper_type::copy( other.type_index, tmp.ptr(), ptr() );
-#endif
+            type_index = helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
         }
         return *this;
     }
@@ -1252,19 +1404,19 @@ private:
         }
         else if ( index() == other.index() )
         {
-            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
+            type_index = helper_type::move_assign( other.type_index, other.ptr(), ptr() );
         }
         else
         {
             helper_type::destroy( type_index, ptr() );
             type_index = variant_npos_internal();
-            type_index = helper_type::move( other.type_index, other.ptr(), ptr() );
+            type_index = helper_type::move_construct( other.type_index, other.ptr(), ptr() );
         }
         return *this;
     }
 
-    template< class T, std::size_t K >
-    variant & move_assign_value( T && value )
+    template< std::size_t K, class T >
+    variant & assign_value( T && value )
     {
         if( index() == K )
         {
@@ -1279,9 +1431,11 @@ private:
         }
         return *this;
     }
-#else
-    template< class T, std::size_t K >
-    variant & copy_assign_value( T const & value )
+
+#endif // variant_CPP11_OR_GREATER
+
+    template< std::size_t K, class T >
+    variant & assign_value( T const & value )
     {
         if( index() == K )
         {
@@ -1297,9 +1451,7 @@ private:
         return *this;
     }
 
-#endif // variant_CPP11_OR_GREATER
-
-    void swap_value( std::size_t index, variant & other )
+    void swap_value( type_index_t index, variant & other )
     {
         using std::swap;
         switch( index )
@@ -1342,10 +1494,12 @@ private:
     type_index_t type_index;
 };
 
+// 19.7.5 Value access
+
 template< class T, {{TplParamsList}} >
 inline bool holds_alternative( variant<{{TplArgsList}}> const & v ) variant_noexcept
 {
-    return v.index() == v.template index_of<T>();
+    return v.index() == variant<{{TplArgsList}}>::template index_of<T>();
 }
 
 template< class R, {{TplParamsList}} >
@@ -1364,11 +1518,14 @@ template< std::size_t K, {{TplParamsList}} >
 inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type &
 get( variant<{{TplArgsList}}> & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return v.template get<K>();
 }
 
@@ -1376,11 +1533,14 @@ template< std::size_t K, {{TplParamsList}} >
 inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &
 get( variant<{{TplArgsList}}> const & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return v.template get<K>();
 }
 
@@ -1402,11 +1562,14 @@ template< std::size_t K, {{TplParamsList}} >
 inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type &&
 get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return std::move(v.template get<K>());
 }
 
@@ -1414,51 +1577,68 @@ template< std::size_t K, {{TplParamsList}} >
 inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &&
 get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
+#if variant_CONFIG_NO_EXCEPTIONS
+    assert( K == v.index() );
+#else
     if ( K != v.index() )
     {
         throw bad_variant_access();
     }
-
+#endif
     return std::move(v.template get<K>());
 }
 
 #endif // variant_CPP11_OR_GREATER
 
 template< class T, {{TplParamsList}} >
-inline typename detail::add_pointer<T>::type
+inline typename std11::add_pointer<T>::type
 get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
+    return ( pv->index() == variant<{{TplArgsList}}>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, {{TplParamsList}} >
-inline typename detail::add_pointer<const T>::type
+inline typename std11::add_pointer<const T>::type
 get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T))
 {
-    return ( pv->index() == pv->template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
+    return ( pv->index() == variant<{{TplArgsList}}>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename detail::add_pointer< typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
+inline typename std11::add_pointer< typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
 get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
     return ( pv->index() == K ) ? &get<K>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename detail::add_pointer< const typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
+inline typename std11::add_pointer< const typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
 get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
     return ( pv->index() == K ) ? &get<K>( *pv )  : variant_nullptr;
 }
 
-template< {{TplParamsList}} >
+// 19.7.10 Specialized algorithms
+
+template< {{TplParamsList}}
+#if variant_CPP11_OR_GREATER
+    variant_REQUIRES_T(
+        {% for n in range(NumParams) -%}
+        std::is_move_constructible<T{{n}}>::value && std17::is_swappable<T{{n}}>::value {{('&&' if not loop.last)}}
+        {% endfor %} )
+#endif
+>
 inline void swap(
     variant<{{TplArgsList}}> & a,
-    variant<{{TplArgsList}}> & b ) variant_noexcept
+    variant<{{TplArgsList}}> & b ) 
+#if variant_CPP11_OR_GREATER
+    noexcept( noexcept( a.swap( b ) ) )
+#endif
 {
     a.swap( b );
 }
+
+// 19.7.7 Visitation
 
 // Variant 'visitor' implementation
 {% macro SequenceGen(len, delim=', ') -%}
@@ -1622,6 +1802,7 @@ inline R visit(const Visitor& v, {% call (i0, i1) SequenceGen(n + 1)%}V{{i1}} co
 {% endfor %}
 #endif
 
+// 19.7.6 Relational operators
 
 namespace detail {
 
@@ -1715,7 +1896,7 @@ using namespace variants;
 
 #if variant_CPP11_OR_GREATER
 
-// specialize the std::hash algorithm:
+// 19.7.12 Hash support
 
 namespace std {
 
@@ -1733,7 +1914,15 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 {
     std::size_t operator()( nonstd::variant<{{TplArgsList}}> const & v ) const variant_noexcept
     {
-        return nonstd::variants::detail::hash( v );
+        namespace nvd = nonstd::variants::detail;
+
+        switch( v.index() )
+        {
+            {% for n in range(NumParams) -%}
+            case {{n}}: return nvd::hash( {{n}} ) ^ nvd::hash( get<{{n}}>( v ) );
+            {% endfor %}
+            default: return false;
+        }
     }
 };
 
@@ -1741,7 +1930,7 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 
 #endif // variant_CPP11_OR_GREATER
 
-#if variant_BETWEEN(variant_COMPILER_MSVC_VERSION, 10, 14 )
+#if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( pop )
 #endif
 

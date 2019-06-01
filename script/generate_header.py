@@ -24,7 +24,7 @@ def ProcessTemplate(src, dst, types, args, verbose):
     result = tpl.render(NumParams=types, VisitorArgs=args)
 #    print (result)
     fout = open(dst, 'wt')
-    fout.write(result)
+    fout.write(result + '\n')
     fout.close()
 
 def main():

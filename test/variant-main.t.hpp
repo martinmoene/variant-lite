@@ -2,7 +2,7 @@
 //
 // https://github.com/martinmoene/variant-lite
 //
-// Distributed under the Boost Software License, Version 1.0. 
+// Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
@@ -10,14 +10,22 @@
 #ifndef TEST_VARIANT_LITE_H_INCLUDED
 #define TEST_VARIANT_LITE_H_INCLUDED
 
-#include "variant.hpp"
-#include "lest_cpp03.hpp"
+#include "nonstd/variant.hpp"
 
-using namespace nonstd;
+// Compiler warning suppression for usage of lest:
 
-#define CASE( name ) lest_CASE( specification(), name )
+#ifdef __clang__
+# pragma clang diagnostic ignored "-Wstring-conversion"
+# pragma clang diagnostic ignored "-Wunused-parameter"
+# pragma clang diagnostic ignored "-Wunused-template"
+# pragma clang diagnostic ignored "-Wunused-function"
+# pragma clang diagnostic ignored "-Wunused-member-function"
+#elif defined __GNUC__
+# pragma GCC   diagnostic ignored "-Wunused-parameter"
+# pragma GCC   diagnostic ignored "-Wunused-function"
+#endif
 
-extern lest::tests & specification();
+#include <iostream>
 
 #if variant_HAVE_STD_VARIANT
 
@@ -71,6 +79,12 @@ using ::nonstd::variants::operator<<;
 } // namespace lest
 
 #endif // variant_HAVE_STD_VARIANT
+
+#include "lest_cpp03.hpp"
+
+extern lest::tests & specification();
+
+#define CASE( name ) lest_CASE( specification(), name )
 
 #endif // TEST_VARIANT_LITE_H_INCLUDED
 
