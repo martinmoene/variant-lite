@@ -187,7 +187,6 @@ if( HAS_CPP17_FLAG )
         set( WHICH variant_VARIANT_NONSTD )
     endif()
 
-
     target_compile_definitions( ${PROGRAM}-cpp17.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
 
     if( HAS_CPPLATEST_FLAG )
