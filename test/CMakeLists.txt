@@ -189,6 +189,10 @@ if( HAS_CPP17_FLAG )
 
 <<<<<<< HEAD
     target_compile_definitions( ${MAIN_BASE}-cpp17.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
+<<<<<<< HEAD
+=======
+
+>>>>>>> 19d7846b1c735363a843505119db99470bd204d7
     if( HAS_CPPLATEST_FLAG )
         target_compile_definitions( ${MAIN_BASE}-cpplatest.t PRIVATE variant_CONFIG_SELECT_VARIANT=${WHICH} )
 =======
