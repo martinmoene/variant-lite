@@ -2383,7 +2383,7 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
             case 14: return nvd::hash( 14 ) ^ nvd::hash( get<14>( v ) );
             case 15: return nvd::hash( 15 ) ^ nvd::hash( get<15>( v ) );
             
-            default: return false;
+            default: return 0;
         }
     }
 };

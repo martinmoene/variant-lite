@@ -1921,7 +1921,7 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
             {% for n in range(NumParams) -%}
             case {{n}}: return nvd::hash( {{n}} ) ^ nvd::hash( get<{{n}}>( v ) );
             {% endfor %}
-            default: return false;
+            default: return 0;
         }
     }
 };
