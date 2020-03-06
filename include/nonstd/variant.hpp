@@ -395,7 +395,7 @@ namespace nonstd {
     template< bool B = (__VA_ARGS__), typename std::enable_if<B, int>::type = 0 >
 
 #define variant_REQUIRES_T(...) \
-    , typename = typename std::enable_if< (__VA_ARGS__), nonstd::variants::detail::enabler >::type
+    , typename std::enable_if< (__VA_ARGS__), int >::type = 0
 
 #define variant_REQUIRES_R(R, ...) \
     typename std::enable_if< (__VA_ARGS__), R>::type
@@ -532,10 +532,6 @@ struct is_nothrow_swappable : decltype( detail::is_nothrow_swappable::test<T>(0)
 // detail:
 
 namespace detail {
-
-// for variant_REQUIRES_T():
-
-/*enum*/ class enabler{};
 
 // typelist:
 
