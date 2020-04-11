@@ -1919,7 +1919,8 @@ struct VisitorApplicatorImpl<R, TX<VT> >
     template< typename Visitor, typename T >
     static R apply(Visitor const&, T)
     {
-        return R();
+        // prevent default construction of a const reference, see issue #39:
+        std::terminate();
     }
 };
 
@@ -2106,7 +2107,8 @@ struct VisitorApplicator
             case 14: return apply_visitor<14>(v, arg);
             case 15: return apply_visitor<15>(v, arg);
             
-            default: return R();
+            // prevent default construction of a const reference, see issue #39:
+            default: std::terminate();
         }
     }
 

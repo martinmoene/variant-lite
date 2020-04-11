@@ -1604,4 +1604,23 @@ CASE("max_index(): should not cause erroneous bad_variant_access in get()" "[.is
     }
 }
 
+namespace issue_39 {
+
+    struct tag_t {};
+
+    struct myvisitor
+    {
+        const std::string& operator()(const int&) const { throw std::exception(); }
+        const std::string& operator()(const tag_t&) const { throw std::exception(); }
+        const std::string& operator()(const std::string& s) const { return s; }
+    };
+}
+
+CASE("visitor: Visitors can't return references, but they can with std::variant" "[.issue-39]")
+{
+    using namespace issue_39;
+    nonstd::variant<int, tag_t, std::string> v("hello");
+    nonstd::visit( myvisitor(), v );
+}
+
 // end of file

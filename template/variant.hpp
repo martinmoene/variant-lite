@@ -1660,7 +1660,8 @@ struct VisitorApplicatorImpl<R, TX<VT> >
     template< typename Visitor, typename T >
     static R apply(Visitor const&, T)
     {
-        return R();
+        // prevent default construction of a const reference, see issue #39:
+        std::terminate();
     }
 };
 
@@ -1734,7 +1735,8 @@ struct VisitorApplicator
             {% for n in range(NumParams) -%}
             case {{n}}: return apply_visitor<{{n}}>(v, arg);
             {% endfor %}
-            default: return R();
+            // prevent default construction of a const reference, see issue #39:
+            default: std::terminate();
         }
     }
 
