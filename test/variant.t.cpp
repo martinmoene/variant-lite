@@ -1619,8 +1619,13 @@ namespace issue_39 {
 CASE("visitor: Visitors can't return references, but they can with std::variant" "[.issue-39]")
 {
     using namespace issue_39;
+
+#if variant_CPP11_OR_GREATER
     nonstd::variant<int, tag_t, std::string> v("hello");
     nonstd::visit( myvisitor(), v );
+#else
+    EXPECT( !!"visitor: references cannot be used yet with C++98 (no C++11)" );
+#endif
 }
 
 // end of file
