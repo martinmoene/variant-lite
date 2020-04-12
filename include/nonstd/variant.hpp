@@ -1516,12 +1516,10 @@ public:
     template< class T >
     T & get()
     {
-        const std::size_t i = index_of<T>();
-
 #if variant_CONFIG_NO_EXCEPTIONS
-        assert( i == index() );
+        assert( index_of<T>() == index() );
 #else
-        if ( i != index() )
+        if ( index_of<T>() != index() )
         {
             throw bad_variant_access();
         }
@@ -1532,12 +1530,10 @@ public:
     template< class T >
     T const & get() const
     {
-        const std::size_t i = index_of<T>();
-
 #if variant_CONFIG_NO_EXCEPTIONS
-        assert( i == index() );
+        assert( index_of<T>() == index() );
 #else
-        if ( i != index() )
+        if ( index_of<T>() != index() )
         {
             throw bad_variant_access();
         }
