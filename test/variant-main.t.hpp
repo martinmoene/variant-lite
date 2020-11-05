@@ -31,8 +31,8 @@
 
 namespace lest {
 
-template< class...  Types >
-inline std::ostream & operator<<( std::ostream & os, nonstd::variant<Types...> const & v )
+template< class Head, class...  Types >
+inline std::ostream & operator<<( std::ostream & os, nonstd::variant<Head, Types...> const & v )
 {
     return os << "[variant:?]";
 }
