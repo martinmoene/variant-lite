@@ -25,10 +25,6 @@
 #define variant_VARIANT_NONSTD   1
 #define variant_VARIANT_STD      2
 
-#if !defined( variant_CONFIG_SELECT_VARIANT )
-# define variant_CONFIG_SELECT_VARIANT  ( variant_HAVE_STD_VARIANT ? variant_VARIANT_STD : variant_VARIANT_NONSTD )
-#endif
-
 #ifndef  variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
 # define variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO  0
 #endif
@@ -75,6 +71,10 @@
 # endif
 #else
 # define  variant_HAVE_STD_VARIANT  0
+#endif
+
+#if !defined( variant_CONFIG_SELECT_VARIANT )
+# define variant_CONFIG_SELECT_VARIANT  ( variant_HAVE_STD_VARIANT ? variant_VARIANT_STD : variant_VARIANT_NONSTD )
 #endif
 
 #define  variant_USES_STD_VARIANT  ( (variant_CONFIG_SELECT_VARIANT == variant_VARIANT_STD) || ((variant_CONFIG_SELECT_VARIANT == variant_VARIANT_DEFAULT) && variant_HAVE_STD_VARIANT) )
