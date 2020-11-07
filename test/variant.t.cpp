@@ -1190,10 +1190,17 @@ struct RVRefTestVisitor
     }
 
     template< typename U >
-    std::string operator()( U && ) const
+    std::string operator()( U && val) const
     {
-        //static_assert( std::is_const<U>::value, "Wrong branch!" );
+#if variant_USES_STD_VARIANT
+        std::ostringstream os;
+        os << val;
+        return os.str();
+#else
+        static_assert( std::is_const<U>::value, "Wrong branch!" );
+        (void) val;
         return ">>> Broken branch! <<<";
+#endif
     }
 };
 
