@@ -200,12 +200,16 @@ CASE( "variant: Allows non-default constructible as second and later type (first
     EXPECT( true );
 }
 
-CASE( "variant: Allows multiple identical types" )
+CASE( "variant: Allows multiple identical types (C++11)" )
 {
+#if variant_CPP11_OR_GREATER
     variant<monostate, int, int> var;
     (void) var;
 
     EXPECT( true );
+#else
+    EXPECT( !!"variant: move-construction is not available (no C++11)" );
+#endif
 }
 
 CASE( "variant: Allows to default-construct variant" )
