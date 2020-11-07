@@ -167,6 +167,25 @@ inline in_place_t in_place_index( detail::in_place_index_tag<K> = detail::in_pla
 #endif // variant_CPP17_OR_GREATER
 #endif // nonstd_lite_HAVE_IN_PLACE_TYPES
 
+// in_place_index-like disambiguation tag identical for all C++ versions:
+
+namespace nonstd {
+namespace variants {
+namespace detail {
+
+template< std::size_t K >
+struct index_tag_t {};
+
+template< std::size_t K >
+inline void index_tag ( index_tag_t<K> = index_tag_t<K>() ) { }
+
+#define variant_index_tag_t(K)  void(&)( nonstd::variants::detail::index_tag_t<K> )
+#define variant_index_tag(K)    nonstd::variants::detail::index_tag<K>
+
+} // namespace detail
+} // namespace variants
+} // namespace nonstd
+
 //
 // Use C++17 std::variant:
 //
@@ -1143,7 +1162,7 @@ public:
 
     {%- for n in range(NumParams) %}
 #if variant_CPP11_OR_GREATER
-    template < nonstd_lite_in_place_index_t( {{n}} ) = nonstd_lite_in_place_index( {{n}} )
+    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
       variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
 #endif
     variant( T{{n}} const & t{{n}} ) : type_index( {{n}} ) { new( ptr() ) T{{n}}( t{{n}} ); }
@@ -1151,7 +1170,7 @@ public:
 
 #if variant_CPP11_OR_GREATER
     {% for n in range(NumParams) -%}
-    template < nonstd_lite_in_place_index_t( {{n}} ) = nonstd_lite_in_place_index( {{n}} )
+    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
       variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
     variant( T{{n}} && t{{n}} )
         : type_index( {{n}} ) { new( ptr() ) T{{n}}( std::move(t{{n}}) ); }
@@ -1247,7 +1266,7 @@ public:
     }
 
     {% for n in range(NumParams) -%}
-    template <nonstd_lite_in_place_index_t( {{n}} ) = nonstd_lite_in_place_index( {{n}} )
+    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
         variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
     variant & operator=( T{{n}} &&      t{{n}} ) { return assign_value<{{n}}>( std::move( t{{n}} ) ); }
     {%- if not loop.last %}
@@ -1259,7 +1278,7 @@ public:
 
     {% for n in range(NumParams) -%}
 #if variant_CPP11_OR_GREATER
-    template <nonstd_lite_in_place_index_t( {{n}} ) = nonstd_lite_in_place_index( {{n}} )
+    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
         variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
 #endif
     variant & operator=( T{{n}} const & t{{n}} ) { return assign_value<{{n}}>( t{{n}} ); }
