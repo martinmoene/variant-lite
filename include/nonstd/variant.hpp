@@ -727,7 +727,7 @@ template<> struct typelist_size< nulltype > { enum V { value = 0 } ; };
 template< class Head, class Tail >
 struct typelist_size< typelist<Head, Tail> >
 {
-    enum V { value = typelist_size<Head>::value + typelist_size<Tail>::value };
+    enum V { value = size_t(typelist_size<Head>::value) + size_t(typelist_size<Tail>::value) };
 };
 
 // typelist index of type:
