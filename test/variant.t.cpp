@@ -208,7 +208,7 @@ CASE( "variant: Allows multiple identical types (C++11)" )
 
     EXPECT( true );
 #else
-    EXPECT( !!"variant: move-construction is not available (no C++11)" );
+    EXPECT( !!"variant: multiple identical types are not available (no C++11)" );
 #endif
 }
 
