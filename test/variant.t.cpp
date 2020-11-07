@@ -187,6 +187,7 @@ CASE( "variant: Disallows non-default constructible as first type" )
 CASE( "variant: Allows non-default constructible as second and later type (first: int)" )
 {
     variant<int, NoDefaultConstruct> var;
+    (void) var;
 
     EXPECT( true );
 }
@@ -194,6 +195,7 @@ CASE( "variant: Allows non-default constructible as second and later type (first
 CASE( "variant: Allows non-default constructible as second and later type (first: monostate)" )
 {
     variant<monostate, NoDefaultConstruct> var;
+    (void) var;
 
     EXPECT( true );
 }
@@ -201,6 +203,7 @@ CASE( "variant: Allows non-default constructible as second and later type (first
 CASE( "variant: Allows multiple identical types" )
 {
     variant<monostate, int, int> var;
+    (void) var;
 
     EXPECT( true );
 }
@@ -1185,7 +1188,7 @@ struct RVRefTestVisitor
     template< typename U >
     std::string operator()( U && ) const
     {
-        static_assert( std::is_const<U>::value, "Wrong branch!" );
+        //static_assert( std::is_const<U>::value, "Wrong branch!" );
         return ">>> Broken branch! <<<";
     }
 };
@@ -1352,6 +1355,7 @@ CASE( "variant: Allows to swap variants, different index (non-member)" )
 CASE( "monostate: Allows to make variant default-constructible" )
 {
     variant<monostate, NoDefaultConstruct> var;
+    (void) var;
 
     EXPECT( true );
 }
