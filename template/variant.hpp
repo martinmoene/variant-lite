@@ -335,6 +335,8 @@ namespace nonstd {
 #define variant_HAVE_REMOVE_CV          variant_CPP11_120
 #define variant_HAVE_STD_ADD_POINTER    variant_CPP11_90
 #define variant_HAVE_TYPE_TRAITS        variant_CPP11_90
+#define variant_HAVE_ENABLE_IF          variant_CPP11_90
+#define variant_HAVE_IS_SAME            variant_CPP11_90
 
 #define variant_HAVE_TR1_TYPE_TRAITS    (!! variant_COMPILER_GNUC_VERSION )
 #define variant_HAVE_TR1_ADD_POINTER    (!! variant_COMPILER_GNUC_VERSION )
@@ -454,10 +456,9 @@ struct conditional< false, Then, Else > { typedef Else type; };
 
 #endif // variant_HAVE_CONDITIONAL
 
-#if variant_HAVE_TYPE_TRAITS || variant_HAVE_TR1_TYPE_TRAITS
+#if variant_HAVE_ENABLE_IF
 
 using std::enable_if;
-using std::is_same;
 
 #else
 
@@ -470,6 +471,14 @@ struct enable_if< true, T > {
   typedef T type;
 };
 
+#endif // variant_HAVE_ENABLE_IF
+
+#if variant_HAVE_IS_SAME
+
+using std::is_same;
+
+#else
+
 template< class T, class U >
 struct is_same {
   enum V { value = 0 } ;
@@ -480,7 +489,7 @@ struct is_same< T, T > {
   enum V { value = 1 } ;
 };
 
-#endif // variant_HAVE_TYPE_TRAITS
+#endif // variant_HAVE_IS_SAME
 
 } // namespace std11
 
