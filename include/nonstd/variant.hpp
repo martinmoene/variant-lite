@@ -794,6 +794,11 @@ struct typelist_type_is_unique< List, CmpIndex, 0 >
   enum V { value = 1 } ;
 };
 
+template< class List, class T >
+struct typelist_contains_unique_type : typelist_type_is_unique< List, typelist_index_of< List, T >::value >
+{
+};
+
 #if variant_CONFIG_MAX_ALIGN_HACK
 
 // Max align, use most restricted type for alignment:
@@ -1725,6 +1730,7 @@ public:
 #if variant_CPP11_OR_GREATER
     template< class T, class... Args
         variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
+        variant_REQUIRES_T( detail::typelist_contains_unique_type< variant_types, T >::value )
     >
     T& emplace( Args&&... args )
     {
@@ -1737,6 +1743,7 @@ public:
 
     template< class T, class U, class... Args
         variant_REQUIRES_T( std::is_constructible< T, std::initializer_list<U>&, Args...>::value )
+        variant_REQUIRES_T( detail::typelist_contains_unique_type< variant_types, T >::value )
     >
     T& emplace( std::initializer_list<U> il, Args&&... args )
     {

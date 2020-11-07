@@ -891,6 +891,19 @@ CASE( "variant: Allows to copy-emplace element based on type (C++11)" )
 #endif
 }
 
+CASE( "variant: Disallows to copy-emplace non-unique element type on type (C++11)" )
+{
+#if variant_CPP11_OR_GREATER
+    variant<monostate, int, int> var;
+    //var.emplace<int>(7);
+    (void) var;
+
+    EXPECT( true );
+#else
+    EXPECT( !!"variant: multiple identical types are not available (no C++11)" );
+#endif
+}
+
 CASE( "variant: Allows to move-emplace element based on type (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
