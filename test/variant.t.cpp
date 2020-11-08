@@ -1691,4 +1691,13 @@ CASE("visitor: Visitors can't return references, but they can with std::variant"
 #endif
 }
 
+CASE( "tweak header: reads tweak header if supported " "[tweak]" )
+{
+#if variant_HAVE_TWEAK_HEADER
+    EXPECT( VARIANT_TWEAK_VALUE == 42 );
+#else
+    EXPECT( !!"Tweak header is not available (variant_HAVE_TWEAK_HEADER: 0)." );
+#endif
+}
+
 // end of file

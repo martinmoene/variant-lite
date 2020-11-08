@@ -25,6 +25,20 @@
 #define variant_VARIANT_NONSTD   1
 #define variant_VARIANT_STD      2
 
+// tweak header support:
+
+#ifdef __has_include
+# if __has_include(<nonstd/variant.tweak.hpp>)
+#  include <nonstd/variant.tweak.hpp>
+# endif
+#define variant_HAVE_TWEAK_HEADER  1
+#else
+#define variant_HAVE_TWEAK_HEADER  0
+//# pragma message("variant.hpp: Note: Tweak header not supported.")
+#endif
+
+// variant selection and configuration:
+
 #ifndef  variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO
 # define variant_CONFIG_OMIT_VARIANT_SIZE_V_MACRO  0
 #endif
