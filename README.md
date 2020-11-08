@@ -376,6 +376,7 @@ The version of *variant lite* is available via tag `[.version]`. The following t
 variant: Disallows non-default constructible as first type
 variant: Allows non-default constructible as second and later type (first: int)
 variant: Allows non-default constructible as second and later type (first: monostate)
+variant: Allows multiple identical types (C++11)
 variant: Allows to default-construct variant
 variant: Allows to copy-construct from variant
 variant: Allows to move-construct from variant (C++11)
@@ -411,6 +412,7 @@ variant: Allows to in-place move-construct elements from intializer-list based o
 variant: Allows to in-place copy-construct elements from intializer-list based on index (C++11)
 variant: Allows to in-place move-construct elements from intializer-list based on index (C++11)
 variant: Allows to copy-emplace element based on type (C++11)
+variant: Disallows to copy-emplace non-unique element type on type (C++11)
 variant: Allows to move-emplace element based on type (C++11)
 variant: Allows to copy-emplace element based on index (C++11)
 variant: Allows to move-emplace element based on index (C++11)
