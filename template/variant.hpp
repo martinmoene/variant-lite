@@ -482,13 +482,10 @@ using std::enable_if;
 #else
 
 template< bool B, class T = void >
-struct enable_if {
-};
+struct enable_if { };
 
 template< class T >
-struct enable_if< true, T > {
-  typedef T type;
-};
+struct enable_if< true, T > { typedef T type; };
 
 #endif // variant_HAVE_ENABLE_IF
 
@@ -500,12 +497,12 @@ using std::is_same;
 
 template< class T, class U >
 struct is_same {
-  enum V { value = 0 } ;
+    enum V { value = 0 } ;
 };
 
 template< class T >
 struct is_same< T, T > {
-  enum V { value = 1 } ;
+    enum V { value = 1 } ;
 };
 
 #endif // variant_HAVE_IS_SAME
@@ -767,18 +764,18 @@ template< class List, std::size_t CmpIndex, std::size_t LastChecked = typelist_s
 struct typelist_type_is_unique
 {
 private:
-  typedef typename typelist_type_at<List, CmpIndex>::type CmpType;
-  typedef typename typelist_type_at<List, LastChecked - 1>::type CurType;
+    typedef typename typelist_type_at<List, CmpIndex>::type cmp_type;
+    typedef typename typelist_type_at<List, LastChecked - 1>::type cur_type;
 
 public:
-  enum V { value = ((CmpIndex == (LastChecked - 1)) | !std11::is_same<CmpType, CurType>::value)
-    && typelist_type_is_unique<List, CmpIndex, LastChecked - 1>::value } ;
+    enum V { value = ((CmpIndex == (LastChecked - 1)) | !std11::is_same<cmp_type, cur_type>::value)
+        && typelist_type_is_unique<List, CmpIndex, LastChecked - 1>::value } ;
 };
 
 template< class List, std::size_t CmpIndex >
 struct typelist_type_is_unique< List, CmpIndex, 0 >
 {
-  enum V { value = 1 } ;
+    enum V { value = 1 } ;
 };
 
 template< class List, class T >
@@ -1158,20 +1155,28 @@ public:
     // 19.7.3.1 Constructors
 
     variant() : type_index( 0 ) { new( ptr() ) T0(); }
-    {# Force newline #}
-
-    {%- for n in range(NumParams) %}
-#if variant_CPP11_OR_GREATER
-    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
-      variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
-#endif
-    variant( T{{n}} const & t{{n}} ) : type_index( {{n}} ) { new( ptr() ) T{{n}}( t{{n}} ); }
-    {% endfor %}
 
 #if variant_CPP11_OR_GREATER
     {% for n in range(NumParams) -%}
     template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
-      variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
+        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
+    variant( T{{n}} const & t{{n}} ) : type_index( {{n}} ) { new( ptr() ) T{{n}}( t{{n}} ); }
+    {%- if not loop.last %}
+
+    {% endif -%}
+    {% endfor %}
+
+#else
+
+    {% for n in range(NumParams) -%}
+    variant( T{{n}} const & t{{n}} ) : type_index( {{n}} ) { new( ptr() ) T{{n}}( t{{n}} ); }
+    {% endfor %}
+#endif
+
+#if variant_CPP11_OR_GREATER
+    {% for n in range(NumParams) -%}
+    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
+        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
     variant( T{{n}} && t{{n}} )
         : type_index( {{n}} ) { new( ptr() ) T{{n}}( std::move(t{{n}}) ); }
     {%- if not loop.last %}
@@ -1276,16 +1281,23 @@ public:
 
 #endif
 
-    {% for n in range(NumParams) -%}
 #if variant_CPP11_OR_GREATER
+
+    {% for n in range(NumParams) -%}
     template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
         variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
-#endif
     variant & operator=( T{{n}} const & t{{n}} ) { return assign_value<{{n}}>( t{{n}} ); }
     {%- if not loop.last %}
 
     {% endif -%}
     {% endfor %}
+
+#else
+
+    {% for n in range(NumParams) -%}
+    variant & operator=( T{{n}} const & t{{n}} ) { return assign_value<{{n}}>( t{{n}} ); }
+    {% endfor %}
+#endif
 
     std::size_t index() const
     {
@@ -1295,6 +1307,7 @@ public:
     // 19.7.3.4 Modifiers
 
 #if variant_CPP11_OR_GREATER
+
     template< class T, class... Args
         variant_REQUIRES_T( std::is_constructible< T, Args...>::value )
         variant_REQUIRES_T( detail::typelist_contains_unique_type< variant_types, T >::value )
