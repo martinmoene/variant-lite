@@ -54,7 +54,7 @@ In a nutshell
 
 **Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite), [expected-lite](https://github.com/martinmoene/expected-lite)  and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
 
-**Limitations of variant lite** are the requirement for the alternative types to be of different types and the limit on the number of alternative types and the number of visitor arguments. The maximum number of types and visitor arguments are configurable via [script generate_header.py](script/generate_header.py) (default: 16 types, 5 visitor arguments). Move construction, move assignment and emplacement require C++11 and are not supported when compiling under C++98. *variant lite* does not provide allocator-extended constructors.
+**Limitations of variant lite** concern the number of alternative types and the number of visitor arguments. The maximum number of types and visitor arguments are configurable via [script generate_header.py](script/generate_header.py) (default: 16 types, 5 visitor arguments). With C++98, the alternative types are required to be of different type and there's no move construction, move assignment and emplacement. *variant lite* does not provide allocator-extended constructors.
 
 
 License
