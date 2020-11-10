@@ -71,20 +71,38 @@ Installation
 ------------
 *variant lite* is a single-file header-only library. Put `variant.hpp` in the [include](include) folder directly into the project source tree or somewhere reachable from your project.
 
-Or, if you use the [conan package manager](https://www.conan.io/), follow these steps:
+Or, if you use the [conan package manager](https://www.conan.io/), you might follow these steps:
 
-1. Add *nonstd-lite* to the conan remotes:
+1. Create source file `./main.cpp`, e.g. with the contents of the example code above.
 
-        conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
+2. Create `./conanfile.txt` file with  a reference to *variant-lite* in the *requires* section:
+    ```Conan
+    [requires]
+    variant-lite/1.2.2  # variant-lite/2.0.0 when available
 
-2. Add a reference to *variant-lite* to the *requires* section of your project's `conanfile.txt` file:
+    [generators]
+    cmake
+    ```
 
-        [requires]
-        variant-lite/[~=0]@nonstd-lite/testing
+3. Create `./CMakeLists.txt`:
+    ```CMake
+    cmake_minimum_required(VERSION 3.1)
+    project(variant-example CXX)
 
-3. Run conan's install command:
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
 
-        conan install
+    add_executable(${PROJECT_NAME} main.cpp)
+    target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+    ```
+
+4. Run the following commands:
+    ```Text
+    mkdir build && cd build
+    conan install .. --settings arch=x86 --settings compiler=gcc
+    cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+    cmake --build . --config Release
+    ```
 
 
 Synopsis
