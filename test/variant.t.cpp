@@ -139,7 +139,7 @@ bool BlowCopyMoveConstruct::blow = true;
 
 struct BlowCopyMoveAssign
 {
-    ~BlowCopyMoveAssign() {};
+    ~BlowCopyMoveAssign() {}
     BlowCopyMoveAssign() {}
     BlowCopyMoveAssign( BlowCopyMoveAssign const & ) {}
     BlowCopyMoveAssign & operator=( BlowCopyMoveAssign const & ) { throw 42; return *this; }
