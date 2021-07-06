@@ -24,6 +24,10 @@ const void * test_nullptr = nullptr;
 const void * test_nullptr = variant_nullptr;
 #endif
 
+// half-open range [lo..hi):
+// Note: variant_BETWEEN() is not be available when std::variant is used:
+#define variant_t_BETWEEN( v, lo, hi ) ( (lo) <= (v) && (v) < (hi) )
+
 // The following tracer code originates as Oracle from Optional by
 // Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
 
@@ -515,6 +519,7 @@ CASE( "variant: Allows to move-construct from element (C++11)" )
 
 CASE( "variant: Allows to convert-copy-construct from element" )
 {
+#if !( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
     int i = 7;
 
     variant<double, std::string> var1(  i );
@@ -525,17 +530,24 @@ CASE( "variant: Allows to convert-copy-construct from element" )
 
     EXPECT( var2.index() == 0u              );
     EXPECT( get<0>(var2) == lest::approx(7) );
+#else
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
+#endif
 }
 
 CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
+#if !( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
     struct Int { operator int() { return 7; } };
 
     variant<double, std::string> var( Int{} );
 
     EXPECT( var.index() == 0u              );
     EXPECT( get<0>(var) == lest::approx(7) );
+#else
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
+#endif
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
 #endif
