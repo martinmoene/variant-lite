@@ -1330,7 +1330,7 @@ CASE( "variant: Allows to get pointer to element or NULL by index" )
 
 CASE( "variant: Allows to compare variants" )
 {
-    variant<int, double> v = 3, w = 7;
+    variant<int, char> v = 3, w = 7;
 
     EXPECT( v == v );
     EXPECT( v != w );
