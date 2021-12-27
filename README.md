@@ -16,9 +16,7 @@
 - [Notes and references](#notes-and-references)
 - [Appendix](#appendix)
 
-
-Example usage
--------------
+## Example usage
 
 ```Cpp
 #include "nonstd/variant.hpp"
@@ -44,31 +42,28 @@ int main()
 
 ### Compile and run
 
-```
+```Console
 prompt>g++ -std=c++98 -Wall -I../include -o 01-basic.exe 01-basic.cpp && 01-basic.exe
 ```
 
-In a nutshell
--------------
+## In a nutshell
+
 **variant lite** is a single-file header-only library to represent a type-safe union. The library aims to provide a [C++17-like variant](http://en.cppreference.com/w/cpp/utility/variant) for use with C++98 and later. If available, std::variant is used. 
 
 **Features and properties of variant lite** are ease of installation (single header), freedom of dependencies other than the standard library and control over object alignment (if needed).  *variant lite* shares the approach to in-place tags with [any-lite](https://github.com/martinmoene/any-lite), [expected-lite](https://github.com/martinmoene/expected-lite)  and with [optional-lite](https://github.com/martinmoene/optional-lite) and these libraries can be used together.
 
 **Limitations of variant lite** concern the number of alternative types and the number of visitor arguments. The maximum number of types and visitor arguments are configurable via [script generate_header.py](script/generate_header.py) (default: 16 types, 5 visitor arguments). With C++98, the alternative types are required to be of different type and there's no move construction, move assignment and emplacement. *variant lite* does not provide allocator-extended constructors.
 
+## License
 
-License
--------
 *variant lite* is distributed under the [Boost Software License](LICENSE.txt).
  
+## Dependencies
 
-Dependencies
-------------
 *variant lite* has no other dependencies than the [C++ standard library](http://en.cppreference.com/w/cpp/header).
 
+## Installation
 
-Installation
-------------
 *variant lite* is a single-file header-only library. Put `variant.hpp` in the [include](include) folder directly into the project source tree or somewhere reachable from your project.
 
 Or, if you use the [conan package manager](https://www.conan.io/), you might follow these steps:
@@ -104,9 +99,7 @@ Or, if you use the [conan package manager](https://www.conan.io/), you might fol
     cmake --build . --config Release
     ```
 
-
-Synopsis
---------
+## Synopsis
 
 **Contents**  
 - [Types in namespace nonstd](#types-in-namespace-nonstd)  
@@ -211,24 +204,29 @@ The maximum number of visitor arguments as configured via script [generate_heade
 If the compiler supports [`__has_include()`](https://en.cppreference.com/w/cpp/preprocessor/include), *variant lite* supports the [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html) mechanism. Provide your *tweak header* as `nonstd/variant.tweak.hpp` in a folder in the include-search-path. In the tweak header, provide definitions as documented below, like `#define boolean_CPLUSPLUS 201103L`.
 
 #### Standard selection macro
+
 \-D<b>variant\_CPLUSPLUS</b>=199711L  
 Define this macro to override the auto-detection of the supported C++ standard, or if your compiler does not set the `__cplusplus` macro correctly.
 
 #### Select `std::variant` or `nonstd::variant`
+
 At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
 
 \-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
 Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
 
 #### Disable exceptions
+
 -D<b>variant_CONFIG_NO_EXCEPTIONS</b>=0  
 Define this to 1 if you want to compile without exceptions. If not defined, the header tries and detect if exceptions have been disabled (e.g. via `-fno-exceptions`). Default is undefined.
 
 #### Presence of `variant_size_V()` simulation macro
+
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_SIZE\_V\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_size_V(T)` macro. Default is 0.
 
 #### Presence of `variant_alternative_T()` simulation macro
+
 \-D<b>variant\_CONFIG\_OMIT\_VARIANT\_ALTERNATIVE\_T\_MACRO</b>=0  
 Define this macro to 1 to omit the `variant_alternative_T(I,T)` macro. Default is 0.
 
@@ -245,9 +243,8 @@ Define this to the pod-type you want to align to (no default).
 \-D<b>variant\_CONFIG\_ALIGN\_AS\_FALLBACK</b>=*pod_type*  
 Define this to the pod-type to use for alignment if the algorithm of *variant lite* cannot find a suitable POD type to use for alignment. Default is `double`.
 
+## Reported to work with
 
-Reported to work with
----------------------
 The table below mentions the compiler versions *variant lite* is reported to work with.
 
 OS        | Compiler   | Versions |
@@ -259,9 +256,8 @@ GNU/Linux | Clang/LLVM | 3.5.0 |
 &nbsp;    | GCC        | 4.8.4 |
 OS X      | ?          | ?   |
 
+## Building the tests
 
-Building the tests
-------------------
 To build the tests you need:
 
 - [CMake](http://cmake.org), version 2.8.12 or later to be installed and in your PATH.
@@ -292,9 +288,7 @@ Here we use c:\variant-lite\build-win-x86-vc10.
 
 All tests should pass, indicating your platform is supported and you are ready to use *variant lite*.
 
-
-Implementation notes
---------------------
+## Implementation notes
 
 ### Object allocation and alignment
 
@@ -329,9 +323,8 @@ The class template `alignment_of<>` is gleaned from [Boost.TypeTraits, alignment
 
 For more information on constructed unions and alignment, see [10-14].
 
+## Other implementations of variant
 
-Other implementations of variant
---------------------------------
 - Isabella Muerte. [MNMLSTC Core](https://github.com/mnmlstc/core) (C++11).
 - Anthony Williams. [C++ variant class, matching the C++17 draft](https://bitbucket.org/anthonyw/variant).
 - Agustín Bergé. [Eggs.Variant, a C++11/14 generic, type-safe, discriminated union](https://github.com/eggs-cpp/variant).
@@ -341,15 +334,12 @@ Other implementations of variant
 - Gregor Burger. [Typesafe tagged union with "don't call us, we'll call you" feature (C++14)](https://github.com/gregorburger/variant).
 - Anatoliy Tomilov. [C++1z variant, never empty, constexpr-enabled visit/multivisit, ... relational](https://github.com/tomilov/variant).
 
-
-Notes and References
---------------------
+## Notes and References
 
 ### Acknowledgments
 
 Thanks to @flexferrum for making the number of variant types and visitor arguments [configurable](#in-a-nutshell).
 Thanks to @siffiejoe for contributing to fixing [lifetime](#31), [noexcept](34) and [hash](#32) issues. 
-
 
 ### References
 
@@ -382,11 +372,10 @@ Thanks to @siffiejoe for contributing to fixing [lifetime](#31), [noexcept](34) 
 [14] [Boost.TypeTraits, alignment_of](http://www.boost.org/doc/libs/1_57_0/libs/type_traits/doc/html/boost_typetraits/reference/alignment_of.html) ( [code](http://www.boost.org/doc/libs/1_57_0/boost/type_traits/alignment_of.hpp) ).
 
 ### Presentations
+
 [15] Ben Deane. [Using Types Effectively](https://youtu.be/ojZbFIQSdl8?list=PLHTh1InhhwT7J5jl4vAhO1WvGHUUFgUQH). CppCon 2016.
 
-
-Appendix
---------
+## Appendix
 
 ### A.1 Compile-time information
 
@@ -394,7 +383,11 @@ The version of *variant lite* is available via tag `[.version]`. The following t
 
 ### A.2 Variant lite test specification
 
-```
+<details>
+<summary>click to expand</summary>
+<p>
+
+```Text
 variant: Disallows non-default constructible as first type
 variant: Allows non-default constructible as second and later type (first: int)
 variant: Allows non-default constructible as second and later type (first: monostate)
@@ -467,3 +460,6 @@ variant_alternative_T(): Allows to select type by index (non-standard: macro)
 std::hash<>: Allows to obtain hash (C++11)
 tweak header: reads tweak header if supported [tweak]
 ```
+
+</p>
+</details>
