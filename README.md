@@ -251,7 +251,7 @@ OS        | Compiler   | Versions |
 ---------:|:-----------|:---------|
 Windows   | Clang/LLVM | ? |
 &nbsp;    | GCC        | 5.2.0 |
-&nbsp;    | Visual C++<br>(Visual Studio)| 8 (2005), 9 (2008), 10 (2010),<br>11 (2012), 12 (2013), 14 (2015) |
+&nbsp;    | Visual C++<br>(Visual Studio)| 8 (2005), 9 (2008), 10 (2010), 11 (2012),<br>12 (2013), 14 (2015), 15 (2017), 16 (2019) |
 GNU/Linux | Clang/LLVM | 3.5.0 |
 &nbsp;    | GCC        | 4.8.4 |
 OS X      | ?          | ?   |
