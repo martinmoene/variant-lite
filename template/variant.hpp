@@ -369,13 +369,13 @@ namespace nonstd {
 
 #define variant_HAVE_CONDITIONAL        variant_CPP11_120
 #define variant_HAVE_REMOVE_CV          variant_CPP11_120
-#define variant_HAVE_STD_ADD_POINTER    variant_CPP11_90
+#define variant_HAVE_STD_ADD_POINTER    variant_CPP11_100
 #define variant_HAVE_TYPE_TRAITS        variant_CPP11_90
-#define variant_HAVE_ENABLE_IF          variant_CPP11_90
-#define variant_HAVE_IS_SAME            variant_CPP11_90
+#define variant_HAVE_ENABLE_IF          variant_CPP11_100
+#define variant_HAVE_IS_SAME            variant_CPP11_100
 
 #define variant_HAVE_TR1_TYPE_TRAITS    (!! variant_COMPILER_GNUC_VERSION )
-#define variant_HAVE_TR1_ADD_POINTER    (!! variant_COMPILER_GNUC_VERSION )
+#define variant_HAVE_TR1_ADD_POINTER    (!! variant_COMPILER_GNUC_VERSION || variant_CPP11_90)
 
 // C++ feature usage:
 
