@@ -32,11 +32,10 @@ environment:
         - generator: "Visual Studio 12 2013"
         - generator: "Visual Studio 11 2012"
         - generator: "Visual Studio 10 2010"
+        - generator: "Visual Studio 9 2008"
 
 matrix:
     exclude:
-        - image:      Visual Studio 2015
-          generator: "Visual Studio 16 2019"
         - image:      Visual Studio 2019
           generator: "Visual Studio 15 2017"
         - image:      Visual Studio 2019
@@ -47,8 +46,8 @@ matrix:
           generator: "Visual Studio 11 2012"
         - image:      Visual Studio 2019
           generator: "Visual Studio 10 2010"
-        - image:      Visual Studio 2015
-          generator: "Visual Studio 15 2017"
+        - image:      Visual Studio 2019
+          generator: "Visual Studio 9 2008"
         - image:      Visual Studio 2017
           generator: "Visual Studio 16 2019"
         - image:      Visual Studio 2017
@@ -59,6 +58,12 @@ matrix:
           generator: "Visual Studio 11 2012"
         - image:      Visual Studio 2017
           generator: "Visual Studio 10 2010"
+        - image:      Visual Studio 2017
+          generator: "Visual Studio 9 2008"
+        - image:      Visual Studio 2015
+          generator: "Visual Studio 16 2019"
+        - image:      Visual Studio 2015
+          generator: "Visual Studio 15 2017"
 
 before_build:
     - mkdir build && cd build
