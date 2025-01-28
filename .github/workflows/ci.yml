@@ -56,7 +56,7 @@ jobs:
         - version: 18
           os: ubuntu-24.04
 
-#    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
