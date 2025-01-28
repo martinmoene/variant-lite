@@ -47,9 +47,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [11, 12]
+        - version: 13
+          os: ubuntu-22.04
+        - version: 14
+          os: ubuntu-24.04
+        - version: 16
+          os: ubuntu-24.04
+        - version: 18
+          os: ubuntu-24.04
 
-    runs-on: ubuntu-latest
+#    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
