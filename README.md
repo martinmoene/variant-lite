@@ -212,13 +212,18 @@ Define this macro to override the auto-detection of the supported C++ standard, 
 
 At default, *variant lite* uses `std::variant` if it is available and lets you use it via namespace `nonstd`. You can however override this default and explicitly request to use `std::variant` or variant lite's `nonstd::variant` as `nonstd::variant` via the following macros.
 
-\-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
+-D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
 Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
 
 #### Disable exceptions
 
 -D<b>variant_CONFIG_NO_EXCEPTIONS</b>=0  
 Define this to 1 if you want to compile without exceptions. If not defined, the header tries and detect if exceptions have been disabled (e.g. via `-fno-exceptions`). Default is undefined.
+
+#### Disable \[\[nodiscard\]\]
+
+-D<b>variant\_CONFIG\_NO\_NODISCARD</b>=0
+Define this to 1 if you want to compile without \[\[nodiscard\]\]. Note that the default of marking `class bad_variant_access` with \[\[nodiscard\]\] is not part of the C++17 standard. The rationale to use \[\[nodiscard\]\] is that unnoticed discarded access error values may break the error handling flow.
 
 #### Presence of `variant_size_V()` simulation macro
 
