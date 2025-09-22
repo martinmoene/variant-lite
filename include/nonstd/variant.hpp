@@ -1212,16 +1212,19 @@ class variant;
 
 // 19.7.8 Class monostate
 
+#ifdef variant_CONFIG_MONOSTATE
+using variant_CONFIG_MONOSTATE;
+#else
 class monostate{};
 
 // 19.7.9 monostate relational operators
-
 inline variant_constexpr bool operator< ( monostate, monostate ) variant_noexcept { return false; }
 inline variant_constexpr bool operator> ( monostate, monostate ) variant_noexcept { return false; }
 inline variant_constexpr bool operator<=( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
+#endif
 
 // 19.7.4 variant helper classes
 
