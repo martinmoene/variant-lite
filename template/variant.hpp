@@ -205,8 +205,8 @@ struct index_tag_t {};
 template< std::size_t K >
 inline void index_tag ( index_tag_t<K> = index_tag_t<K>() ) { }
 
-#define variant_index_tag_t(K)  void(&)( nonstd::variants::detail::index_tag_t<K> )
-#define variant_index_tag(K)    nonstd::variants::detail::index_tag<K>
+#define variant_index_tag_t(K)  nonstd::variants::detail::index_tag_t<K>*
+#define variant_index_tag(K)    nullptr
 
 } // namespace detail
 } // namespace variants
