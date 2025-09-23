@@ -28,6 +28,26 @@ const void * test_nullptr = variant_nullptr;
 // Note: variant_BETWEEN() is not be available when std::variant is used:
 #define variant_t_BETWEEN( v, lo, hi ) ( (lo) <= (v) && (v) < (hi) )
 
+#ifndef variant_COMPILER_VERSION
+# define variant_COMPILER_VERSION( major, minor, patch )  ( 10 * ( 10 * (major) + (minor) ) + (patch) )
+#endif
+
+#ifndef variant_COMPILER_CLANG_VERSION
+# if defined(__clang__)
+#  define variant_COMPILER_CLANG_VERSION  variant_COMPILER_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
+# else
+#  define variant_COMPILER_CLANG_VERSION  0
+# endif
+#endif
+
+#ifndef variant_COMPILER_GNUC_VERSION
+# if defined(__GNUC__) && !defined(__clang__)
+#  define variant_COMPILER_GNUC_VERSION  variant_COMPILER_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
+# else
+#  define variant_COMPILER_GNUC_VERSION  0
+# endif
+#endif
+
 // The following tracer code originates as Oracle from Optional by
 // Andrzej Krzemienski, https://github.com/akrzemi1/Optional.
 
@@ -519,7 +539,13 @@ CASE( "variant: Allows to move-construct from element (C++11)" )
 
 CASE( "variant: Allows to convert-copy-construct from element" )
 {
-#if !( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
+#if ( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
+#elif ( variant_USES_STD_VARIANT && variant_COMPILER_GNUC_VERSION >= 1010 )
+    EXPECT( !!"variant: no convert-copy-construct from element with GCC 10.1 or later" );
+#elif ( variant_USES_STD_VARIANT && variant_COMPILER_CLANG_VERSION >= 1100 )
+    EXPECT( !!"variant: no convert-copy-construct from element with Clang 11 or later" );
+#else
     int i = 7;
 
     variant<double, std::string> var1(  i );
@@ -530,23 +556,25 @@ CASE( "variant: Allows to convert-copy-construct from element" )
 
     EXPECT( var2.index() == 0u              );
     EXPECT( get<0>(var2) == lest::approx(7) );
-#else
-    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
 #endif
 }
 
 CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-#if !( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
+#if ( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
+#elif ( variant_USES_STD_VARIANT && variant_COMPILER_GNUC_VERSION >= 1010 )
+    EXPECT( !!"variant: no convert-copy-construct from element with GCC 10.1 or later" );
+#elif ( variant_USES_STD_VARIANT && variant_COMPILER_CLANG_VERSION >= 1100 )
+    EXPECT( !!"variant: no convert-copy-construct from element with Clang 11 or later" );
+#else
     struct Int { operator int() { return 7; } };
 
     variant<double, std::string> var( Int{} );
 
     EXPECT( var.index() == 0u              );
     EXPECT( get<0>(var) == lest::approx(7) );
-#else
-    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
 #endif
 #else
     EXPECT( !!"variant: move-construction is not available (no C++11)" );
@@ -1640,7 +1668,7 @@ namespace issue_31 {
         CopyOnly( CopyOnly const & ) {}
         CopyOnly & operator=( CopyOnly const & ) { return *this; }
 
-#if variant_CPP11_OR_GREATER
+#if variant_CPP11_OR_GREATER && !(variant_USES_STD_VARIANT && defined(_LIBCPP_VERSION))
         CopyOnly( CopyOnly && ) = delete;
         CopyOnly & operator=( CopyOnly && ) = delete;
 #endif
