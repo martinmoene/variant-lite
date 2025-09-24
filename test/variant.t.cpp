@@ -1703,6 +1703,16 @@ CASE("visitor: Visitors can't return references, but they can with std::variant"
 #endif
 }
 
+CASE("index_tag<>: Undefined reference to index_tag<0ul> on clang-17 and later" "[.issue-54 pr-56]")
+{
+#if variant_CPP11_OR_GREATER
+    nonstd::variant< char, int, long, std::string > var;
+    var = 'v' ;
+#else
+    EXPECT( !!"index_tag<>: code not present for C++98 (no C++11)" );
+#endif
+}
+
 CASE( "tweak header: reads tweak header if supported " "[tweak]" )
 {
 #if variant_HAVE_TWEAK_HEADER
