@@ -2050,7 +2050,7 @@ using namespace variants;
 
 } // namespace nonstd
 
-#if variant_CPP11_OR_GREATER
+#if ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
 
 // 19.7.12 Hash support
 
@@ -2084,7 +2084,7 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 
 } //namespace std
 
-#endif // variant_CPP11_OR_GREATER
+#endif // ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
 
 #if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( pop )

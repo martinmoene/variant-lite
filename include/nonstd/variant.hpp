@@ -2705,7 +2705,7 @@ using namespace variants;
 
 } // namespace nonstd
 
-#if variant_CPP11_OR_GREATER
+#if ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
 
 // 19.7.12 Hash support
 
@@ -2753,7 +2753,7 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 } //namespace std
 
-#endif // variant_CPP11_OR_GREATER
+#endif // ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
 
 #if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( pop )
