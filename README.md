@@ -215,6 +215,26 @@ At default, *variant lite* uses `std::variant` if it is available and lets you u
 -D<b>variant\_CONFIG\_SELECT\_VARIANT</b>=variant_VARIANT_DEFAULT  
 Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::variant`. Define this to `variant_VARIANT_NONSTD` to select `nonstd::variant` as `nonstd::variant`. Default is undefined, which has the same effect as defining to `variant_VARIANT_DEFAULT`.
 
+#### Override `bad_variant_access`
+
+\-D<b>variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS</b>=type 
+
+Define this macro to override the default definition of `bad_variant_access`. This is useful when integrating with other compatibility libraries or the standard library to avoid conflicting exception types.
+
+For example: `#define variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS std::bad_variant_access`
+
+If not defined, variant-lite uses its own `nonstd::bad_variant_access`.
+
+#### Override `monostate`
+
+\-D<b>variant_CONFIG_OVERRIDE_MONOSTATE</b>=type 
+
+Define this macro to override the default `monostate` type used by variant-lite. This helps prevent type conflicts when multiple libraries define their own monostate. 
+
+For example: `#define variant_CONFIG_OVERRIDE_MONOSTATE std::monostate`
+
+If not defined, variant-lite uses its own `nonstd::monostate`.
+
 #### Disable exceptions
 
 -D<b>variant_CONFIG_NO_EXCEPTIONS</b>=0  
@@ -247,32 +267,6 @@ Define this to the pod-type you want to align to (no default).
 
 \-D<b>variant\_CONFIG\_ALIGN\_AS\_FALLBACK</b>=*pod_type*  
 Define this to the pod-type to use for alignment if the algorithm of *variant lite* cannot find a suitable POD type to use for alignment. Default is `double`.
-
-#### Override `bad_variant_access`
-<b>variant_CONFIG_BAD_VARIANT_ACCESS</b>=type 
-
-Define this macro to override the default definition of `bad_variant_access`. 
-
-This is useful when integrating with other compatibility libraries or the standard library to avoid conflicting exception types. 
-
-Example:
-```cpp
-#define variant_CONFIG_BAD_VARIANT_ACCESS std::bad_variant_access
-```
-If not defined, variant-lite uses its own `nonstd::bad_variant_access`.
-
-#### Override `monostate`
-<b>variant_CONFIG_MONOSTATE</b>=type 
-
-Define this macro to override the default `monostate` type used by variant-lite. 
-
-This helps prevent type conflicts when multiple libraries define their own monostate. 
-
-Example:
-```cpp
-#define variant_CONFIG_MONOSTATE std::monostate
-```
-If not defined, variant-lite uses its own `nonstd::monostate`.
 
 ## Reported to work with
 

@@ -1087,9 +1087,9 @@ class variant;
 
 // 19.7.8 Class monostate
 
-#ifdef variant_CONFIG_MONOSTATE
+#ifdef variant_CONFIG_OVERRIDE_MONOSTATE
 
-using variant_CONFIG_MONOSTATE;
+using variant_CONFIG_OVERRIDE_MONOSTATE;
 
 #else
 
@@ -1103,7 +1103,7 @@ inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
 
-#endif // variant_CONFIG_MONOSTATE
+#endif // variant_CONFIG_OVERRIDE_MONOSTATE
 
 // 19.7.4 variant helper classes
 
@@ -1162,8 +1162,8 @@ static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
 
 // 19.7.11 Class bad_variant_access
 
-#ifdef variant_CONFIG_BAD_VARIANT_ACCESS
-using variant_CONFIG_BAD_VARIANT_ACCESS;
+#ifdef variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS
+using variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS;
 #else
 class variant_nodiscard bad_variant_access : public std::exception
 {
@@ -1177,7 +1177,7 @@ public:
         return "bad variant access";
     }
 };
-#endif // variant_CONFIG_BAD_VARIANT_ACCESS
+#endif // variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS
 
 #endif // variant_CONFIG_NO_EXCEPTIONS
 
@@ -2060,7 +2060,7 @@ using namespace variants;
 
 namespace std {
 
-#ifndef variant_CONFIG_MONOSTATE
+#ifndef variant_CONFIG_OVERRIDE_MONOSTATE
 
 template<>
 struct hash< nonstd::monostate >
@@ -2071,7 +2071,7 @@ struct hash< nonstd::monostate >
     }
 };
 
-#endif // variant_CONFIG_MONOSTATE
+#endif // variant_CONFIG_OVERRIDE_MONOSTATE
 
 template< {{TplParamsList}} >
 struct hash< nonstd::variant<{{TplArgsList}}> >
