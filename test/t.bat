@@ -24,11 +24,12 @@ set unit_config=
 
 set msvc_defines=^
     -D_CRT_SECURE_NO_WARNINGS ^
-    -D_SCL_SECURE_NO_WARNINGS
+    -D_SCL_SECURE_NO_WARNINGS ^
+    -D_SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING
 
 set CppCoreCheckInclude=%VCINSTALLDIR%\Auxiliary\VS\include
 
-cl -nologo -W3 -EHsc %std% %unit_select% %unit_config% %msvc_defines% -I"%CppCoreCheckInclude%" -Ilest -I../include -I. %unit%-main.t.cpp %unit%.t.cpp && %unit%-main.t.exe
+cl -nologo -W3 -EHsc %std% %unit_select% %unit_config% %msvc_defines% -I"%CppCoreCheckInclude%" -Ilest -I../include -I. %unit%-main.t.cpp %unit%.t.cpp %unit%-override.t.cpp && %unit%-main.t.exe
 endlocal & goto :EOF
 
 :: subroutines:

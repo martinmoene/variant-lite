@@ -484,6 +484,7 @@ variant_alternative_t<>: Allows to select type by index (C++11)
 variant_alternative_T(): Allows to select type by index (non-standard: macro)
 std::hash<>: Allows to obtain hash (C++11)
 tweak header: reads tweak header if supported [tweak]
+bad_variant_access: Allows to override nonstd::bad_variant_access via variant_CONFIG_OVERRIDE_MONOSTATE
 ```
 
 </p>
