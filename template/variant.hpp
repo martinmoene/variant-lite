@@ -1088,8 +1088,11 @@ class variant;
 // 19.7.8 Class monostate
 
 #ifdef variant_CONFIG_MONOSTATE
+
 using variant_CONFIG_MONOSTATE;
+
 #else
+
 class monostate{};
 
 // 19.7.9 monostate relational operators
@@ -1099,6 +1102,7 @@ inline variant_constexpr bool operator<=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
+
 #endif // variant_CONFIG_MONOSTATE
 
 // 19.7.4 variant helper classes
@@ -2050,11 +2054,13 @@ using namespace variants;
 
 } // namespace nonstd
 
-#if ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
+#if variant_CPP11_OR_GREATER
 
 // 19.7.12 Hash support
 
 namespace std {
+
+#ifndef variant_CONFIG_MONOSTATE
 
 template<>
 struct hash< nonstd::monostate >
@@ -2064,6 +2070,8 @@ struct hash< nonstd::monostate >
         return 42;
     }
 };
+
+#endif // variant_CONFIG_MONOSTATE
 
 template< {{TplParamsList}} >
 struct hash< nonstd::variant<{{TplArgsList}}> >
@@ -2084,7 +2092,7 @@ struct hash< nonstd::variant<{{TplArgsList}}> >
 
 } //namespace std
 
-#endif // ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
+#endif // variant_CPP11_OR_GREATER
 
 #if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( pop )

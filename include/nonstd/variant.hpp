@@ -1213,8 +1213,11 @@ class variant;
 // 19.7.8 Class monostate
 
 #ifdef variant_CONFIG_MONOSTATE
+
 using variant_CONFIG_MONOSTATE;
+
 #else
+
 class monostate{};
 
 // 19.7.9 monostate relational operators
@@ -1224,7 +1227,8 @@ inline variant_constexpr bool operator<=( monostate, monostate ) variant_noexcep
 inline variant_constexpr bool operator>=( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator==( monostate, monostate ) variant_noexcept { return true;  }
 inline variant_constexpr bool operator!=( monostate, monostate ) variant_noexcept { return false; }
-#endif
+
+#endif // variant_CONFIG_MONOSTATE
 
 // 19.7.4 variant helper classes
 
@@ -1298,7 +1302,7 @@ public:
         return "bad variant access";
     }
 };
-#endif
+#endif // variant_CONFIG_BAD_VARIANT_ACCESS
 
 #endif // variant_CONFIG_NO_EXCEPTIONS
 
@@ -2705,11 +2709,13 @@ using namespace variants;
 
 } // namespace nonstd
 
-#if ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
+#if variant_CPP11_OR_GREATER
 
 // 19.7.12 Hash support
 
 namespace std {
+
+#ifndef variant_CONFIG_MONOSTATE
 
 template<>
 struct hash< nonstd::monostate >
@@ -2719,6 +2725,8 @@ struct hash< nonstd::monostate >
         return 42;
     }
 };
+
+#endif // variant_CONFIG_MONOSTATE
 
 template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8, class T9, class T10, class T11, class T12, class T13, class T14, class T15 >
 struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> >
@@ -2753,7 +2761,7 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 } //namespace std
 
-#endif // ! defined (variant_CONFIG_MONOSTATE) && variant_CPP11_OR_GREATER
+#endif // variant_CPP11_OR_GREATER
 
 #if variant_BETWEEN( variant_COMPILER_MSVC_VER, 1300, 1900 )
 # pragma warning( pop )
