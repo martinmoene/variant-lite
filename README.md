@@ -221,7 +221,7 @@ Define this to `variant_VARIANT_STD` to select `std::variant` as `nonstd::varian
 
 Define this macro to override the default definition of `bad_variant_access`. This is useful when integrating with other compatibility libraries or the standard library to avoid conflicting exception types.
 
-For example: `#define variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS std::bad_variant_access`
+For example: `#define variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS std::bad_variant_access`.
 
 If not defined, variant-lite uses its own `nonstd::bad_variant_access`.
 
@@ -231,7 +231,7 @@ If not defined, variant-lite uses its own `nonstd::bad_variant_access`.
 
 Define this macro to override the default `monostate` type used by variant-lite. This helps prevent type conflicts when multiple libraries define their own monostate. 
 
-For example: `#define variant_CONFIG_OVERRIDE_MONOSTATE std::monostate`
+For example: `#define variant_CONFIG_OVERRIDE_MONOSTATE std::monostate`.
 
 If not defined, variant-lite uses its own `nonstd::monostate`.
 
