@@ -651,8 +651,8 @@ struct TX : T
     template< class U > inline TX<T> operator<<( U const & ) const { return TX<T>();  }
     template< class U > inline TX<T> operator>>( U const & ) const { return TX<T>();  }
 
-                        inline bool  operator==( T const & ) const { return false; }
-                        inline bool  operator< ( T const & ) const { return false; }
+    template< class U > inline bool  operator==( U const & ) const { return false; }
+    template< class U > inline bool  operator< ( U const & ) const { return false; }
 
     template< class U > inline TX<T> operator& ( U const & ) const { return TX<T>();  }
     template< class U > inline TX<T> operator| ( U const & ) const { return TX<T>();  }

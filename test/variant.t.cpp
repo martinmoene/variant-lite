@@ -1355,7 +1355,9 @@ CASE( "variant: Allows to compare variants" )
 
     EXPECT_NOT( v == w );
     EXPECT_NOT( v != v );
+    EXPECT_NOT( v <  v );
     EXPECT_NOT( w <  v );
+    EXPECT_NOT( v >  v );
     EXPECT_NOT( v >  w );
     EXPECT_NOT( w <= v );
     EXPECT_NOT( v >= w );
