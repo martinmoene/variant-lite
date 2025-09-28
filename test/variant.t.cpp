@@ -1733,6 +1733,15 @@ CASE("visitor: Visitors can't return references, but they can with std::variant"
 #endif
 }
 
+CASE("variant: non-converting constructor with variant as element of e.g. std::pair" "[.issue-48]")
+{
+#if variant_COMPILE_TIME_TEST
+    std::pair< std::string, nonstd::variant<std::string> > y2 = {"a", "b"};
+#else
+    EXPECT( !!"variant: compilation issue (no compile-time tests)" );
+#endif
+}
+
 CASE("index_tag<>: Undefined reference to index_tag<0ul> on clang-17 and later" "[.issue-54 pr-56]")
 {
 #if variant_CPP11_OR_GREATER
