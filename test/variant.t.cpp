@@ -539,12 +539,12 @@ CASE( "variant: Allows to move-construct from element (C++11)" )
 
 CASE( "variant: Allows to convert-copy-construct from element" )
 {
-#if ( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
+#if (  variant_USES_STD_VARIANT && defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) )
     EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
 #elif ( variant_USES_STD_VARIANT && variant_COMPILER_GNUC_VERSION >= 1010 )
-    EXPECT( !!"variant: no convert-copy-construct from element with GCC 10.1 or later" );
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (GCC 10.1 or later)" );
 #elif ( variant_USES_STD_VARIANT && variant_COMPILER_CLANG_VERSION >= 1100 )
-    EXPECT( !!"variant: no convert-copy-construct from element with Clang 11 or later" );
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (Clang 11 or later)" );
 #else
     int i = 7;
 
@@ -562,12 +562,12 @@ CASE( "variant: Allows to convert-copy-construct from element" )
 CASE( "variant: Allows to convert-move-construct from element (C++11)" )
 {
 #if variant_CPP11_OR_GREATER
-#if ( defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) && variant_USES_STD_VARIANT )
+#if ( variant_USES_STD_VARIANT && defined(_MSC_VER) && variant_t_BETWEEN(_MSC_VER, 1920, 1930 ) )
     EXPECT( !!"variant: no convert-copy-construct from element with std::variant (VS2019/VC142/1920)" );
 #elif ( variant_USES_STD_VARIANT && variant_COMPILER_GNUC_VERSION >= 1010 )
-    EXPECT( !!"variant: no convert-copy-construct from element with GCC 10.1 or later" );
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (GCC 10.1 or later)" );
 #elif ( variant_USES_STD_VARIANT && variant_COMPILER_CLANG_VERSION >= 1100 )
-    EXPECT( !!"variant: no convert-copy-construct from element with Clang 11 or later" );
+    EXPECT( !!"variant: no convert-copy-construct from element with std::variant (Clang 11 or later)" );
 #else
     struct Int { operator int() { return 7; } };
 
