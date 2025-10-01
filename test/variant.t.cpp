@@ -199,6 +199,18 @@ std::size_t to_size_t( T v )
 } // anonymous namespace
 
 //
+// compile-time checks:
+//
+
+CASE( "variant: Compile-time checks" "[.compiletime]" )
+{
+#if variant_COMPILE_TIME
+    { variant<> var; }                      // at least one type required
+    { variant<NoDefaultConstruct> var; }    // first type must be default-constructible
+#endif
+}
+
+//
 // variant member operations:
 //
 

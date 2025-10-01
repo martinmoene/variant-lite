@@ -355,6 +355,7 @@ namespace nonstd {
 #define variant_CPP11_140  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1900)
 #define variant_CPP11_141  (variant_CPP11_OR_GREATER_ || variant_COMPILER_MSVC_VER >= 1910)
 
+#define variant_CPP11_000  (variant_CPP11_OR_GREATER)
 #define variant_CPP14_000  (variant_CPP14_OR_GREATER)
 #define variant_CPP17_000  (variant_CPP17_OR_GREATER)
 
@@ -363,8 +364,10 @@ namespace nonstd {
 #define variant_HAVE_CONSTEXPR_11       variant_CPP11_140
 #define variant_HAVE_INITIALIZER_LIST   variant_CPP11_120
 #define variant_HAVE_NOEXCEPT           variant_CPP11_140
+#define variant_HAVE_NOEXCEPT_OP        variant_CPP11_140
 #define variant_HAVE_NULLPTR            variant_CPP11_100
 #define variant_HAVE_OVERRIDE           variant_CPP11_140
+#define variant_HAVE_STATIC_ASSERT      variant_CPP11_000
 
 // Presence of C++14 language features:
 
@@ -406,6 +409,12 @@ namespace nonstd {
 # define variant_noexcept /*noexcept*/
 #endif
 
+#if variant_HAVE_NOEXCEPT_OP
+# define variant_noexcept_op(expr) noexcept(expr)
+#else
+# define variant_noexcept_op(expr) /*noexcept(expr)*/
+#endif
+
 #if variant_HAVE_NULLPTR
 # define variant_nullptr nullptr
 #else
@@ -438,6 +447,12 @@ namespace nonstd {
 # include <type_traits>
 #elif variant_HAVE_TR1_TYPE_TRAITS
 # include <tr1/type_traits>
+#endif
+
+#if variant_HAVE_STATIC_ASSERT
+# define variant_STATIC_ASSERT(expr, msg)     static_assert(expr, msg)
+#else // C++98
+# define variant_STATIC_ASSERT(expr, msg)   /*static_assert(expr, msg)*/
 #endif
 
 //
@@ -738,7 +753,7 @@ public:
     enum V { value = (alignof( Head ) > tail_value) ? alignof( Head ) : std::size_t( tail_value ) };
 };
 
-#endif
+#endif // variant_CPP11_OR_GREATER
 
 // typelist size (length):
 
@@ -1265,18 +1280,27 @@ template<
 >
 class variant
 {
-    // static_assert(sizeof...(Types) > 0, "Template parameter type list of variant can not be empty.");
-    // static_assert(!detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
-    // static_assert(!detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
-    // static_assert(sizeof...(Types) < std::numeric_limits<type_index_t>::max(), "Internal index type must be able to accommodate all alternatives.");
-
     typedef detail::helper< {{TplArgsList}} > helper_type;
     typedef {{TLMacroName}}( {{TplArgsList}} ) variant_types;
+
+#if variant_CPP11_OR_GREATER
+    variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value > 0, "Template parameter type list of variant can not be empty.");
+    variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value <= variant_CONFIG_MAX_TYPE_COUNT, "Exceeding 33configured number of alternative types.");
+    // variant_STATIC_ASSERT( !detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
+    // variant_STATIC_ASSERT( !detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
+ #endif
 
 public:
     // 19.7.3.1 Constructors
 
-    variant() : type_index( 0 ) { new( ptr() ) T0(); }
+    variant() variant_noexcept_op( std::is_nothrow_default_constructible<T0>::value )
+    : type_index( 0 )
+    {
+#if variant_CPP11_OR_GREATER
+        variant_STATIC_ASSERT( std::is_default_constructible<T0>::value, "First type in variant must be default constructible to allow default construction of variant (e.g. use monostate).");
+#endif
+        new( ptr() ) T0();
+    }
 
 #if variant_CPP11_OR_GREATER
     // no variant( T const & t )
@@ -1292,13 +1316,15 @@ public:
     template < typename T, typename Traits = detail::value_traits<T, variant_types>
         variant_REQUIRES_B( Traits::is_valid && !std::is_same<variant<variant_types>, typename Traits::value_type>::value )
     >
-    variant( T && t )
+    variant( T && t ) noexcept( std::is_nothrow_constructible<typename Traits::target_type, T&&>::value )
         : type_index( Traits::list_index )
     {
         new( ptr() ) typename Traits::target_type( std::forward<T>( t ) );
     }
 
 #endif // variant_CPP11_OR_GREATER
+
+    // This function shall not participate in overload resolution unless is_copy_constructible_v<T_i> is true for all i.
 
     variant(variant const & other)
     : type_index( variant_npos_internal() )
@@ -1379,7 +1405,7 @@ public:
 
     variant & operator=( variant && other ) noexcept(
         {% for n in range(NumParams) -%}
-        std::is_nothrow_move_assignable<T{{n}}>::value{{')' if loop.last else ' &&'}}
+        std::is_nothrow_move_constructible<T{{n}}>::value && std::is_nothrow_move_assignable<T{{n}}>::value{{')' if loop.last else ' &&'}}
         {% endfor -%}
     {
         return move_assign( std::move( other ) );
@@ -1388,7 +1414,9 @@ public:
     template < typename T, typename Traits = detail::value_traits<T, variant_types>
         variant_REQUIRES_B( Traits::is_valid && !std::is_same<variant<variant_types>, typename Traits::value_type>::value )
     >
-    variant & operator=( T && t )
+    variant & operator=( T && t ) noexcept(
+            std::is_nothrow_constructible<typename Traits::target_type,T&&>::value
+            && std::is_nothrow_assignable<typename Traits::target_type,T&&>::value )
     {
         type_index = variant_npos_internal();
         return move_assign( std::move( variant( std::forward<T>( t ) ) ) );
@@ -1404,11 +1432,6 @@ public:
     variant & operator=( T{{n}} const & t{{n}} ) { return assign_value<{{n}}>( t{{n}} ); }
     {% endfor %}
 #endif
-
-    std::size_t index() const
-    {
-        return variant_npos_internal() == type_index ? variant_npos : static_cast<std::size_t>( type_index );
-    }
 
     // 19.7.3.4 Modifiers
 
@@ -1460,9 +1483,14 @@ public:
 
     // 19.7.3.5 Value status
 
-    bool valueless_by_exception() const
+    variant_constexpr bool valueless_by_exception() const variant_noexcept
     {
         return type_index == variant_npos_internal();
+    }
+
+    variant_constexpr std::size_t index() const variant_noexcept
+    {
+        return variant_npos_internal() == type_index ? variant_npos : static_cast<std::size_t>( type_index );
     }
 
     // 19.7.3.6 Swap
@@ -1718,25 +1746,25 @@ private:
 // 19.7.5 Value access
 
 template< class T, {{TplParamsList}} >
-inline bool holds_alternative( variant<{{TplArgsList}}> const & v ) variant_noexcept
+inline variant_constexpr bool holds_alternative( variant<{{TplArgsList}}> const & v ) variant_noexcept
 {
     return v.index() == variant<{{TplArgsList}}>::template index_of<T>();
 }
 
 template< class R, {{TplParamsList}} >
-inline R & get( variant<{{TplArgsList}}> & v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+inline variant_constexpr R & get( variant<{{TplArgsList}}> & v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
 {
     return v.template get<R>();
 }
 
 template< class R, {{TplParamsList}} >
-inline R const & get( variant<{{TplArgsList}}> const & v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+inline variant_constexpr R const & get( variant<{{TplArgsList}}> const & v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
 {
     return v.template get<R>();
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type &
+inline variant_constexpr14 typename variant_alternative< K, variant<{{TplArgsList}}> >::type &
 get( variant<{{TplArgsList}}> & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
 #if variant_CONFIG_NO_EXCEPTIONS
@@ -1751,7 +1779,7 @@ get( variant<{{TplArgsList}}> & v, nonstd_lite_in_place_index_t(K) = nonstd_lite
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &
+inline variant_constexpr14 typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &
 get( variant<{{TplArgsList}}> const & v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
 #if variant_CONFIG_NO_EXCEPTIONS
@@ -1768,19 +1796,19 @@ get( variant<{{TplArgsList}}> const & v, nonstd_lite_in_place_index_t(K) = nonst
 #if variant_CPP11_OR_GREATER
 
 template< class R, {{TplParamsList}} >
-inline R && get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+inline variant_constexpr R && get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
 {
     return std::move(v.template get<R>());
 }
 
 template< class R, {{TplParamsList}} >
-inline R const && get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
+inline variant_constexpr R const && get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_type_t(R) = nonstd_lite_in_place_type(R) )
 {
     return std::move(v.template get<R>());
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type &&
+inline variant_constexpr14 typename variant_alternative< K, variant<{{TplArgsList}}> >::type &&
 get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
 #if variant_CONFIG_NO_EXCEPTIONS
@@ -1795,7 +1823,7 @@ get( variant<{{TplArgsList}}> && v, nonstd_lite_in_place_index_t(K) = nonstd_lit
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &&
+inline variant_constexpr14 typename variant_alternative< K, variant<{{TplArgsList}}> >::type const &&
 get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
 {
 #if variant_CONFIG_NO_EXCEPTIONS
@@ -1812,29 +1840,29 @@ get( variant<{{TplArgsList}}> const && v, nonstd_lite_in_place_index_t(K) = nons
 #endif // variant_CPP11_OR_GREATER
 
 template< class T, {{TplParamsList}} >
-inline typename std11::add_pointer<T>::type
-get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) )
+inline variant_constexpr typename std11::add_pointer<T>::type
+get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T) ) variant_noexcept
 {
     return ( pv->index() == variant<{{TplArgsList}}>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< class T, {{TplParamsList}} >
-inline typename std11::add_pointer<const T>::type
-get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T))
+inline variant_constexpr typename std11::add_pointer<const T>::type
+get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_type_t(T) = nonstd_lite_in_place_type(T)) variant_noexcept
 {
     return ( pv->index() == variant<{{TplArgsList}}>::template index_of<T>() ) ? &get<T>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename std11::add_pointer< typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
-get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+inline variant_constexpr typename std11::add_pointer< typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
+get_if( variant<{{TplArgsList}}> * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) ) variant_noexcept
 {
     return ( pv->index() == K ) ? &get<K>( *pv ) : variant_nullptr;
 }
 
 template< std::size_t K, {{TplParamsList}} >
-inline typename std11::add_pointer< const typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
-get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) )
+inline variant_constexpr typename std11::add_pointer< const typename variant_alternative<K, variant<{{TplArgsList}}> >::type >::type
+get_if( variant<{{TplArgsList}}> const * pv, nonstd_lite_in_place_index_t(K) = nonstd_lite_in_place_index(K) ) variant_noexcept
 {
     return ( pv->index() == K ) ? &get<K>( *pv )  : variant_nullptr;
 }
@@ -2010,7 +2038,7 @@ struct VisitorImpl
 #if variant_CPP11_OR_GREATER
 // No perfect forwarding here in order to simplify code
 template< typename Visitor, typename ... V >
-inline auto visit(Visitor const& v, V const& ... vars) -> typename detail::VisitorImpl<sizeof ... (V), Visitor, V... > ::result_type
+inline variant_constexpr auto visit(Visitor const& v, V const& ... vars) -> typename detail::VisitorImpl<sizeof ... (V), Visitor, V... > ::result_type
 {
     typedef detail::VisitorImpl<sizeof ... (V), Visitor, V... > impl_type;
     return impl_type::applicator_type::apply(v, vars...);
@@ -2018,7 +2046,7 @@ inline auto visit(Visitor const& v, V const& ... vars) -> typename detail::Visit
 #else
 {% for n in range(VisitorArgs) %}
 template< typename R, typename Visitor, {% call (i0, i1) SequenceGen(n + 1)%}typename V{{i1}}{% endcall %} >
-inline R visit(const Visitor& v, {% call (i0, i1) SequenceGen(n + 1)%}V{{i1}} const& arg{{i1}}{% endcall %})
+inline variant_constexpr R visit(const Visitor& v, {% call (i0, i1) SequenceGen(n + 1)%}V{{i1}} const& arg{{i1}}{% endcall %})
 {
     return detail::VisitorApplicator<R>::apply(v, {% call (i0, i1) SequenceGen(n + 1)%}arg{{i1}}{% endcall %});
 }
@@ -2058,7 +2086,7 @@ struct Comparator
 } //namespace detail
 
 template< {{TplParamsList}} >
-inline bool operator==(
+inline variant_constexpr14 bool operator==(
     variant<{{TplArgsList}}> const & v,
     variant<{{TplArgsList}}> const & w )
 {
@@ -2068,7 +2096,7 @@ inline bool operator==(
 }
 
 template< {{TplParamsList}} >
-inline bool operator!=(
+inline variant_constexpr bool operator!=(
     variant<{{TplArgsList}}> const & v,
     variant<{{TplArgsList}}> const & w )
 {
@@ -2076,7 +2104,7 @@ inline bool operator!=(
 }
 
 template< {{TplParamsList}} >
-inline bool operator<(
+inline variant_constexpr14 bool operator<(
     variant<{{TplArgsList}}> const & v,
     variant<{{TplArgsList}}> const & w )
 {
@@ -2088,7 +2116,7 @@ inline bool operator<(
 }
 
 template< {{TplParamsList}} >
-inline bool operator>(
+inline variant_constexpr bool operator>(
     variant<{{TplArgsList}}> const & v,
     variant<{{TplArgsList}}> const & w )
 {
@@ -2096,7 +2124,7 @@ inline bool operator>(
 }
 
 template< {{TplParamsList}} >
-inline bool operator<=(
+inline variant_constexpr bool operator<=(
     variant<{{TplArgsList}}> const & v,
     variant<{{TplArgsList}}> const & w )
 {
@@ -2104,7 +2132,7 @@ inline bool operator<=(
 }
 
 template< {{TplParamsList}} >
-inline bool operator>=(
+inline variant_constexpr bool operator>=(
     variant<{{TplArgsList}}> const & v,
     variant<{{TplArgsList}}> const & w )
 {
