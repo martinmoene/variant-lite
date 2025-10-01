@@ -1,4 +1,4 @@
-// Copyright 2016-2018 by Martin Moene
+// Copyright 2016-2025 by Martin Moene
 //
 // https://github.com/martinmoene/variant-lite
 //
