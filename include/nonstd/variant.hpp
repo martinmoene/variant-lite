@@ -10,7 +10,7 @@
 #ifndef NONSTD_VARIANT_LITE_HPP
 #define NONSTD_VARIANT_LITE_HPP
 
-#define variant_lite_MAJOR  2
+#define variant_lite_MAJOR  3
 #define variant_lite_MINOR  0
 #define variant_lite_PATCH  0
 
@@ -1173,7 +1173,7 @@ struct helper
         case 13: as<T13>( data )->~T13(); break;
         case 14: as<T14>( data )->~T14(); break;
         case 15: as<T15>( data )->~T15(); break;
-
+        
         }
     }
 
@@ -1216,7 +1216,7 @@ struct helper
         case 13: new( to_value ) T13( std::move( *as<T13>( from_value ) ) ); break;
         case 14: new( to_value ) T14( std::move( *as<T14>( from_value ) ) ); break;
         case 15: new( to_value ) T15( std::move( *as<T15>( from_value ) ) ); break;
-
+        
         }
         return from_index;
     }
@@ -1241,7 +1241,7 @@ struct helper
         case 13: *as<T13>( to_value ) = std::move( *as<T13>( from_value ) ); break;
         case 14: *as<T14>( to_value ) = std::move( *as<T14>( from_value ) ); break;
         case 15: *as<T15>( to_value ) = std::move( *as<T15>( from_value ) ); break;
-
+        
         }
         return from_index;
     }
@@ -1267,7 +1267,7 @@ struct helper
         case 13: new( to_value ) T13( *as<T13>( from_value ) ); break;
         case 14: new( to_value ) T14( *as<T14>( from_value ) ); break;
         case 15: new( to_value ) T15( *as<T15>( from_value ) ); break;
-
+        
         }
         return from_index;
     }
@@ -1292,7 +1292,7 @@ struct helper
         case 13: *as<T13>( to_value ) = *as<T13>( from_value ); break;
         case 14: *as<T14>( to_value ) = *as<T14>( from_value ); break;
         case 15: *as<T15>( to_value ) = *as<T15>( from_value ); break;
-
+        
         }
         return from_index;
     }
@@ -1422,7 +1422,7 @@ class variant
 
 #if variant_CPP11_OR_GREATER
     variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value > 0, "Template parameter type list of variant can not be empty.");
-    variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value <= variant_CONFIG_MAX_TYPE_COUNT, "Exceeding 33configured number of alternative types.");
+    variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value <= variant_CONFIG_MAX_TYPE_COUNT, "Exceeding configured number of alternative types.");
     // variant_STATIC_ASSERT( !detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
     // variant_STATIC_ASSERT( !detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
  #endif
@@ -1459,7 +1459,7 @@ public:
     variant( T13 const & t13 ) : type_index( 13 ) { new( ptr() ) T13( t13 ); }
     variant( T14 const & t14 ) : type_index( 14 ) { new( ptr() ) T14( t14 ); }
     variant( T15 const & t15 ) : type_index( 15 ) { new( ptr() ) T15( t15 ); }
-
+    
 #endif
 
 #if variant_CPP11_OR_GREATER
@@ -1621,7 +1621,7 @@ public:
     variant & operator=( T13 const & t13 ) { return assign_value<13>( t13 ); }
     variant & operator=( T14 const & t14 ) { return assign_value<14>( t14 ); }
     variant & operator=( T15 const & t15 ) { return assign_value<15>( t15 ); }
-
+    
 #endif
 
     // 19.7.3.4 Modifiers
@@ -1704,8 +1704,8 @@ public:
             std::is_nothrow_move_constructible<T12>::value && std17::is_nothrow_swappable<T12>::value &&
             std::is_nothrow_move_constructible<T13>::value && std17::is_nothrow_swappable<T13>::value &&
             std::is_nothrow_move_constructible<T14>::value && std17::is_nothrow_swappable<T14>::value &&
-            std::is_nothrow_move_constructible<T15>::value && std17::is_nothrow_swappable<T15>::value
-
+            std::is_nothrow_move_constructible<T15>::value && std17::is_nothrow_swappable<T15>::value 
+            
         )
 #endif
     {
@@ -1926,7 +1926,7 @@ private:
             case 13: swap( this->get<13>(), other.get<13>() ); break;
             case 14: swap( this->get<14>(), other.get<14>() ); break;
             case 15: swap( this->get<15>(), other.get<15>() ); break;
-
+            
         }
     }
 
@@ -2106,7 +2106,7 @@ template< class T0, class T1, class T2, class T3, class T4, class T5, class T6, 
         std::is_move_constructible<T12>::value && std17::is_swappable<T12>::value &&
         std::is_move_constructible<T13>::value && std17::is_swappable<T13>::value &&
         std::is_move_constructible<T14>::value && std17::is_swappable<T14>::value &&
-        std::is_move_constructible<T15>::value && std17::is_swappable<T15>::value
+        std::is_move_constructible<T15>::value && std17::is_swappable<T15>::value 
          )
 #endif
 >
@@ -2166,11 +2166,11 @@ struct TypedVisitorUnwrapper<2, R, Visitor, T2>
 {
     const Visitor& visitor;
     T2 const& val2;
-
+    
     TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_)
         : visitor(visitor_)
         , val2(val2_)
-
+        
     {
     }
 
@@ -2187,12 +2187,12 @@ struct TypedVisitorUnwrapper<3, R, Visitor, T2, T3>
     const Visitor& visitor;
     T2 const& val2;
     T3 const& val3;
-
+    
     TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_)
         : visitor(visitor_)
         , val2(val2_)
         , val3(val3_)
-
+        
     {
     }
 
@@ -2210,13 +2210,13 @@ struct TypedVisitorUnwrapper<4, R, Visitor, T2, T3, T4>
     T2 const& val2;
     T3 const& val3;
     T4 const& val4;
-
+    
     TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_, T4 const& val4_)
         : visitor(visitor_)
         , val2(val2_)
         , val3(val3_)
         , val4(val4_)
-
+        
     {
     }
 
@@ -2235,14 +2235,14 @@ struct TypedVisitorUnwrapper<5, R, Visitor, T2, T3, T4, T5>
     T3 const& val3;
     T4 const& val4;
     T5 const& val5;
-
+    
     TypedVisitorUnwrapper(const Visitor& visitor_, T2 const& val2_, T3 const& val3_, T4 const& val4_, T5 const& val5_)
         : visitor(visitor_)
         , val2(val2_)
         , val3(val3_)
         , val4(val4_)
         , val5(val5_)
-
+        
     {
     }
 
@@ -2267,42 +2267,42 @@ struct VisitorUnwrapper
     {
     }
 
-
+    
     template< typename T1 >
     R operator()(T1 const& val1) const
     {
         typedef TypedVisitorUnwrapper<2, R, Visitor, T1> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1), r);
     }
-
+    
     template< typename T1, typename T2 >
     R operator()(T1 const& val1, T2 const& val2) const
     {
         typedef TypedVisitorUnwrapper<3, R, Visitor, T1, T2> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2), r);
     }
-
+    
     template< typename T1, typename T2, typename T3 >
     R operator()(T1 const& val1, T2 const& val2, T3 const& val3) const
     {
         typedef TypedVisitorUnwrapper<4, R, Visitor, T1, T2, T3> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3), r);
     }
-
+    
     template< typename T1, typename T2, typename T3, typename T4 >
     R operator()(T1 const& val1, T2 const& val2, T3 const& val3, T4 const& val4) const
     {
         typedef TypedVisitorUnwrapper<5, R, Visitor, T1, T2, T3, T4> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4), r);
     }
-
+    
     template< typename T1, typename T2, typename T3, typename T4, typename T5 >
     R operator()(T1 const& val1, T2 const& val2, T3 const& val3, T4 const& val4, T5 const& val5) const
     {
         typedef TypedVisitorUnwrapper<6, R, Visitor, T1, T2, T3, T4, T5> visitor_type;
         return VisitorApplicator<R>::apply(visitor_type(visitor, val1, val2, val3, val4, val5), r);
     }
-
+    
 };
 
 
@@ -2330,7 +2330,7 @@ struct VisitorApplicator
             case 13: return apply_visitor<13>(v, arg);
             case 14: return apply_visitor<14>(v, arg);
             case 15: return apply_visitor<15>(v, arg);
-
+            
             // prevent default construction of a const reference, see issue #39:
             default: std::terminate();
         }
@@ -2357,7 +2357,7 @@ struct VisitorApplicator
         return apply(unwrapper, arg2, args ...);
     }
 #else
-
+    
     template< typename Visitor, typename V1, typename V2 >
     static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2)
     {
@@ -2365,7 +2365,7 @@ struct VisitorApplicator
         Unwrapper unwrapper(v, arg1);
         return apply(unwrapper, arg2);
     }
-
+    
     template< typename Visitor, typename V1, typename V2, typename V3 >
     static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3)
     {
@@ -2373,7 +2373,7 @@ struct VisitorApplicator
         Unwrapper unwrapper(v, arg1);
         return apply(unwrapper, arg2, arg3);
     }
-
+    
     template< typename Visitor, typename V1, typename V2, typename V3, typename V4 >
     static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4)
     {
@@ -2381,7 +2381,7 @@ struct VisitorApplicator
         Unwrapper unwrapper(v, arg1);
         return apply(unwrapper, arg2, arg3, arg4);
     }
-
+    
     template< typename Visitor, typename V1, typename V2, typename V3, typename V4, typename V5 >
     static R apply(const Visitor& v, V1 const& arg1, V2 const& arg2, V3 const& arg3, V4 const& arg4, V5 const& arg5)
     {
@@ -2389,7 +2389,7 @@ struct VisitorApplicator
         Unwrapper unwrapper(v, arg1);
         return apply(unwrapper, arg2, arg3, arg4, arg5);
     }
-
+    
 #endif
 };
 
@@ -2472,7 +2472,7 @@ struct Comparator
             case 13: return get<13>( v ) == get<13>( w );
             case 14: return get<14>( v ) == get<14>( w );
             case 15: return get<15>( v ) == get<15>( w );
-
+            
             default: return false;
         }
     }
@@ -2497,7 +2497,7 @@ struct Comparator
             case 13: return get<13>( v ) < get<13>( w );
             case 14: return get<14>( v ) < get<14>( w );
             case 15: return get<15>( v ) < get<15>( w );
-
+            
             default: return false;
         }
     }
@@ -2609,7 +2609,7 @@ struct hash< nonstd::variant<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
             case 13: return nvd::hash( 13 ) ^ nvd::hash( get<13>( v ) );
             case 14: return nvd::hash( 14 ) ^ nvd::hash( get<14>( v ) );
             case 15: return nvd::hash( 15 ) ^ nvd::hash( get<15>( v ) );
-
+            
             default: return 0;
         }
     }

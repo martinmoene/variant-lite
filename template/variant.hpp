@@ -10,7 +10,7 @@
 #ifndef NONSTD_VARIANT_LITE_HPP
 #define NONSTD_VARIANT_LITE_HPP
 
-#define variant_lite_MAJOR  2
+#define variant_lite_MAJOR  3
 #define variant_lite_MINOR  0
 #define variant_lite_PATCH  0
 
@@ -1285,7 +1285,7 @@ class variant
 
 #if variant_CPP11_OR_GREATER
     variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value > 0, "Template parameter type list of variant can not be empty.");
-    variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value <= variant_CONFIG_MAX_TYPE_COUNT, "Exceeding 33configured number of alternative types.");
+    variant_STATIC_ASSERT( detail::typelist_size<variant_types>::value <= variant_CONFIG_MAX_TYPE_COUNT, "Exceeding configured number of alternative types.");
     // variant_STATIC_ASSERT( !detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
     // variant_STATIC_ASSERT( !detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
  #endif

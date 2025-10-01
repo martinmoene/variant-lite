@@ -114,9 +114,9 @@ Or, if you use the [conan package manager](https://www.conan.io/), you might fol
 | Purpose               | Type | Notes |
 |-----------------------|------|-------|
 | Type-safe union       | template&lt; class T0...T6 ><br>class **variant** | non-standard: may hold up to seven types |
-| Default constructible | class **monostate**                  |Type to make variant default constructible |
-| Error reporting       | class **bad_variant_access**         |&nbsp; |
-| In-place construction | struct **in_place_tag**              |&nbsp;             |
+| Default constructible | class **monostate**                  | Type to make variant default constructible |
+| Error reporting       | class **bad_variant_access**         | &nbsp; |
+| In-place construction | struct **in_place_tag**              | &nbsp; |
 | &nbsp;                | **in_place**                         | select type or index for in-place construction |
 | &nbsp;                | **in_place_type**                    | select type for in-place construction |
 | &nbsp;                | **in_place_index**                   | select index for in-place construction |
@@ -134,8 +134,8 @@ Or, if you use the [conan package manager](https://www.conan.io/), you might fol
 | Kind         | Std  | Method                                       | Result |
 |--------------|------|----------------------------------------------|--------|
 | Construction |&nbsp;| **variant**()                                    | default-construct first type      |
-| &nbsp;       |&nbsp;| **variant**( Tx const & x )                      | copy-construct with value type Tx |
-| &nbsp;       |C++11 | **variant**( Tx && x )                           | move-construct with value type Tx |
+| &nbsp;       |C++98 | **variant**( Tx const & x )                      | copy-construct with value type Tx, non-converting |
+| &nbsp;       |C++11 | **variant**( T && x )                            | universal-construct from value type T |
 | &nbsp;       |&nbsp;| **variant**( variant const & rhs )               | copy-construct from other variant |
 | &nbsp;       |C++11 | **variant**( variant && rhs )                    | move-construct from other variant |
 | &nbsp;       |C++11 | template&lt; class T, class... Args ><br>explicit **variant**( in_place_type_t(T), Args&&... args) | in-place-construct type T |
@@ -145,8 +145,8 @@ Or, if you use the [conan package manager](https://www.conan.io/), you might fol
 | Destruction  |&nbsp;| **~variant**()                                   | destruct current content |
 | Assignment   |&nbsp;| variant & **operator=**( variant const & rhs )   | copy-assign from other |
 | &nbsp;       |C++11 | variant & **operator=**( variant && rhs )        | move-assign from other |
-| &nbsp;       |C++11 | template&lt; class Tx ><br>variant & **operator=**( Tx && t ) | move-assign from value |
-| &nbsp;       |< C++11 | template&lt; class Tx ><br>variant & **operator=**( Tx const & t ) | copy-assign from value;<br>non-standard |
+| &nbsp;       |C++11 | template&lt; class Tx ><br>variant & **operator=**( T && t ) | universal-assign from value type T |
+| &nbsp;       |C++98 | template&lt; class Tx ><br>variant & **operator=**( Tx const & t ) | copy-assign from value;<br>non-standard |
 | State        |&nbsp;| std::size_t **index**() const                    | index of current content's type |
 | &nbsp;       |&nbsp;| bool **valueless_by_exception**() const          | true if no content is present |
 | Emplace      |C++11 | template&lt; class T, class... Args ><br>T & **emplace**( Args&&... args ) | emplace type T |
