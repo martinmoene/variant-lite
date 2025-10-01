@@ -719,22 +719,22 @@ struct typelist
 // typelist max element size:
 
 template< class List >
-struct typelist_max;
+struct typelist_max_sizeof;
 
 template<>
-struct typelist_max< nulltype >
+struct typelist_max_sizeof< nulltype >
 {
     enum V { value = 0 } ;
     typedef void type;
 };
 
 template< class Head, class Tail >
-struct typelist_max< typelist<Head, Tail> >
+struct typelist_max_sizeof< typelist<Head, Tail> >
 {
 private:
-    enum TV { tail_value = size_t( typelist_max<Tail>::value ) };
+    enum TV { tail_value = size_t( typelist_max_sizeof<Tail>::value ) };
 
-    typedef typename typelist_max<Tail>::type tail_type;
+    typedef typename typelist_max_sizeof<Tail>::type tail_type;
 
 public:
     enum V { value = (sizeof( Head ) > tail_value) ? sizeof( Head ) : std::size_t( tail_value ) } ;
@@ -1903,7 +1903,7 @@ private:
     }
 
 private:
-    enum { data_size  = detail::typelist_max< variant_types >::value };
+    enum { data_size  = detail::typelist_max_sizeof< variant_types >::value };
 
 #if variant_CPP11_OR_GREATER
 
@@ -1920,7 +1920,7 @@ private:
     aligned_storage_t data;
 
 #else
-    typedef typename detail::typelist_max< variant_types >::type max_type;
+    typedef typename detail::typelist_max_sizeof< variant_types >::type max_type;
 
     typedef variant_ALIGN_AS( max_type ) align_as_type;
 
