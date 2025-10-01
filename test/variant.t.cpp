@@ -7,6 +7,7 @@
 
 #include "variant-main.t.hpp"
 
+#include <map>
 #include <memory>
 
 using namespace nonstd;
@@ -295,13 +296,9 @@ CASE( "variant: Allows to obtain the index of the current type" )
 
 CASE( "variant: Allows to inspect if variant is \"valueless by exception\"" )
 {
-#if variant_CPP11_OR_GREATER
-    empty_variant_t var{ make_empty_variant() };
+    empty_variant_t var( make_empty_variant() );
 
     EXPECT( var.valueless_by_exception() );
-#else
-    EXPECT( !!"variant: emplace is not available (no C++11)" );
-#endif
 }
 
 CASE( "variant: Allows to copy-assign from variant" )
@@ -369,47 +366,35 @@ CASE( "variant: Allows to copy-assign from variant" )
 
 CASE( "variant: Allows to copy-assign mutually empty variant" )
 {
-#if variant_CPP11_OR_GREATER
-    empty_variant_t var1{ make_empty_variant() };
-    empty_variant_t var2{ make_empty_variant() };
+    empty_variant_t var1( make_empty_variant() );
+    empty_variant_t var2( make_empty_variant() );
 
     var1 = var2;
 
     EXPECT( var1.valueless_by_exception() );
     EXPECT( var2.valueless_by_exception() );
-#else
-    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
-#endif
 }
 
 CASE( "variant: Allows to copy-assign from empty variant" )
 {
-#if variant_CPP11_OR_GREATER
-    empty_variant_t var1{ make_non_empty_variant() };
-    empty_variant_t var2{ make_empty_variant()     };
+    empty_variant_t var1( make_non_empty_variant() );
+    empty_variant_t var2( make_empty_variant()     );
 
     var1 = var2;
 
     EXPECT( var1.valueless_by_exception() );
     EXPECT( var2.valueless_by_exception() );
-#else
-    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
-#endif
 }
 
 CASE( "variant: Allows to copy-assign to empty variant" )
 {
-#if variant_CPP11_OR_GREATER
-    empty_variant_t var1{ make_empty_variant()     };
-    empty_variant_t var2{ make_non_empty_variant() };
+    empty_variant_t var1( make_empty_variant()     );
+    empty_variant_t var2( make_non_empty_variant() );
 
     var1 = var2;
 
     EXPECT_NOT( var1.valueless_by_exception() );
     EXPECT_NOT( var2.valueless_by_exception() );
-#else
-    EXPECT( !!"variant: make_empty_variant requires C++11 (no C++11)" );
-#endif
 }
 
 CASE( "variant: Allows to move-assign from variant (C++11)" )
@@ -1735,10 +1720,14 @@ CASE("visitor: Visitors can't return references, but they can with std::variant"
 
 CASE("variant: non-converting constructor with variant as element of e.g. std::pair" "[.issue-48]")
 {
-#if variant_COMPILE_TIME_TEST
+#if variant_CPP11_OR_GREATER
     std::pair< std::string, nonstd::variant<std::string> > y2 = {"a", "b"};
+
+    using foo = nonstd::variant<int, std::string>;
+    using bar = std::map<std::string, foo>;
+    auto zoo  = bar{{"hello", "world"}};
 #else
-    EXPECT( !!"variant: compilation issue (no compile-time tests)" );
+    EXPECT( !!"variant: was compilation issue (no compile-time tests) (no C++11)" );
 #endif
 }
 

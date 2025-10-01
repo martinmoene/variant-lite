@@ -666,6 +666,20 @@ struct TX : T
 struct S{{n}}{}; typedef TX<S{{n}}> T{{n}};
 {% endfor %}
 
+} // namespace detail
+
+// index of the variant in the invalid state (constant)
+
+typedef std::size_t type_index_t;
+
+#if variant_CPP11_OR_GREATER
+variant_constexpr type_index_t variant_npos = static_cast<type_index_t>( -1 );
+#else
+static const type_index_t variant_npos = static_cast<type_index_t>( -1 );
+#endif
+
+namespace detail {
+
 struct nulltype{};
 
 template< class Head, class Tail >
@@ -814,6 +828,74 @@ template< class List, class T >
 struct typelist_contains_unique_type : typelist_type_is_unique< List, typelist_index_of< List, T >::value >
 {
 };
+
+//
+// Mechanism to allow for convertible types.
+// Inspired on mapbox variant, https://github.com/mapbox/variant.
+//
+
+#if variant_CPP11_OR_GREATER
+
+// direct_type:
+
+template <typename T, typename Typelist>
+struct direct_type;
+
+template <typename T, typename First, typename Tail>
+struct direct_type<T, typelist<First, Tail> >
+{
+    static constexpr type_index_t index = std::is_same<T, First>::value
+        ? static_cast<type_index_t>( typelist_size<Tail>::value )
+        : direct_type<T, Tail>::index;
+};
+
+template <typename T>
+struct direct_type<T, nulltype>
+{
+    static constexpr type_index_t index = variant_npos;
+};
+
+// convertible_type:
+
+template <typename T, typename Typelist>
+struct convertible_type;
+
+template <typename T, typename First, typename Tail>
+struct convertible_type<T, typelist<First, Tail> >
+{
+    static constexpr type_index_t index = std::is_convertible<T, First>::value
+        ? static_cast<type_index_t>( typelist_size<Tail>::value )
+        : convertible_type<T, Tail>::index;
+};
+
+template <typename T>
+struct convertible_type<T, nulltype>
+{
+    static constexpr type_index_t index = variant_npos;
+};
+
+template <typename T, typename Typelist>
+struct value_traits
+{
+    using value_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+
+    static constexpr type_index_t  direct_index = direct_type<value_type, Typelist>::index;
+    static constexpr type_index_t convert_index = convertible_type<value_type, Typelist>::index;
+    static constexpr bool is_valid_direct_index = direct_index != variant_npos;
+
+    static constexpr type_index_t  index = is_valid_direct_index ? direct_index : convert_index;
+    static constexpr bool       is_valid = index != variant_npos;
+
+    static constexpr type_index_t list_index = is_valid ? typelist_size<Typelist>::value - 1 - index : 0;
+
+    using target_type = typename typelist_type_at<Typelist, list_index>::type;
+};
+
+#endif // variant_CPP11_OR_GREATER
+
+//
+// Alignment:
+//
 
 #if variant_CONFIG_MAX_ALIGN_HACK
 
@@ -1150,14 +1232,6 @@ using variant_alternative_t = typename variant_alternative<K, T>::type;
 // NTS:implement specializes the std::uses_allocator type trait
 // std::uses_allocator<nonstd::variant>
 
-// index of the variant in the invalid state (constant)
-
-#if variant_CPP11_OR_GREATER
-variant_constexpr std::size_t variant_npos = static_cast<std::size_t>( -1 );
-#else
-static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
-#endif
-
 #if ! variant_CONFIG_NO_EXCEPTIONS
 
 // 19.7.11 Class bad_variant_access
@@ -1191,6 +1265,11 @@ template<
 >
 class variant
 {
+    // static_assert(sizeof...(Types) > 0, "Template parameter type list of variant can not be empty.");
+    // static_assert(!detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
+    // static_assert(!detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
+    // static_assert(sizeof...(Types) < std::numeric_limits<type_index_t>::max(), "Internal index type must be able to accommodate all alternatives.");
+
     typedef detail::helper< {{TplArgsList}} > helper_type;
     typedef {{TLMacroName}}( {{TplArgsList}} ) variant_types;
 
@@ -1200,15 +1279,7 @@ public:
     variant() : type_index( 0 ) { new( ptr() ) T0(); }
 
 #if variant_CPP11_OR_GREATER
-    {% for n in range(NumParams) -%}
-    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
-    variant( T{{n}} const & t{{n}} ) : type_index( {{n}} ) { new( ptr() ) T{{n}}( t{{n}} ); }
-    {%- if not loop.last %}
-
-    {% endif -%}
-    {% endfor %}
-
+    // no variant( T const & t )
 #else
 
     {% for n in range(NumParams) -%}
@@ -1217,21 +1288,22 @@ public:
 #endif
 
 #if variant_CPP11_OR_GREATER
-    {% for n in range(NumParams) -%}
-    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
-    variant( T{{n}} && t{{n}} )
-        : type_index( {{n}} ) { new( ptr() ) T{{n}}( std::move(t{{n}}) ); }
-    {%- if not loop.last %}
 
-    {% endif -%}
-    {% endfor %}
-#endif
+    template < typename T, typename Traits = detail::value_traits<T, variant_types>
+        variant_REQUIRES_B( Traits::is_valid && !std::is_same<variant<variant_types>, typename Traits::value_type>::value )
+    >
+    variant( T && t )
+        : type_index( Traits::list_index )
+    {
+        new( ptr() ) typename Traits::target_type( std::forward<T>( t ) );
+    }
+
+#endif // variant_CPP11_OR_GREATER
 
     variant(variant const & other)
-    : type_index( other.type_index )
+    : type_index( variant_npos_internal() )
     {
-        (void) helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
+        type_index = helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
@@ -1240,9 +1312,9 @@ public:
         {% for n in range(NumParams) -%}
         std::is_nothrow_move_constructible<T{{n}}>::value{{')' if loop.last else ' &&'}}
         {% endfor -%}
-    : type_index( other.type_index )
+    : type_index( variant_npos_internal() )
     {
-        (void) helper_type::move_construct( other.type_index, other.ptr(), ptr() );
+        type_index = helper_type::move_construct( other.type_index, other.ptr(), ptr() );
     }
 
     template< std::size_t K >
@@ -1313,28 +1385,19 @@ public:
         return move_assign( std::move( other ) );
     }
 
-    {% for n in range(NumParams) -%}
-    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
-    variant & operator=( T{{n}} &&      t{{n}} ) { return assign_value<{{n}}>( std::move( t{{n}} ) ); }
-    {%- if not loop.last %}
+    template < typename T, typename Traits = detail::value_traits<T, variant_types>
+        variant_REQUIRES_B( Traits::is_valid && !std::is_same<variant<variant_types>, typename Traits::value_type>::value )
+    >
+    variant & operator=( T && t )
+    {
+        type_index = variant_npos_internal();
+        return move_assign( std::move( variant( std::forward<T>( t ) ) ) );
+    }
 
-    {% endif -%}
-    {% endfor %}
-
-#endif
+#endif //variant_CPP11_OR_GREATER
 
 #if variant_CPP11_OR_GREATER
-
-    {% for n in range(NumParams) -%}
-    template < variant_index_tag_t( {{n}} ) = variant_index_tag( {{n}} )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, {{n}} >::value) >
-    variant & operator=( T{{n}} const & t{{n}} ) { return assign_value<{{n}}>( t{{n}} ); }
-    {%- if not loop.last %}
-
-    {% endif -%}
-    {% endfor %}
-
+    // no variant & operator=( T const & t )
 #else
 
     {% for n in range(NumParams) -%}

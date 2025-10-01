@@ -693,6 +693,20 @@ struct S14{}; typedef TX<S14> T14;
 struct S15{}; typedef TX<S15> T15;
 
 
+} // namespace detail
+
+// index of the variant in the invalid state (constant)
+
+typedef std::size_t type_index_t;
+
+#if variant_CPP11_OR_GREATER
+variant_constexpr type_index_t variant_npos = static_cast<type_index_t>( -1 );
+#else
+static const type_index_t variant_npos = static_cast<type_index_t>( -1 );
+#endif
+
+namespace detail {
+
 struct nulltype{};
 
 template< class Head, class Tail >
@@ -855,6 +869,74 @@ template< class List, class T >
 struct typelist_contains_unique_type : typelist_type_is_unique< List, typelist_index_of< List, T >::value >
 {
 };
+
+//
+// Mechanism to allow for convertible types.
+// Inspired on mapbox variant, https://github.com/mapbox/variant.
+//
+
+#if variant_CPP11_OR_GREATER
+
+// direct_type:
+
+template <typename T, typename Typelist>
+struct direct_type;
+
+template <typename T, typename First, typename Tail>
+struct direct_type<T, typelist<First, Tail> >
+{
+    static constexpr type_index_t index = std::is_same<T, First>::value
+        ? static_cast<type_index_t>( typelist_size<Tail>::value )
+        : direct_type<T, Tail>::index;
+};
+
+template <typename T>
+struct direct_type<T, nulltype>
+{
+    static constexpr type_index_t index = variant_npos;
+};
+
+// convertible_type:
+
+template <typename T, typename Typelist>
+struct convertible_type;
+
+template <typename T, typename First, typename Tail>
+struct convertible_type<T, typelist<First, Tail> >
+{
+    static constexpr type_index_t index = std::is_convertible<T, First>::value
+        ? static_cast<type_index_t>( typelist_size<Tail>::value )
+        : convertible_type<T, Tail>::index;
+};
+
+template <typename T>
+struct convertible_type<T, nulltype>
+{
+    static constexpr type_index_t index = variant_npos;
+};
+
+template <typename T, typename Typelist>
+struct value_traits
+{
+    using value_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+
+    static constexpr type_index_t  direct_index = direct_type<value_type, Typelist>::index;
+    static constexpr type_index_t convert_index = convertible_type<value_type, Typelist>::index;
+    static constexpr bool is_valid_direct_index = direct_index != variant_npos;
+
+    static constexpr type_index_t  index = is_valid_direct_index ? direct_index : convert_index;
+    static constexpr bool       is_valid = index != variant_npos;
+
+    static constexpr type_index_t list_index = is_valid ? typelist_size<Typelist>::value - 1 - index : 0;
+
+    using target_type = typename typelist_type_at<Typelist, list_index>::type;
+};
+
+#endif // variant_CPP11_OR_GREATER
+
+//
+// Alignment:
+//
 
 #if variant_CONFIG_MAX_ALIGN_HACK
 
@@ -1275,14 +1357,6 @@ using variant_alternative_t = typename variant_alternative<K, T>::type;
 // NTS:implement specializes the std::uses_allocator type trait
 // std::uses_allocator<nonstd::variant>
 
-// index of the variant in the invalid state (constant)
-
-#if variant_CPP11_OR_GREATER
-variant_constexpr std::size_t variant_npos = static_cast<std::size_t>( -1 );
-#else
-static const std::size_t variant_npos = static_cast<std::size_t>( -1 );
-#endif
-
 #if ! variant_CONFIG_NO_EXCEPTIONS
 
 // 19.7.11 Class bad_variant_access
@@ -1328,6 +1402,11 @@ template<
     >
 class variant
 {
+    // static_assert(sizeof...(Types) > 0, "Template parameter type list of variant can not be empty.");
+    // static_assert(!detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
+    // static_assert(!detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
+    // static_assert(sizeof...(Types) < std::numeric_limits<type_index_t>::max(), "Internal index type must be able to accommodate all alternatives.");
+
     typedef detail::helper< T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15 > helper_type;
     typedef variant_TL16( T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15 ) variant_types;
 
@@ -1337,70 +1416,7 @@ public:
     variant() : type_index( 0 ) { new( ptr() ) T0(); }
 
 #if variant_CPP11_OR_GREATER
-    template < variant_index_tag_t( 0 ) = variant_index_tag( 0 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 0 >::value) >
-    variant( T0 const & t0 ) : type_index( 0 ) { new( ptr() ) T0( t0 ); }
-
-    template < variant_index_tag_t( 1 ) = variant_index_tag( 1 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 1 >::value) >
-    variant( T1 const & t1 ) : type_index( 1 ) { new( ptr() ) T1( t1 ); }
-
-    template < variant_index_tag_t( 2 ) = variant_index_tag( 2 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 2 >::value) >
-    variant( T2 const & t2 ) : type_index( 2 ) { new( ptr() ) T2( t2 ); }
-
-    template < variant_index_tag_t( 3 ) = variant_index_tag( 3 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 3 >::value) >
-    variant( T3 const & t3 ) : type_index( 3 ) { new( ptr() ) T3( t3 ); }
-
-    template < variant_index_tag_t( 4 ) = variant_index_tag( 4 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 4 >::value) >
-    variant( T4 const & t4 ) : type_index( 4 ) { new( ptr() ) T4( t4 ); }
-
-    template < variant_index_tag_t( 5 ) = variant_index_tag( 5 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 5 >::value) >
-    variant( T5 const & t5 ) : type_index( 5 ) { new( ptr() ) T5( t5 ); }
-
-    template < variant_index_tag_t( 6 ) = variant_index_tag( 6 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 6 >::value) >
-    variant( T6 const & t6 ) : type_index( 6 ) { new( ptr() ) T6( t6 ); }
-
-    template < variant_index_tag_t( 7 ) = variant_index_tag( 7 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 7 >::value) >
-    variant( T7 const & t7 ) : type_index( 7 ) { new( ptr() ) T7( t7 ); }
-
-    template < variant_index_tag_t( 8 ) = variant_index_tag( 8 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 8 >::value) >
-    variant( T8 const & t8 ) : type_index( 8 ) { new( ptr() ) T8( t8 ); }
-
-    template < variant_index_tag_t( 9 ) = variant_index_tag( 9 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 9 >::value) >
-    variant( T9 const & t9 ) : type_index( 9 ) { new( ptr() ) T9( t9 ); }
-
-    template < variant_index_tag_t( 10 ) = variant_index_tag( 10 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 10 >::value) >
-    variant( T10 const & t10 ) : type_index( 10 ) { new( ptr() ) T10( t10 ); }
-
-    template < variant_index_tag_t( 11 ) = variant_index_tag( 11 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 11 >::value) >
-    variant( T11 const & t11 ) : type_index( 11 ) { new( ptr() ) T11( t11 ); }
-
-    template < variant_index_tag_t( 12 ) = variant_index_tag( 12 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 12 >::value) >
-    variant( T12 const & t12 ) : type_index( 12 ) { new( ptr() ) T12( t12 ); }
-
-    template < variant_index_tag_t( 13 ) = variant_index_tag( 13 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 13 >::value) >
-    variant( T13 const & t13 ) : type_index( 13 ) { new( ptr() ) T13( t13 ); }
-
-    template < variant_index_tag_t( 14 ) = variant_index_tag( 14 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 14 >::value) >
-    variant( T14 const & t14 ) : type_index( 14 ) { new( ptr() ) T14( t14 ); }
-
-    template < variant_index_tag_t( 15 ) = variant_index_tag( 15 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 15 >::value) >
-    variant( T15 const & t15 ) : type_index( 15 ) { new( ptr() ) T15( t15 ); }
-
+    // no variant( T const & t )
 #else
 
     variant( T0 const & t0 ) : type_index( 0 ) { new( ptr() ) T0( t0 ); }
@@ -1423,91 +1439,22 @@ public:
 #endif
 
 #if variant_CPP11_OR_GREATER
-    template < variant_index_tag_t( 0 ) = variant_index_tag( 0 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 0 >::value) >
-    variant( T0 && t0 )
-        : type_index( 0 ) { new( ptr() ) T0( std::move(t0) ); }
 
-    template < variant_index_tag_t( 1 ) = variant_index_tag( 1 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 1 >::value) >
-    variant( T1 && t1 )
-        : type_index( 1 ) { new( ptr() ) T1( std::move(t1) ); }
+    template < typename T, typename Traits = detail::value_traits<T, variant_types>
+        variant_REQUIRES_B( Traits::is_valid && !std::is_same<variant<variant_types>, typename Traits::value_type>::value )
+    >
+    variant( T && t )
+        : type_index( Traits::list_index )
+    {
+        new( ptr() ) typename Traits::target_type( std::forward<T>( t ) );
+    }
 
-    template < variant_index_tag_t( 2 ) = variant_index_tag( 2 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 2 >::value) >
-    variant( T2 && t2 )
-        : type_index( 2 ) { new( ptr() ) T2( std::move(t2) ); }
-
-    template < variant_index_tag_t( 3 ) = variant_index_tag( 3 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 3 >::value) >
-    variant( T3 && t3 )
-        : type_index( 3 ) { new( ptr() ) T3( std::move(t3) ); }
-
-    template < variant_index_tag_t( 4 ) = variant_index_tag( 4 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 4 >::value) >
-    variant( T4 && t4 )
-        : type_index( 4 ) { new( ptr() ) T4( std::move(t4) ); }
-
-    template < variant_index_tag_t( 5 ) = variant_index_tag( 5 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 5 >::value) >
-    variant( T5 && t5 )
-        : type_index( 5 ) { new( ptr() ) T5( std::move(t5) ); }
-
-    template < variant_index_tag_t( 6 ) = variant_index_tag( 6 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 6 >::value) >
-    variant( T6 && t6 )
-        : type_index( 6 ) { new( ptr() ) T6( std::move(t6) ); }
-
-    template < variant_index_tag_t( 7 ) = variant_index_tag( 7 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 7 >::value) >
-    variant( T7 && t7 )
-        : type_index( 7 ) { new( ptr() ) T7( std::move(t7) ); }
-
-    template < variant_index_tag_t( 8 ) = variant_index_tag( 8 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 8 >::value) >
-    variant( T8 && t8 )
-        : type_index( 8 ) { new( ptr() ) T8( std::move(t8) ); }
-
-    template < variant_index_tag_t( 9 ) = variant_index_tag( 9 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 9 >::value) >
-    variant( T9 && t9 )
-        : type_index( 9 ) { new( ptr() ) T9( std::move(t9) ); }
-
-    template < variant_index_tag_t( 10 ) = variant_index_tag( 10 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 10 >::value) >
-    variant( T10 && t10 )
-        : type_index( 10 ) { new( ptr() ) T10( std::move(t10) ); }
-
-    template < variant_index_tag_t( 11 ) = variant_index_tag( 11 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 11 >::value) >
-    variant( T11 && t11 )
-        : type_index( 11 ) { new( ptr() ) T11( std::move(t11) ); }
-
-    template < variant_index_tag_t( 12 ) = variant_index_tag( 12 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 12 >::value) >
-    variant( T12 && t12 )
-        : type_index( 12 ) { new( ptr() ) T12( std::move(t12) ); }
-
-    template < variant_index_tag_t( 13 ) = variant_index_tag( 13 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 13 >::value) >
-    variant( T13 && t13 )
-        : type_index( 13 ) { new( ptr() ) T13( std::move(t13) ); }
-
-    template < variant_index_tag_t( 14 ) = variant_index_tag( 14 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 14 >::value) >
-    variant( T14 && t14 )
-        : type_index( 14 ) { new( ptr() ) T14( std::move(t14) ); }
-
-    template < variant_index_tag_t( 15 ) = variant_index_tag( 15 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 15 >::value) >
-    variant( T15 && t15 )
-        : type_index( 15 ) { new( ptr() ) T15( std::move(t15) ); }
-#endif
+#endif // variant_CPP11_OR_GREATER
 
     variant(variant const & other)
-    : type_index( other.type_index )
+    : type_index( variant_npos_internal() )
     {
-        (void) helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
+        type_index = helper_type::copy_construct( other.type_index, other.ptr(), ptr() );
     }
 
 #if variant_CPP11_OR_GREATER
@@ -1529,9 +1476,9 @@ public:
         std::is_nothrow_move_constructible<T13>::value &&
         std::is_nothrow_move_constructible<T14>::value &&
         std::is_nothrow_move_constructible<T15>::value)
-        : type_index( other.type_index )
+        : type_index( variant_npos_internal() )
     {
-        (void) helper_type::move_construct( other.type_index, other.ptr(), ptr() );
+        type_index = helper_type::move_construct( other.type_index, other.ptr(), ptr() );
     }
 
     template< std::size_t K >
@@ -1615,138 +1562,19 @@ public:
         return move_assign( std::move( other ) );
     }
 
-    template < variant_index_tag_t( 0 ) = variant_index_tag( 0 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 0 >::value) >
-    variant & operator=( T0 &&      t0 ) { return assign_value<0>( std::move( t0 ) ); }
+    template < typename T, typename Traits = detail::value_traits<T, variant_types>
+        variant_REQUIRES_B( Traits::is_valid && !std::is_same<variant<variant_types>, typename Traits::value_type>::value )
+    >
+    variant & operator=( T && t )
+    {
+        type_index = variant_npos_internal();
+        return move_assign( std::move( variant( std::forward<T>( t ) ) ) );
+    }
 
-    template < variant_index_tag_t( 1 ) = variant_index_tag( 1 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 1 >::value) >
-    variant & operator=( T1 &&      t1 ) { return assign_value<1>( std::move( t1 ) ); }
-
-    template < variant_index_tag_t( 2 ) = variant_index_tag( 2 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 2 >::value) >
-    variant & operator=( T2 &&      t2 ) { return assign_value<2>( std::move( t2 ) ); }
-
-    template < variant_index_tag_t( 3 ) = variant_index_tag( 3 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 3 >::value) >
-    variant & operator=( T3 &&      t3 ) { return assign_value<3>( std::move( t3 ) ); }
-
-    template < variant_index_tag_t( 4 ) = variant_index_tag( 4 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 4 >::value) >
-    variant & operator=( T4 &&      t4 ) { return assign_value<4>( std::move( t4 ) ); }
-
-    template < variant_index_tag_t( 5 ) = variant_index_tag( 5 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 5 >::value) >
-    variant & operator=( T5 &&      t5 ) { return assign_value<5>( std::move( t5 ) ); }
-
-    template < variant_index_tag_t( 6 ) = variant_index_tag( 6 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 6 >::value) >
-    variant & operator=( T6 &&      t6 ) { return assign_value<6>( std::move( t6 ) ); }
-
-    template < variant_index_tag_t( 7 ) = variant_index_tag( 7 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 7 >::value) >
-    variant & operator=( T7 &&      t7 ) { return assign_value<7>( std::move( t7 ) ); }
-
-    template < variant_index_tag_t( 8 ) = variant_index_tag( 8 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 8 >::value) >
-    variant & operator=( T8 &&      t8 ) { return assign_value<8>( std::move( t8 ) ); }
-
-    template < variant_index_tag_t( 9 ) = variant_index_tag( 9 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 9 >::value) >
-    variant & operator=( T9 &&      t9 ) { return assign_value<9>( std::move( t9 ) ); }
-
-    template < variant_index_tag_t( 10 ) = variant_index_tag( 10 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 10 >::value) >
-    variant & operator=( T10 &&      t10 ) { return assign_value<10>( std::move( t10 ) ); }
-
-    template < variant_index_tag_t( 11 ) = variant_index_tag( 11 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 11 >::value) >
-    variant & operator=( T11 &&      t11 ) { return assign_value<11>( std::move( t11 ) ); }
-
-    template < variant_index_tag_t( 12 ) = variant_index_tag( 12 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 12 >::value) >
-    variant & operator=( T12 &&      t12 ) { return assign_value<12>( std::move( t12 ) ); }
-
-    template < variant_index_tag_t( 13 ) = variant_index_tag( 13 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 13 >::value) >
-    variant & operator=( T13 &&      t13 ) { return assign_value<13>( std::move( t13 ) ); }
-
-    template < variant_index_tag_t( 14 ) = variant_index_tag( 14 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 14 >::value) >
-    variant & operator=( T14 &&      t14 ) { return assign_value<14>( std::move( t14 ) ); }
-
-    template < variant_index_tag_t( 15 ) = variant_index_tag( 15 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 15 >::value) >
-    variant & operator=( T15 &&      t15 ) { return assign_value<15>( std::move( t15 ) ); }
-
-#endif
+#endif //variant_CPP11_OR_GREATER
 
 #if variant_CPP11_OR_GREATER
-
-    template < variant_index_tag_t( 0 ) = variant_index_tag( 0 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 0 >::value) >
-    variant & operator=( T0 const & t0 ) { return assign_value<0>( t0 ); }
-
-    template < variant_index_tag_t( 1 ) = variant_index_tag( 1 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 1 >::value) >
-    variant & operator=( T1 const & t1 ) { return assign_value<1>( t1 ); }
-
-    template < variant_index_tag_t( 2 ) = variant_index_tag( 2 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 2 >::value) >
-    variant & operator=( T2 const & t2 ) { return assign_value<2>( t2 ); }
-
-    template < variant_index_tag_t( 3 ) = variant_index_tag( 3 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 3 >::value) >
-    variant & operator=( T3 const & t3 ) { return assign_value<3>( t3 ); }
-
-    template < variant_index_tag_t( 4 ) = variant_index_tag( 4 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 4 >::value) >
-    variant & operator=( T4 const & t4 ) { return assign_value<4>( t4 ); }
-
-    template < variant_index_tag_t( 5 ) = variant_index_tag( 5 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 5 >::value) >
-    variant & operator=( T5 const & t5 ) { return assign_value<5>( t5 ); }
-
-    template < variant_index_tag_t( 6 ) = variant_index_tag( 6 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 6 >::value) >
-    variant & operator=( T6 const & t6 ) { return assign_value<6>( t6 ); }
-
-    template < variant_index_tag_t( 7 ) = variant_index_tag( 7 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 7 >::value) >
-    variant & operator=( T7 const & t7 ) { return assign_value<7>( t7 ); }
-
-    template < variant_index_tag_t( 8 ) = variant_index_tag( 8 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 8 >::value) >
-    variant & operator=( T8 const & t8 ) { return assign_value<8>( t8 ); }
-
-    template < variant_index_tag_t( 9 ) = variant_index_tag( 9 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 9 >::value) >
-    variant & operator=( T9 const & t9 ) { return assign_value<9>( t9 ); }
-
-    template < variant_index_tag_t( 10 ) = variant_index_tag( 10 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 10 >::value) >
-    variant & operator=( T10 const & t10 ) { return assign_value<10>( t10 ); }
-
-    template < variant_index_tag_t( 11 ) = variant_index_tag( 11 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 11 >::value) >
-    variant & operator=( T11 const & t11 ) { return assign_value<11>( t11 ); }
-
-    template < variant_index_tag_t( 12 ) = variant_index_tag( 12 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 12 >::value) >
-    variant & operator=( T12 const & t12 ) { return assign_value<12>( t12 ); }
-
-    template < variant_index_tag_t( 13 ) = variant_index_tag( 13 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 13 >::value) >
-    variant & operator=( T13 const & t13 ) { return assign_value<13>( t13 ); }
-
-    template < variant_index_tag_t( 14 ) = variant_index_tag( 14 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 14 >::value) >
-    variant & operator=( T14 const & t14 ) { return assign_value<14>( t14 ); }
-
-    template < variant_index_tag_t( 15 ) = variant_index_tag( 15 )
-        variant_REQUIRES_B(detail::typelist_type_is_unique< variant_types, 15 >::value) >
-    variant & operator=( T15 const & t15 ) { return assign_value<15>( t15 ); }
-
+    // no variant & operator=( T const & t )
 #else
 
     variant & operator=( T0 const & t0 ) { return assign_value<0>( t0 ); }
