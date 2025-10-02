@@ -1377,8 +1377,11 @@ using variant_alternative_t = typename variant_alternative<K, T>::type;
 // 19.7.11 Class bad_variant_access
 
 #ifdef variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS
+
 using variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS;
+
 #else
+
 class variant_nodiscard bad_variant_access : public std::exception
 {
 public:
@@ -1391,6 +1394,7 @@ public:
         return "bad variant access";
     }
 };
+
 #endif // variant_CONFIG_OVERRIDE_BAD_VARIANT_ACCESS
 
 #endif // variant_CONFIG_NO_EXCEPTIONS
