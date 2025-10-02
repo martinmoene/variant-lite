@@ -131,8 +131,8 @@ Or, if you use the [conan package manager](https://www.conan.io/), you might fol
 
 ### Interface of *variant lite*
 
-| Kind         | Std  | Method                                       | Result |
-|--------------|------|----------------------------------------------|--------|
+| Kind         |Standard| Method                                       | Result |
+|--------------|--------|----------------------------------------------|--------|
 | Construction |&nbsp;| **variant**()                                    | default-construct first type      |
 | &nbsp;       |C++98 | **variant**( Tx const & x )                      | copy-construct with value type Tx, non-converting |
 | &nbsp;       |C++11 | **variant**( T && x )                            | universal-construct from value type T |
@@ -158,8 +158,8 @@ Or, if you use the [conan package manager](https://www.conan.io/), you might fol
 
 ### Algorithms for *variant lite*
 
-| Kind                        | Std  | Function |
-|-----------------------------|------|----------|
+| Kind                        |Standard| Function |
+|-----------------------------|--------|----------|
 | **Relational operators**    |&nbsp;| &nbsp;   |
 | ==                          |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
 | !=                          |&nbsp;| template<...><br>bool **operator==**( variant<...> const & v, variant&lt;...> const & w ) |
